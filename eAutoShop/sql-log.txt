@@ -1,0 +1,297 @@
+eautoshop-sql  | SQL Server 2022 will run as non-root by default.
+eautoshop-sql  | This container is running as user mssql.
+eautoshop-sql  | To learn more visit https://go.microsoft.com/fwlink/?linkid=2099216.
+eautoshop-sql  | 2026-07-16 14:56:23.95 Server      Setup step is copying system data file 'C:\templatedata\master.mdf' to '/var/opt/mssql/data/master.mdf'.
+eautoshop-sql  | 2026-07-16 14:56:24.00 Server      Did not find an existing master data file /var/opt/mssql/data/master.mdf, copying the missing default master and other system database files. If you have moved the database location, but not moved the database files, startup may fail. To repair: shutdown SQL Server, move the master database to configured location, and restart.
+eautoshop-sql  | 2026-07-16 14:56:24.00 Server      Setup step is copying system data file 'C:\templatedata\mastlog.ldf' to '/var/opt/mssql/data/mastlog.ldf'.
+eautoshop-sql  | 2026-07-16 14:56:24.02 Server      Setup step is copying system data file 'C:\templatedata\model.mdf' to '/var/opt/mssql/data/model.mdf'.
+eautoshop-sql  | 2026-07-16 14:56:24.09 Server      Setup step is copying system data file 'C:\templatedata\modellog.ldf' to '/var/opt/mssql/data/modellog.ldf'.
+eautoshop-sql  | 2026-07-16 14:56:24.15 Server      Setup step is copying system data file 'C:\templatedata\msdbdata.mdf' to '/var/opt/mssql/data/msdbdata.mdf'.
+eautoshop-sql  | 2026-07-16 14:56:24.27 Server      Setup step is copying system data file 'C:\templatedata\msdblog.ldf' to '/var/opt/mssql/data/msdblog.ldf'.
+eautoshop-sql  | 2026-07-16 14:56:24.28 Server      Setup step is FORCE copying system data file 'C:\templatedata\model_replicatedmaster.mdf' to '/var/opt/mssql/data/model_replicatedmaster.mdf'.
+eautoshop-sql  | 2026-07-16 14:56:24.33 Server      Setup step is FORCE copying system data file 'C:\templatedata\model_replicatedmaster.ldf' to '/var/opt/mssql/data/model_replicatedmaster.ldf'.
+eautoshop-sql  | 2026-07-16 14:56:24.35 Server      Setup step is FORCE copying system data file 'C:\templatedata\model_msdbdata.mdf' to '/var/opt/mssql/data/model_msdbdata.mdf'.
+eautoshop-sql  | 2026-07-16 14:56:24.51 Server      Setup step is FORCE copying system data file 'C:\templatedata\model_msdblog.ldf' to '/var/opt/mssql/data/model_msdblog.ldf'.
+eautoshop-sql  | 2026-07-16 14:56:24.59 Server      Microsoft SQL Server 2022 (RTM-CU25-GDR) (KB5101347) - 16.0.4262.2 (X64) 
+eautoshop-sql  | 	Jun 18 2026 14:30:08 
+eautoshop-sql  | 	Copyright (C) 2022 Microsoft Corporation
+eautoshop-sql  | 	Developer Edition (64-bit) on Linux (Ubuntu 22.04.5 LTS) <X64>
+eautoshop-sql  | 2026-07-16 14:56:24.59 Server      UTC adjustment: 0:00
+eautoshop-sql  | 2026-07-16 14:56:24.60 Server      (c) Microsoft Corporation.
+eautoshop-sql  | 2026-07-16 14:56:24.60 Server      All rights reserved.
+eautoshop-sql  | 2026-07-16 14:56:24.60 Server      Server process ID is 464.
+eautoshop-sql  | 2026-07-16 14:56:24.61 Server      Logging SQL Server messages in file '/var/opt/mssql/log/errorlog'.
+eautoshop-sql  | 2026-07-16 14:56:24.61 Server      Registry startup parameters: 
+eautoshop-sql  | 	 -d /var/opt/mssql/data/master.mdf
+eautoshop-sql  | 	 -l /var/opt/mssql/data/mastlog.ldf
+eautoshop-sql  | 	 -e /var/opt/mssql/log/errorlog
+eautoshop-sql  | 2026-07-16 14:56:24.63 Server      SQL Server detected 1 sockets with 4 cores per socket and 8 logical processors per socket, 8 total logical processors; using 8 logical processors based on SQL Server licensing. This is an informational message; no user action is required.
+eautoshop-sql  | 2026-07-16 14:56:24.63 Server      SQL Server is starting at normal priority base (=7). This is an informational message only. No user action is required.
+eautoshop-sql  | 2026-07-16 14:56:24.63 Server      Detected 5442 MB of RAM, 5007 MB of available memory, 5007 MB of available page file. This is an informational message; no user action is required.
+eautoshop-sql  | 2026-07-16 14:56:24.64 Server      Using conventional memory in the memory manager.
+eautoshop-sql  | 2026-07-16 14:56:24.64 Server      Detected pause instruction latency: 56 cycles.
+eautoshop-sql  | 2026-07-16 14:56:24.65 Server      SQL Server detected the following NUMA node configuration (NUMA Node number 0, Processor Group number 0, CPU Mask 0x00000000000000ff).
+eautoshop-sql  | 2026-07-16 14:56:24.65 Server      Page exclusion bitmap is enabled.
+eautoshop-sql  | 2026-07-16 14:56:24.88 Server      Buffer pool extension is not supported on Linux platform.
+eautoshop-sql  | 2026-07-16 14:56:24.95 Server      Buffer Pool: Allocating 8388608 bytes for 793425 hashPages.
+eautoshop-sql  | 2026-07-16 14:56:25.28 Server      Buffer pool extension is already disabled. No action is necessary.
+eautoshop-sql  | 2026-07-16 14:56:26.04 Server      Installing Client TLS certificates to the store.
+eautoshop-sql  | 2026-07-16 14:56:26.08 Server      CPU vectorization level(s) detected:  SSE SSE2 SSE3 SSSE3 SSE41 SSE42 AVX AVX2 POPCNT BMI1 BMI2
+eautoshop-sql  | 2026-07-16 14:56:26.33 Server      Successfully initialized the TLS configuration. Allowed TLS protocol versions are ['1.0 1.1 1.2']. Allowed TLS ciphers are ['ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES128-SHA256:ECDHE-ECDSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA:ECDHE-ECDSA-AES128-SHA:AES256-GCM-SHA384:AES128-GCM-SHA256:AES256-SHA256:AES128-SHA256:AES256-SHA:AES128-SHA:!DHE-RSA-AES256-GCM-SHA384:!DHE-RSA-AES128-GCM-SHA256:!DHE-RSA-AES256-SHA:!DHE-RSA-AES128-SHA'].
+eautoshop-sql  | 2026-07-16 14:56:26.38 Server      Query Store settings initialized with enabled = 1, 
+eautoshop-sql  | 2026-07-16 14:56:26.41 Server      The maximum number of dedicated administrator connections for this instance is '1'
+eautoshop-sql  | 2026-07-16 14:56:26.42 Server      Node configuration: node 0: CPU mask: 0x00000000000000ff:0 Active CPU mask: 0x00000000000000ff:0. This message provides a description of the NUMA configuration for this computer. This is an informational message only. No user action is required.
+eautoshop-sql  | 2026-07-16 14:56:26.47 Server      Using dynamic lock allocation.  Initial allocation of 2500 Lock blocks and 5000 Lock Owner blocks per node.  This is an informational message only.  No user action is required.
+eautoshop-sql  | 2026-07-16 14:56:26.53 Server      In-Memory OLTP initialized on lowend machine.
+eautoshop-sql  | 2026-07-16 14:56:26.59 Server      [INFO] Created Extended Events session 'hkenginexesession'
+eautoshop-sql  | 2026-07-16 14:56:26.59 Server      CLR version v4.0.30319 loaded.
+eautoshop-sql  | 2026-07-16 14:56:26.59 Server      Database Instant File Initialization: enabled. For security and performance considerations see the topic 'Database Instant File Initialization' in SQL Server Books Online. This is an informational message only. No user action is required.
+eautoshop-sql  | ForceFlush is enabled for this instance. 
+eautoshop-sql  | 2026-07-16 14:56:26.65 Server      Total Log Writer threads: 2. This is an informational message; no user action is required.
+eautoshop-sql  | 2026-07-16 14:56:26.68 Server      clwb is selected for pmem flush operation.
+eautoshop-sql  | 2026-07-16 14:56:26.69 Server      Software Usage Metrics is disabled.
+eautoshop-sql  | Failed to open password policy registry path. Using default password policy values.2026-07-16 14:56:26.78 spid29s     [1]. Feature Status: PVS: 0. CTR: 0. ConcurrentPFSUpdate: 1. ConcurrentGAMUpdate: 1. ConcurrentSGAMUpdate: 1, CleanupUnderUserTransaction: 0. TranLevelPVS: 0
+eautoshop-sql  | 2026-07-16 14:56:26.78 spid29s     Starting up database 'master'.
+eautoshop-sql  | BulkAdmin AllowedPathsList cleared (path filtering disabled)ForceFlush feature is enabled for log durability.
+eautoshop-sql  | 2026-07-16 14:56:27.17 spid29s     Converting database 'master' from version 927 to the current version 957.
+eautoshop-sql  | 2026-07-16 14:56:27.17 spid29s     Database 'master' running the upgrade step from version 927 to version 928.
+eautoshop-sql  | 2026-07-16 14:56:27.26 spid29s     Database 'master' running the upgrade step from version 928 to version 929.
+eautoshop-sql  | 2026-07-16 14:56:27.30 spid29s     Database 'master' running the upgrade step from version 929 to version 930.
+eautoshop-sql  | 2026-07-16 14:56:27.33 spid29s     Database 'master' running the upgrade step from version 930 to version 931.
+eautoshop-sql  | 2026-07-16 14:56:27.36 spid29s     Database 'master' running the upgrade step from version 931 to version 932.
+eautoshop-sql  | 2026-07-16 14:56:27.38 spid29s     Database 'master' running the upgrade step from version 932 to version 933.
+eautoshop-sql  | 2026-07-16 14:56:27.41 spid29s     Database 'master' running the upgrade step from version 933 to version 934.
+eautoshop-sql  | 2026-07-16 14:56:27.44 spid29s     Database 'master' running the upgrade step from version 934 to version 935.
+eautoshop-sql  | 2026-07-16 14:56:27.53 spid29s     Database 'master' running the upgrade step from version 935 to version 936.
+eautoshop-sql  | 2026-07-16 14:56:27.55 spid29s     Database 'master' running the upgrade step from version 936 to version 937.
+eautoshop-sql  | 2026-07-16 14:56:27.57 spid29s     Database 'master' running the upgrade step from version 937 to version 938.
+eautoshop-sql  | 2026-07-16 14:56:27.60 spid29s     Database 'master' running the upgrade step from version 938 to version 939.
+eautoshop-sql  | 2026-07-16 14:56:27.63 spid29s     Database 'master' running the upgrade step from version 939 to version 940.
+eautoshop-sql  | 2026-07-16 14:56:27.65 Server      External governance manager initialized
+eautoshop-sql  | 2026-07-16 14:56:27.68 spid29s     Database 'master' running the upgrade step from version 940 to version 941.
+eautoshop-sql  | 2026-07-16 14:56:27.70 spid29s     Database 'master' running the upgrade step from version 941 to version 942.
+eautoshop-sql  | 2026-07-16 14:56:27.74 spid29s     Database 'master' running the upgrade step from version 942 to version 943.
+eautoshop-sql  | 2026-07-16 14:56:27.79 Server      Common language runtime (CLR) functionality initialized.
+eautoshop-sql  | 2026-07-16 14:56:27.82 spid29s     Database 'master' running the upgrade step from version 943 to version 944.
+eautoshop-sql  | 2026-07-16 14:56:27.84 spid29s     Database 'master' running the upgrade step from version 944 to version 945.
+eautoshop-sql  | 2026-07-16 14:56:27.88 spid29s     Database 'master' running the upgrade step from version 945 to version 946.
+eautoshop-sql  | 2026-07-16 14:56:27.91 spid29s     Database 'master' running the upgrade step from version 946 to version 947.
+eautoshop-sql  | 2026-07-16 14:56:27.93 spid29s     Database 'master' running the upgrade step from version 947 to version 948.
+eautoshop-sql  | 2026-07-16 14:56:27.96 spid29s     Database 'master' running the upgrade step from version 948 to version 949.
+eautoshop-sql  | 2026-07-16 14:56:27.98 spid29s     Database 'master' running the upgrade step from version 949 to version 950.
+eautoshop-sql  | 2026-07-16 14:56:28.01 spid29s     Database 'master' running the upgrade step from version 950 to version 951.
+eautoshop-sql  | 2026-07-16 14:56:28.05 spid29s     Database 'master' running the upgrade step from version 951 to version 952.
+eautoshop-sql  | 2026-07-16 14:56:28.08 spid29s     Database 'master' running the upgrade step from version 952 to version 953.
+eautoshop-sql  | 2026-07-16 14:56:28.11 spid29s     Database 'master' running the upgrade step from version 953 to version 954.
+eautoshop-sql  | 2026-07-16 14:56:28.14 spid29s     Database 'master' running the upgrade step from version 954 to version 955.
+eautoshop-sql  | 2026-07-16 14:56:28.17 spid29s     Database 'master' running the upgrade step from version 955 to version 956.
+eautoshop-sql  | 2026-07-16 14:56:28.24 spid29s     Database 'master' running the upgrade step from version 956 to version 957.
+eautoshop-sql  | 2026-07-16 14:56:28.45 spid30s     [32767]. Feature Status: PVS: 0. CTR: 0. ConcurrentPFSUpdate: 1. ConcurrentGAMUpdate: 1. ConcurrentSGAMUpdate: 1, CleanupUnderUserTransaction: 0. TranLevelPVS: 0
+eautoshop-sql  | 2026-07-16 14:56:28.47 spid30s     Starting up database 'mssqlsystemresource'.
+eautoshop-sql  | 2026-07-16 14:56:28.49 spid30s     The resource database build version is 16.00.4262. This is an informational message only. No user action is required.
+eautoshop-sql  | 2026-07-16 14:56:28.51 spid38s     Password policy update was successful.
+eautoshop-sql  | 2026-07-16 14:56:28.62 spid30s     [3]. Feature Status: PVS: 0. CTR: 0. ConcurrentPFSUpdate: 1. ConcurrentGAMUpdate: 1. ConcurrentSGAMUpdate: 1, CleanupUnderUserTransaction: 0. TranLevelPVS: 0
+eautoshop-sql  | 2026-07-16 14:56:28.62 spid30s     Starting up database 'model'.
+eautoshop-sql  | 2026-07-16 14:56:28.63 spid29s     [32762]. Feature Status: PVS: 0. CTR: 0. ConcurrentPFSUpdate: 1. ConcurrentGAMUpdate: 1. ConcurrentSGAMUpdate: 1, CleanupUnderUserTransaction: 0. TranLevelPVS: 0
+eautoshop-sql  | 2026-07-16 14:56:28.63 spid29s     Starting up database 'model_replicatedmaster'.
+eautoshop-sql  | 2026-07-16 14:56:28.92 spid30s     Converting database 'model' from version 927 to the current version 957.
+eautoshop-sql  | 2026-07-16 14:56:28.92 spid30s     Database 'model' running the upgrade step from version 927 to version 928.
+eautoshop-sql  | 2026-07-16 14:56:28.95 spid29s     Converting database 'model_replicatedmaster' from version 927 to the current version 957.
+eautoshop-sql  | 2026-07-16 14:56:28.96 spid29s     Database 'model_replicatedmaster' running the upgrade step from version 927 to version 928.
+eautoshop-sql  | 2026-07-16 14:56:28.96 spid30s     Database 'model' running the upgrade step from version 928 to version 929.
+eautoshop-sql  | 2026-07-16 14:56:28.99 spid29s     Database 'model_replicatedmaster' running the upgrade step from version 928 to version 929.
+eautoshop-sql  | 2026-07-16 14:56:29.03 spid30s     Database 'model' running the upgrade step from version 929 to version 930.
+eautoshop-sql  | 2026-07-16 14:56:29.07 spid30s     Database 'model' running the upgrade step from version 930 to version 931.
+eautoshop-sql  | 2026-07-16 14:56:29.09 spid30s     Database 'model' running the upgrade step from version 931 to version 932.
+eautoshop-sql  | 2026-07-16 14:56:29.11 spid29s     Database 'model_replicatedmaster' running the upgrade step from version 929 to version 930.
+eautoshop-sql  | 2026-07-16 14:56:29.13 spid30s     Database 'model' running the upgrade step from version 932 to version 933.
+eautoshop-sql  | 2026-07-16 14:56:29.15 spid29s     Database 'model_replicatedmaster' running the upgrade step from version 930 to version 931.
+eautoshop-sql  | 2026-07-16 14:56:29.17 spid30s     Database 'model' running the upgrade step from version 933 to version 934.
+eautoshop-sql  | 2026-07-16 14:56:29.19 spid29s     Database 'model_replicatedmaster' running the upgrade step from version 931 to version 932.
+eautoshop-sql  | 2026-07-16 14:56:29.20 spid30s     Database 'model' running the upgrade step from version 934 to version 935.
+eautoshop-sql  | 2026-07-16 14:56:29.22 spid29s     Database 'model_replicatedmaster' running the upgrade step from version 932 to version 933.
+eautoshop-sql  | 2026-07-16 14:56:29.23 spid30s     Database 'model' running the upgrade step from version 935 to version 936.
+eautoshop-sql  | 2026-07-16 14:56:29.25 spid29s     Database 'model_replicatedmaster' running the upgrade step from version 933 to version 934.
+eautoshop-sql  | 2026-07-16 14:56:29.26 spid30s     Database 'model' running the upgrade step from version 936 to version 937.
+eautoshop-sql  | 2026-07-16 14:56:29.29 spid29s     Database 'model_replicatedmaster' running the upgrade step from version 934 to version 935.
+eautoshop-sql  | 2026-07-16 14:56:29.30 spid30s     Database 'model' running the upgrade step from version 937 to version 938.
+eautoshop-sql  | 2026-07-16 14:56:29.34 spid29s     Database 'model_replicatedmaster' running the upgrade step from version 935 to version 936.
+eautoshop-sql  | 2026-07-16 14:56:29.37 spid30s     Database 'model' running the upgrade step from version 938 to version 939.
+eautoshop-sql  | 2026-07-16 14:56:29.39 spid29s     Database 'model_replicatedmaster' running the upgrade step from version 936 to version 937.
+eautoshop-sql  | 2026-07-16 14:56:29.41 spid30s     Database 'model' running the upgrade step from version 939 to version 940.
+eautoshop-sql  | 2026-07-16 14:56:29.43 spid29s     Database 'model_replicatedmaster' running the upgrade step from version 937 to version 938.
+eautoshop-sql  | 2026-07-16 14:56:29.46 spid30s     Database 'model' running the upgrade step from version 940 to version 941.
+eautoshop-sql  | 2026-07-16 14:56:29.47 spid29s     Database 'model_replicatedmaster' running the upgrade step from version 938 to version 939.
+eautoshop-sql  | 2026-07-16 14:56:29.51 spid30s     Database 'model' running the upgrade step from version 941 to version 942.
+eautoshop-sql  | 2026-07-16 14:56:29.52 spid29s     Database 'model_replicatedmaster' running the upgrade step from version 939 to version 940.
+eautoshop-sql  | 2026-07-16 14:56:29.55 spid30s     Database 'model' running the upgrade step from version 942 to version 943.
+eautoshop-sql  | 2026-07-16 14:56:29.56 spid29s     Database 'model_replicatedmaster' running the upgrade step from version 940 to version 941.
+eautoshop-sql  | 2026-07-16 14:56:29.60 spid29s     Database 'model_replicatedmaster' running the upgrade step from version 941 to version 942.
+eautoshop-sql  | 2026-07-16 14:56:29.63 spid30s     Database 'model' running the upgrade step from version 943 to version 944.
+eautoshop-sql  | 2026-07-16 14:56:29.66 spid29s     Database 'model_replicatedmaster' running the upgrade step from version 942 to version 943.
+eautoshop-sql  | 2026-07-16 14:56:29.67 spid30s     Database 'model' running the upgrade step from version 944 to version 945.
+eautoshop-sql  | 2026-07-16 14:56:29.71 spid38s     A self-generated certificate was successfully loaded for encryption.
+eautoshop-sql  | 2026-07-16 14:56:29.71 spid38s     Server is listening on [ 'any' <ipv6> 1433] accept sockets 1.
+eautoshop-sql  | 2026-07-16 14:56:29.72 spid38s     Server is listening on [ 'any' <ipv4> 1433] accept sockets 1.
+eautoshop-sql  | 2026-07-16 14:56:29.73 Server      Server is listening on [ ::1 <ipv6> 1434] accept sockets 1.
+eautoshop-sql  | 2026-07-16 14:56:29.74 Server      Server is listening on [ 127.0.0.1 <ipv4> 1434] accept sockets 1.
+eautoshop-sql  | 2026-07-16 14:56:29.74 Server      Dedicated admin connection support was established for listening locally on port 1434.
+eautoshop-sql  | 2026-07-16 14:56:29.74 spid30s     Database 'model' running the upgrade step from version 945 to version 946.
+eautoshop-sql  | 2026-07-16 14:56:29.75 spid38s     Server is listening on [ ::1 <ipv6> 1431] accept sockets 1.
+eautoshop-sql  | 2026-07-16 14:56:29.75 spid38s     Server is listening on [ 127.0.0.1 <ipv4> 1431] accept sockets 1.
+eautoshop-sql  | 2026-07-16 14:56:29.76 spid38s     SQL Server is now ready for client connections. This is an informational message; no user action is required.
+eautoshop-sql  | 2026-07-16 14:56:29.78 spid30s     Database 'model' running the upgrade step from version 946 to version 947.
+eautoshop-sql  | 2026-07-16 14:56:29.84 spid29s     Database 'model_replicatedmaster' running the upgrade step from version 943 to version 944.
+eautoshop-sql  | 2026-07-16 14:56:29.85 spid30s     Database 'model' running the upgrade step from version 947 to version 948.
+eautoshop-sql  | 2026-07-16 14:56:29.88 spid29s     Database 'model_replicatedmaster' running the upgrade step from version 944 to version 945.
+eautoshop-sql  | 2026-07-16 14:56:29.89 spid30s     Database 'model' running the upgrade step from version 948 to version 949.
+eautoshop-sql  | 2026-07-16 14:56:29.94 spid30s     Database 'model' running the upgrade step from version 949 to version 950.
+eautoshop-sql  | 2026-07-16 14:56:29.95 spid29s     Database 'model_replicatedmaster' running the upgrade step from version 945 to version 946.
+eautoshop-sql  | 2026-07-16 14:56:30.00 spid30s     Database 'model' running the upgrade step from version 950 to version 951.
+eautoshop-sql  | 2026-07-16 14:56:30.00 spid29s     Database 'model_replicatedmaster' running the upgrade step from version 946 to version 947.
+eautoshop-sql  | 2026-07-16 14:56:30.07 spid29s     Database 'model_replicatedmaster' running the upgrade step from version 947 to version 948.
+eautoshop-sql  | 2026-07-16 14:56:30.08 spid30s     Database 'model' running the upgrade step from version 951 to version 952.
+eautoshop-sql  | 2026-07-16 14:56:30.13 spid30s     Database 'model' running the upgrade step from version 952 to version 953.
+eautoshop-sql  | 2026-07-16 14:56:30.13 spid29s     Database 'model_replicatedmaster' running the upgrade step from version 948 to version 949.
+eautoshop-sql  | 2026-07-16 14:56:30.20 spid29s     Database 'model_replicatedmaster' running the upgrade step from version 949 to version 950.
+eautoshop-sql  | 2026-07-16 14:56:30.20 spid30s     Database 'model' running the upgrade step from version 953 to version 954.
+eautoshop-sql  | 2026-07-16 14:56:30.23 spid29s     Database 'model_replicatedmaster' running the upgrade step from version 950 to version 951.
+eautoshop-sql  | 2026-07-16 14:56:30.23 spid30s     Database 'model' running the upgrade step from version 954 to version 955.
+eautoshop-sql  | 2026-07-16 14:56:30.26 spid30s     Database 'model' running the upgrade step from version 955 to version 956.
+eautoshop-sql  | 2026-07-16 14:56:30.29 spid29s     Database 'model_replicatedmaster' running the upgrade step from version 951 to version 952.
+eautoshop-sql  | 2026-07-16 14:56:30.32 spid29s     Database 'model_replicatedmaster' running the upgrade step from version 952 to version 953.
+eautoshop-sql  | 2026-07-16 14:56:30.32 spid30s     Database 'model' running the upgrade step from version 956 to version 957.
+eautoshop-sql  | 2026-07-16 14:56:30.40 spid29s     Database 'model_replicatedmaster' running the upgrade step from version 953 to version 954.
+eautoshop-sql  | 2026-07-16 14:56:30.44 spid29s     Database 'model_replicatedmaster' running the upgrade step from version 954 to version 955.
+eautoshop-sql  | 2026-07-16 14:56:30.47 spid29s     Database 'model_replicatedmaster' running the upgrade step from version 955 to version 956.
+eautoshop-sql  | 2026-07-16 14:56:30.52 spid29s     Database 'model_replicatedmaster' running the upgrade step from version 956 to version 957.
+eautoshop-sql  | 2026-07-16 14:56:30.77 spid29s     [32761]. Feature Status: PVS: 0. CTR: 0. ConcurrentPFSUpdate: 1. ConcurrentGAMUpdate: 1. ConcurrentSGAMUpdate: 1, CleanupUnderUserTransaction: 0. TranLevelPVS: 0
+eautoshop-sql  | 2026-07-16 14:56:30.77 spid29s     Starting up database 'model_msdb'.
+eautoshop-sql  | 2026-07-16 14:56:31.00 spid29s     Converting database 'model_msdb' from version 927 to the current version 957.
+eautoshop-sql  | 2026-07-16 14:56:31.01 spid29s     Database 'model_msdb' running the upgrade step from version 927 to version 928.
+eautoshop-sql  | 2026-07-16 14:56:31.03 spid29s     Database 'model_msdb' running the upgrade step from version 928 to version 929.
+eautoshop-sql  | 2026-07-16 14:56:31.10 spid29s     Database 'model_msdb' running the upgrade step from version 929 to version 930.
+eautoshop-sql  | 2026-07-16 14:56:31.15 spid29s     Database 'model_msdb' running the upgrade step from version 930 to version 931.
+eautoshop-sql  | 2026-07-16 14:56:31.17 spid29s     Database 'model_msdb' running the upgrade step from version 931 to version 932.
+eautoshop-sql  | 2026-07-16 14:56:31.20 spid29s     Database 'model_msdb' running the upgrade step from version 932 to version 933.
+eautoshop-sql  | 2026-07-16 14:56:31.23 spid29s     Database 'model_msdb' running the upgrade step from version 933 to version 934.
+eautoshop-sql  | 2026-07-16 14:56:31.25 spid29s     Database 'model_msdb' running the upgrade step from version 934 to version 935.
+eautoshop-sql  | 2026-07-16 14:56:31.28 spid29s     Database 'model_msdb' running the upgrade step from version 935 to version 936.
+eautoshop-sql  | 2026-07-16 14:56:31.30 spid29s     Database 'model_msdb' running the upgrade step from version 936 to version 937.
+eautoshop-sql  | 2026-07-16 14:56:31.33 spid29s     Database 'model_msdb' running the upgrade step from version 937 to version 938.
+eautoshop-sql  | 2026-07-16 14:56:31.35 spid29s     Database 'model_msdb' running the upgrade step from version 938 to version 939.
+eautoshop-sql  | 2026-07-16 14:56:31.37 spid29s     Database 'model_msdb' running the upgrade step from version 939 to version 940.
+eautoshop-sql  | 2026-07-16 14:56:31.40 spid29s     Database 'model_msdb' running the upgrade step from version 940 to version 941.
+eautoshop-sql  | 2026-07-16 14:56:31.42 spid29s     Database 'model_msdb' running the upgrade step from version 941 to version 942.
+eautoshop-sql  | 2026-07-16 14:56:31.44 spid29s     Database 'model_msdb' running the upgrade step from version 942 to version 943.
+eautoshop-sql  | 2026-07-16 14:56:31.50 spid29s     Database 'model_msdb' running the upgrade step from version 943 to version 944.
+eautoshop-sql  | 2026-07-16 14:56:31.52 spid29s     Database 'model_msdb' running the upgrade step from version 944 to version 945.
+eautoshop-sql  | 2026-07-16 14:56:31.56 spid29s     Database 'model_msdb' running the upgrade step from version 945 to version 946.
+eautoshop-sql  | 2026-07-16 14:56:31.58 spid29s     Database 'model_msdb' running the upgrade step from version 946 to version 947.
+eautoshop-sql  | 2026-07-16 14:56:31.60 spid29s     Database 'model_msdb' running the upgrade step from version 947 to version 948.
+eautoshop-sql  | 2026-07-16 14:56:31.62 spid29s     Database 'model_msdb' running the upgrade step from version 948 to version 949.
+eautoshop-sql  | 2026-07-16 14:56:31.64 spid29s     Database 'model_msdb' running the upgrade step from version 949 to version 950.
+eautoshop-sql  | 2026-07-16 14:56:31.67 spid29s     Database 'model_msdb' running the upgrade step from version 950 to version 951.
+eautoshop-sql  | 2026-07-16 14:56:31.70 spid29s     Database 'model_msdb' running the upgrade step from version 951 to version 952.
+eautoshop-sql  | 2026-07-16 14:56:31.73 spid29s     Database 'model_msdb' running the upgrade step from version 952 to version 953.
+eautoshop-sql  | 2026-07-16 14:56:31.76 spid29s     Database 'model_msdb' running the upgrade step from version 953 to version 954.
+eautoshop-sql  | 2026-07-16 14:56:31.78 spid29s     Database 'model_msdb' running the upgrade step from version 954 to version 955.
+eautoshop-sql  | 2026-07-16 14:56:31.81 spid29s     Database 'model_msdb' running the upgrade step from version 955 to version 956.
+eautoshop-sql  | 2026-07-16 14:56:31.87 spid29s     Database 'model_msdb' running the upgrade step from version 956 to version 957.
+eautoshop-sql  | 2026-07-16 14:56:32.00 spid40s     Attribute synchronization initialized
+eautoshop-sql  | 2026-07-16 14:56:32.00 spid29s     Resource governor reconfiguration succeeded.
+eautoshop-sql  | 2026-07-16 14:56:32.00 spid40s     Attribute synchronization manager initialized
+eautoshop-sql  | 2026-07-16 14:56:32.01 spid29s     SQL Server Audit is starting the audits. This is an informational message. No user action is required.
+eautoshop-sql  | 2026-07-16 14:56:32.01 spid29s     SQL Server Audit has started the audits. This is an informational message. No user action is required.
+eautoshop-sql  | 2026-07-16 14:56:32.11 spid29s     SQL Trace ID 1 was started by login "sa".
+eautoshop-sql  | 2026-07-16 14:56:32.13 spid29s     Server name is '4888095c686e'. This is an informational message only. No user action is required.
+eautoshop-sql  | 2026-07-16 14:56:32.25 spid30s     Clearing tempdb database.
+eautoshop-sql  | 2026-07-16 14:56:32.25 spid56s     Always On: The availability replica manager is starting. This is an informational message only. No user action is required.
+eautoshop-sql  | 2026-07-16 14:56:32.26 spid56s     Always On: The availability replica manager is waiting for the instance of SQL Server to allow client connections. This is an informational message only. No user action is required.
+eautoshop-sql  | 2026-07-16 14:56:32.28 spid59s     [4]. Feature Status: PVS: 0. CTR: 0. ConcurrentPFSUpdate: 1. ConcurrentGAMUpdate: 1. ConcurrentSGAMUpdate: 1, CleanupUnderUserTransaction: 0. TranLevelPVS: 0
+eautoshop-sql  | 2026-07-16 14:56:32.28 spid59s     Starting up database 'msdb'.
+eautoshop-sql  | 2026-07-16 14:56:32.50 spid59s     Converting database 'msdb' from version 927 to the current version 957.
+eautoshop-sql  | 2026-07-16 14:56:32.50 spid59s     Database 'msdb' running the upgrade step from version 927 to version 928.
+eautoshop-sql  | 2026-07-16 14:56:32.54 spid59s     Database 'msdb' running the upgrade step from version 928 to version 929.
+eautoshop-sql  | 2026-07-16 14:56:32.55 spid30s     [2]. Feature Status: PVS: 0. CTR: 0. ConcurrentPFSUpdate: 1. ConcurrentGAMUpdate: 1. ConcurrentSGAMUpdate: 1, CleanupUnderUserTransaction: 0. TranLevelPVS: 0
+eautoshop-sql  | 2026-07-16 14:56:32.55 spid30s     Starting up database 'tempdb'.
+eautoshop-sql  | 2026-07-16 14:56:32.62 spid59s     Database 'msdb' running the upgrade step from version 929 to version 930.
+eautoshop-sql  | 2026-07-16 14:56:32.65 spid59s     Database 'msdb' running the upgrade step from version 930 to version 931.
+eautoshop-sql  | 2026-07-16 14:56:32.69 spid59s     Database 'msdb' running the upgrade step from version 931 to version 932.
+eautoshop-sql  | 2026-07-16 14:56:32.71 spid59s     Database 'msdb' running the upgrade step from version 932 to version 933.
+eautoshop-sql  | 2026-07-16 14:56:32.72 spid30s     The tempdb database has 1 data file(s).
+eautoshop-sql  | 2026-07-16 14:56:32.73 spid56s     The Service Broker endpoint is in disabled or stopped state.
+eautoshop-sql  | 2026-07-16 14:56:32.73 spid56s     The Database Mirroring endpoint is in disabled or stopped state.
+eautoshop-sql  | 2026-07-16 14:56:32.74 spid59s     Database 'msdb' running the upgrade step from version 933 to version 934.
+eautoshop-sql  | 2026-07-16 14:56:32.75 spid56s     Service Broker manager has started.
+eautoshop-sql  | 2026-07-16 14:56:32.77 spid59s     Database 'msdb' running the upgrade step from version 934 to version 935.
+eautoshop-sql  | 2026-07-16 14:56:32.80 spid59s     Database 'msdb' running the upgrade step from version 935 to version 936.
+eautoshop-sql  | 2026-07-16 14:56:32.82 spid59s     Database 'msdb' running the upgrade step from version 936 to version 937.
+eautoshop-sql  | 2026-07-16 14:56:32.84 spid59s     Database 'msdb' running the upgrade step from version 937 to version 938.
+eautoshop-sql  | 2026-07-16 14:56:32.86 spid59s     Database 'msdb' running the upgrade step from version 938 to version 939.
+eautoshop-sql  | 2026-07-16 14:56:32.87 spid59s     Database 'msdb' running the upgrade step from version 939 to version 940.
+eautoshop-sql  | 2026-07-16 14:56:32.89 spid59s     Database 'msdb' running the upgrade step from version 940 to version 941.
+eautoshop-sql  | 2026-07-16 14:56:32.91 spid59s     Database 'msdb' running the upgrade step from version 941 to version 942.
+eautoshop-sql  | 2026-07-16 14:56:32.93 spid59s     Database 'msdb' running the upgrade step from version 942 to version 943.
+eautoshop-sql  | 2026-07-16 14:56:32.99 spid59s     Database 'msdb' running the upgrade step from version 943 to version 944.
+eautoshop-sql  | 2026-07-16 14:56:33.01 spid59s     Database 'msdb' running the upgrade step from version 944 to version 945.
+eautoshop-sql  | 2026-07-16 14:56:33.05 spid59s     Database 'msdb' running the upgrade step from version 945 to version 946.
+eautoshop-sql  | 2026-07-16 14:56:33.07 spid59s     Database 'msdb' running the upgrade step from version 946 to version 947.
+eautoshop-sql  | 2026-07-16 14:56:33.09 spid59s     Database 'msdb' running the upgrade step from version 947 to version 948.
+eautoshop-sql  | 2026-07-16 14:56:33.12 spid59s     Database 'msdb' running the upgrade step from version 948 to version 949.
+eautoshop-sql  | 2026-07-16 14:56:33.14 spid59s     Database 'msdb' running the upgrade step from version 949 to version 950.
+eautoshop-sql  | 2026-07-16 14:56:33.16 spid59s     Database 'msdb' running the upgrade step from version 950 to version 951.
+eautoshop-sql  | 2026-07-16 14:56:33.19 spid59s     Database 'msdb' running the upgrade step from version 951 to version 952.
+eautoshop-sql  | 2026-07-16 14:56:33.21 spid59s     Database 'msdb' running the upgrade step from version 952 to version 953.
+eautoshop-sql  | 2026-07-16 14:56:33.25 spid59s     Database 'msdb' running the upgrade step from version 953 to version 954.
+eautoshop-sql  | 2026-07-16 14:56:33.27 spid59s     Database 'msdb' running the upgrade step from version 954 to version 955.
+eautoshop-sql  | 2026-07-16 14:56:33.28 spid59s     Database 'msdb' running the upgrade step from version 955 to version 956.
+eautoshop-sql  | 2026-07-16 14:56:33.32 spid59s     Database 'msdb' running the upgrade step from version 956 to version 957.
+eautoshop-sql  | 2026-07-16 14:56:33.41 spid29s     Recovery is complete. This is an informational message only. No user action is required.
+eautoshop-sql  | 2026-07-16 14:56:33.44 spid36s     The default language (LCID 0) has been set for engine and full-text services.
+eautoshop-sql  | 2026-07-16 14:56:34.07 spid36s     The tempdb database has 8 data file(s).
+eautoshop-sql  | Processing /docker-entrypoint-initdb.d/AutoShop_Full_SQL_Schema.sql
+eautoshop-sql  | Changed database context to 'master'.
+eautoshop-sql  | 2026-07-16 14:56:49.41 spid59      [5]. Feature Status: PVS: 0. CTR: 0. ConcurrentPFSUpdate: 1. ConcurrentGAMUpdate: 1. ConcurrentSGAMUpdate: 1, CleanupUnderUserTransaction: 0. TranLevelPVS: 0
+eautoshop-sql  | 2026-07-16 14:56:49.42 spid59      Starting up database '190081'.
+eautoshop-sql  | 2026-07-16 14:56:49.42 spid59      RemoveStaleDbEntries: Cleanup of stale DB entries called for database ID: [5]
+eautoshop-sql  | 2026-07-16 14:56:49.43 spid59      RemoveStaleDbEntries: Cleanup of stale DB entries skipped because master db is not memory optimized. DbId: 5.
+eautoshop-sql  | 2026-07-16 14:56:49.53 spid59      Parallel redo is started for database '190081' with worker pool size [4].
+eautoshop-sql  | 2026-07-16 14:56:49.55 spid59      Parallel redo is shutdown for database '190081' with worker pool size [4].
+eautoshop-sql  | Changed database context to '190081'.
+eautoshop-sql  | 2026-07-16 14:56:49.64 spid59      Setting database option COMPATIBILITY_LEVEL to 160 for database '190081'.
+eautoshop-sql  | 2026-07-16 14:56:49.65 spid59      Setting database option ANSI_NULL_DEFAULT to OFF for database '190081'.
+eautoshop-sql  | 2026-07-16 14:56:49.65 spid59      Setting database option ANSI_NULLS to OFF for database '190081'.
+eautoshop-sql  | 2026-07-16 14:56:49.66 spid59      Setting database option ANSI_PADDING to OFF for database '190081'.
+eautoshop-sql  | 2026-07-16 14:56:49.66 spid59      Setting database option ANSI_WARNINGS to OFF for database '190081'.
+eautoshop-sql  | 2026-07-16 14:56:49.67 spid59      Setting database option ARITHABORT to OFF for database '190081'.
+eautoshop-sql  | 2026-07-16 14:56:49.68 spid59      Setting database option AUTO_CLOSE to OFF for database '190081'.
+eautoshop-sql  | 2026-07-16 14:56:49.68 spid59      Setting database option AUTO_SHRINK to OFF for database '190081'.
+eautoshop-sql  | 2026-07-16 14:56:49.69 spid59      Setting database option AUTO_UPDATE_STATISTICS to ON for database '190081'.
+eautoshop-sql  | 2026-07-16 14:56:49.69 spid59      Setting database option CURSOR_CLOSE_ON_COMMIT to OFF for database '190081'.
+eautoshop-sql  | 2026-07-16 14:56:49.69 spid59      Setting database option CURSOR_DEFAULT to GLOBAL for database '190081'.
+eautoshop-sql  | 2026-07-16 14:56:49.70 spid59      Setting database option CONCAT_NULL_YIELDS_NULL to OFF for database '190081'.
+eautoshop-sql  | 2026-07-16 14:56:49.71 spid59      Setting database option NUMERIC_ROUNDABORT to OFF for database '190081'.
+eautoshop-sql  | 2026-07-16 14:56:49.71 spid59      Setting database option QUOTED_IDENTIFIER to OFF for database '190081'.
+eautoshop-sql  | 2026-07-16 14:56:49.72 spid59      Setting database option RECURSIVE_TRIGGERS to OFF for database '190081'.
+eautoshop-sql  | 2026-07-16 14:56:49.72 spid59      Setting database option ENABLE_BROKER to ON for database '190081'.
+eautoshop-sql  | 2026-07-16 14:56:49.72 spid59      Setting database option AUTO_UPDATE_STATISTICS_ASYNC to OFF for database '190081'.
+eautoshop-sql  | 2026-07-16 14:56:49.73 spid59      Setting database option DATE_CORRELATION_OPTIMIZATION to OFF for database '190081'.
+eautoshop-sql  | 2026-07-16 14:56:49.73 spid59      Setting database option TRUSTWORTHY to OFF for database '190081'.
+eautoshop-sql  | 2026-07-16 14:56:49.74 spid59      Setting database option ALLOW_SNAPSHOT_ISOLATION to OFF for database '190081'.
+eautoshop-sql  | 2026-07-16 14:56:49.74 spid59      Setting database option PARAMETERIZATION to SIMPLE for database '190081'.
+eautoshop-sql  | 2026-07-16 14:56:49.75 spid59      Setting database option READ_COMMITTED_SNAPSHOT to OFF for database '190081'.
+eautoshop-sql  | 2026-07-16 14:56:49.76 spid59      Setting database option HONOR_BROKER_PRIORITY to OFF for database '190081'.
+eautoshop-sql  | 2026-07-16 14:56:49.77 spid59      Setting database option RECOVERY to FULL for database '190081'.
+eautoshop-sql  | 2026-07-16 14:56:49.78 spid59      Setting database option MULTI_USER to ON for database '190081'.
+eautoshop-sql  | 2026-07-16 14:56:49.79 spid59      Setting database option PAGE_VERIFY to CHECKSUM for database '190081'.
+eautoshop-sql  | 2026-07-16 14:56:49.79 spid59      Setting database option DB_CHAINING to OFF for database '190081'.
+eautoshop-sql  | 2026-07-16 14:56:49.80 spid59      Setting database option FILESTREAM NON_TRANSACTED_ACCESS to OFF for database '190081'.
+eautoshop-sql  | 2026-07-16 14:56:49.83 spid59      Setting database option target_recovery_time to 60 for database '190081'.
+eautoshop-sql  | 2026-07-16 14:56:49.83 spid59      Setting database option delayed_durability to disabled for database '190081'.
+eautoshop-sql  | 2026-07-16 14:56:49.84 spid59      Setting database option accelerated_database_recovery to OFF for database '190081'.
+eautoshop-sql  | 2026-07-16 14:56:49.93 spid59      Setting database option query_store to on for database '190081'.
+eautoshop-sql  | 2026-07-16 14:56:49.94 spid59      Setting database option query_store to read_write for database '190081'.
+eautoshop-sql  | Changed database context to '190081'.
+eautoshop-sql  | Msg 15007, Level 16, State 1, Server 4888095c686e, Line 2
+eautoshop-sql  | 'test' is not a valid login or you do not have permission.

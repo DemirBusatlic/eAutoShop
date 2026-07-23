@@ -1,0 +1,125 @@
+services:
+  eautoshop-sql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: eautoshop-sql
+    restart: unless-stopped
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "QWElkj132!"
+      MSSQL_PID: "Developer"
+    ports:
+      - "1401:1433"
+    expose:
+      - "1433"
+    volumes:
+      - sql-data:/var/opt/mssql
+      - ./eAutoShop.DB:/docker-entrypoint-initdb.d:ro
+    command: bash -c "/opt/mssql/bin/sqlservr & sleep 30 && if [ ! -f /var/opt/mssql/data/190081.mdf ]; then for f in /docker-entrypoint-initdb.d/*.sql; do [ -e \"$$f\" ] || { echo \"No SQL files found in /docker-entrypoint-initdb.d\"; exit 1; }; echo \"Processing $$f\" && /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P QWElkj132! -C -b -i \"$$f\" || exit 1; done; fi & wait"
+    networks:
+      - autoshopnet
+    healthcheck:
+     test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'QWElkj132!' -C -Q \"IF DB_ID(N'190081') IS NULL THROW 50000, 'Database not ready', 1; SELECT 1\" >/dev/null 2>&1 || exit 1"]
+     interval: 10s
+     timeout: 5s
+     retries: 20
+     start_period: 60s
+
+  rabbitmq:
+    image: rabbitmq:4-management
+    container_name: rabbitmq
+    hostname: rabbitmq
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: "guest"
+      RABBITMQ_DEFAULT_PASS: "guest"
+      RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS: '-rabbit loopback_users "none"'
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    networks:
+      - autoshopnet
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  report-init:
+    image: busybox
+    container_name: eautoshop-report-init
+    command: /bin/sh -c "cp -r /pre-existing-reports/. /reports/"
+    volumes:
+      - ./eAutoShop.HelperApi/Reports:/pre-existing-reports:ro
+      - report-storage:/reports
+    networks:
+      - autoshopnet
+    restart: "no"
+
+  eautoshop-api:
+    container_name: eautoshop-api
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: eAutoShop.Api/Dockerfile
+    environment:
+      ConnectionStrings__DefaultConnection: "Server=eautoshop-sql,1433;Database=190081;User Id=sa;Password=QWElkj132!;ConnectRetryCount=10;TrustServerCertificate=True"
+      ASPNETCORE_ENVIRONMENT: "Development"
+      ASPNETCORE_URLS: "http://+:5236"
+      STRIPE_SECRET_KEY: "${STRIPE_SECRET_KEY}"
+      STRIPE_PUBLISHABLE_KEY: "${STRIPE_PUBLISHABLE_KEY}"
+      JWT_SECRET_KEY: "${JWT_SECRET_KEY}"
+      RABBITMQ_HOST: "rabbitmq"
+      RABBITMQ_USERNAME: "guest"
+      RABBITMQ_PASSWORD: "guest"
+    ports:
+      - "5236:5236"
+    networks:
+      - autoshopnet
+    depends_on:
+      eautoshop-sql:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      report-init:
+        condition: service_completed_successfully
+    volumes:
+      - ./eAutoShop.Api/RecommenderModels:/app/RecommenderModels
+      - report-storage:/app/reports
+
+  eautoshop-helperapi:
+    container_name: eautoshop-helperapi
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: eAutoShop.HelperApi/Dockerfile
+    environment:
+      ConnectionStrings__DefaultConnection: "Server=eautoshop-sql,1433;Database=190081;User Id=sa;Password=QWElkj132!;ConnectRetryCount=10;TrustServerCertificate=True"
+      ASPNETCORE_ENVIRONMENT: "Development"
+      RABBITMQ_HOST: "rabbitmq"
+      RABBITMQ_USERNAME: "guest"
+      RABBITMQ_PASSWORD: "guest"
+    ports:
+      - "5233:5233"
+    networks:
+      - autoshopnet
+    depends_on:
+      eautoshop-sql:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      report-init:
+        condition: service_completed_successfully
+    volumes:
+      - report-storage:/app/reports
+
+volumes:
+  sql-data:
+  rabbitmq-data:
+  report-storage:
+
+networks:
+  autoshopnet:
+    driver: bridge
