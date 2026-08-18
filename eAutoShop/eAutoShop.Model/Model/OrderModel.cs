@@ -11,7 +11,6 @@ namespace eAutoShop.Model.Model
         public DateTime OrderDate { get; set; }
         public DateTime? ShippingDate { get; set; }
         public double TotalAmount { get; set; }
-        public double ClientDiscountValue { get; set; }
         public string State { get; set; }
         public int CityId { get; set; }
         public string ShippingCity { get; set; }

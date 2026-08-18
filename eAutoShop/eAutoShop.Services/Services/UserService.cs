@@ -134,39 +134,107 @@ namespace eAutoShop.Services.Services
 
         public async Task<UserModel> UpdateByToken(UserUpdateRequest request)
         {
-            var entity = await _context.Users.FirstOrDefaultAsync(x => x.Username == request.Username);
+            var entity = await _context.Users
+                .Include(x => x.City)
+                .Include(x => x.Role)
+                .FirstOrDefaultAsync(x => x.Id == request.UserId);
 
             if (entity == null)
             {
                 throw new UserException("User doesn't exist.");
             }
 
-            _mapper.Map(request, entity);
-
-            if (!string.IsNullOrWhiteSpace(request.Image))
+            if (!entity.Active)
             {
-                try
-                {
-                    entity.Image = Convert.FromBase64String(request.Image);
-                }
-                catch (FormatException)
-                {
-                    throw new UserException("Invalid image format.");
-                }
+                throw new UserException("Your account is inactive.");
             }
-            else
+
+            if (request.Name != null)
             {
-                entity.Image = null;
+                entity.Name = request.Name.Trim();
+            }
+
+            if (request.Surname != null)
+            {
+                entity.Surname = request.Surname.Trim();
+            }
+
+            if (request.Email != null)
+            {
+                var email = request.Email.Trim();
+
+                var emailTaken = await _context.Users.AnyAsync(
+                    x => x.Id != entity.Id && x.Email == email
+                );
+
+                if (emailTaken)
+                {
+                    throw new UserException("This email is already in use.");
+                }
+
+                entity.Email = email;
+            }
+
+            if (request.Phone != null)
+            {
+                entity.Phone = request.Phone.Trim();
+            }
+
+            if (request.Gender != null)
+            {
+                entity.Gender = request.Gender.Trim();
+            }
+
+            if (request.Address != null)
+            {
+                entity.Address = string.IsNullOrWhiteSpace(request.Address)
+                    ? null
+                    : request.Address.Trim();
+            }
+
+            if (request.PostalCode != null)
+            {
+                entity.PostalCode = string.IsNullOrWhiteSpace(request.PostalCode)
+                    ? null
+                    : request.PostalCode.Trim();
             }
 
             if (request.CityId.HasValue)
             {
+                var cityExists = await _context.Cities.AnyAsync(
+                    x => x.Id == request.CityId.Value
+                );
+
+                if (!cityExists)
+                {
+                    throw new UserException("Selected city doesn't exist.");
+                }
+
                 entity.CityId = request.CityId.Value;
+            }
+
+            if (request.Image != null)
+            {
+                if (string.IsNullOrWhiteSpace(request.Image))
+                {
+                    entity.Image = null;
+                }
+                else
+                {
+                    try
+                    {
+                        entity.Image = Convert.FromBase64String(request.Image);
+                    }
+                    catch (FormatException)
+                    {
+                        throw new UserException("Invalid image format.");
+                    }
+                }
             }
 
             await _context.SaveChangesAsync();
 
-            return _mapper.Map<UserModel>(entity);
+            return await GetById(entity.Id);
         }
 
         public override async Task BeforeInsert(User entity,UserInsertRequest request)

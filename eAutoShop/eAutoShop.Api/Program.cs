@@ -2,7 +2,9 @@ using eAutoShop.Api.Filters;
 using eAutoShop.Api.RabbitMQListener;
 using eAutoShop.Api.SignalR;
 using eAutoShop.Model.Utilities;
+using eAutoShop.Model.Model;
 using eAutoShop.Services;
+using eAutoShop.Services.Mapping;
 using eAutoShop.Services.Database;
 using eAutoShop.Services.Interfaces;
 using eAutoShop.Services.Services;
@@ -244,7 +246,10 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<AutoShopContext>(options =>
     options.UseSqlServer(connectionString));
 
+TypeAdapterConfig.GlobalSettings.Scan(typeof(OrderMappingConfig).Assembly);
+
 builder.Services.AddSingleton(TypeAdapterConfig.GlobalSettings);
+
 builder.Services.AddScoped<IMapper, ServiceMapper>();
 
 var app = builder.Build();

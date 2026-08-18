@@ -1,122 +1,77 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
+import 'package:provider/provider.dart';
+import 'package:eautoshop_mobile/app.dart';
+import 'package:eautoshop_mobile/services/notification_service.dart';
+import 'package:eautoshop_mobile/services/signalr_notifications_service.dart';
+import 'package:eautoshop_mobile/providers/auth_provider.dart';
+import 'package:eautoshop_mobile/providers/city_provider.dart';
+import 'package:eautoshop_mobile/providers/user_provider.dart';
+import 'package:eautoshop_mobile/providers/product_provider.dart';
+import 'package:eautoshop_mobile/providers/product_category_provider.dart';
+import 'package:eautoshop_mobile/providers/product_recommender_provider.dart';
+import 'package:eautoshop_mobile/providers/car_models_by_manufacturer_provider.dart';
+import 'package:eautoshop_mobile/providers/order_provider.dart';
+import 'package:eautoshop_mobile/providers/order_item_provider.dart';
+import 'package:eautoshop_mobile/providers/product_review_provider.dart';
 
-void main() {
-  runApp(const MyApp());
-}
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  String stripePublishableKey = const String.fromEnvironment(
+    'STRIPE_PUBLISHABLE_KEY',
+    defaultValue: '',
+  );
 
-  // This widget is the root of your application.
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: .fromSeed(seedColor: Colors.deepPurple),
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+  if (stripePublishableKey.isEmpty) {
+    try {
+      await dotenv.load(fileName: '.env');
+
+      stripePublishableKey = dotenv.env['STRIPE_PUBLISHABLE_KEY'] ?? '';
+    } on FileNotFoundError {
+      debugPrint('Nije pronađen .env fajl.');
+    }
+  }
+
+  if (stripePublishableKey.isEmpty) {
+    throw Exception(
+      'Nedostaje STRIPE_PUBLISHABLE_KEY. '
+      'Dodaj ga u .env ili proslijedi pomoću --dart-define.',
     );
   }
-}
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
+  Stripe.publishableKey = stripePublishableKey;
+  await Stripe.instance.applySettings();
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
+  final notificationService = NotificationService();
 
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
+  await notificationService.init();
+  await notificationService.requestPermission();
 
-  final String title;
+  final signalRNotificationsService = SignalRNotificationsService(
+    notificationService,
+  );
 
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: .center,
-          children: [
-            const Text('You have pushed the button this many times:'),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (_) => AuthProvider(signalRNotificationsService),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ),
-    );
-  }
+        ChangeNotifierProvider(create: (_) => CityProvider()),
+        ChangeNotifierProvider(create: (_) => UserProvider()),
+        ChangeNotifierProvider(create: (_) => ProductProvider()),
+        ChangeNotifierProvider(create: (_) => ProductCategoryProvider()),
+        ChangeNotifierProvider(create: (_) => ProductRecommenderProvider()),
+        ChangeNotifierProvider(
+          create: (_) => CarModelsByManufacturerProvider(),
+        ),
+        ChangeNotifierProvider(create: (_) => OrderProvider()),
+        ChangeNotifierProvider(create: (_) => OrderItemProvider()),
+        ChangeNotifierProvider(create: (_) => ProductReviewProvider()),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }

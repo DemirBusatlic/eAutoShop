@@ -13,7 +13,7 @@ namespace eAutoShop.Api.Controllers
 
     //[Authorize]
 
-    [AllowAnonymous]
+   
     [ApiController]
     public class UserController : BaseCRUDController<UserModel,UserSearchObject,UserInsertRequest,UserUpdateRequest>
     {
@@ -30,7 +30,30 @@ namespace eAutoShop.Api.Controllers
             return await (_service as IUserService).Insert(request);
         }
 
+        
+        [AllowAnonymous]
+        [HttpPost("Register")]
+        public async Task<UserModel> Register(UserInsertRequest request)
+        {
+            request.RoleId = 2;
 
+            return await ((IUserService)_service).Insert(request);
+        }
+
+        [Authorize]
+        [HttpGet("Me")]
+        public async Task<UserModel> GetCurrentUser()
+        {
+            var userIdClaim =
+                User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (!int.TryParse(userIdClaim, out var userId))
+            {
+                throw new UserException("Invalid user token.");
+            }
+
+            return await _service.GetById(userId);
+        } 
         [Authorize]
         [HttpPut("UpdateByToken")]
         public async Task<UserModel> UpdateByToken(UserUpdateRequest request)

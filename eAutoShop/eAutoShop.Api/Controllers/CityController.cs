@@ -15,5 +15,11 @@ namespace eAutoShop.Api.Controllers
         public CityController(ICityService service, ILogger<BaseCRUDController<CityModel, CitySearchObject, CityInsertRequest, CityUpdateRequest>> logger) : base(logger, service)
         {
         }
+
+        [AllowAnonymous]
+        public override async Task<PageResult<CityModel>> Get([FromQuery] CitySearchObject? search = null)
+        {
+            return await _service.Get(search);
+        }
     }
 }
