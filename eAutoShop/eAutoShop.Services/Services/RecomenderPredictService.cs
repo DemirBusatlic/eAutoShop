@@ -37,7 +37,7 @@ namespace eAutoShop.Services.Services
 
                 ITransformer model = mlContext.Model.Load(productsModelPath, out modelSchema);
 
-                var products = await _context.Products.Where(x => x.Id != productId && x.State == "active").ToListAsync();
+                var products = await _context.Products.Include(x => x.ProductCategory).Include(x => x.CarModels).Where(x => x.Id != productId && x.State == "active").ToListAsync();
 
                 var predictionResult = new List<Tuple<Product, float>>();
 

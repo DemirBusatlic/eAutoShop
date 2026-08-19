@@ -274,12 +274,28 @@ app.MapHub<ReportNotificationHub>("/reportNotificationHub");
 var stripeSettings = app.Services.GetRequiredService<IOptions<StripeSettings>>().Value;
 StripeConfiguration.ApiKey = stripeSettings.SecretKey;
 
-//using (var scope = app.Services.CreateScope())
-//{
-//    var dbContext = scope.ServiceProvider.GetRequiredService<AutoShopContext>();
-//    //dbContext.Database.EnsureCreated();
+using (var scope = app.Services.CreateScope())
+{
+    try
+    {
+        var recommenderTrainService = scope.ServiceProvider
+            .GetRequiredService<IRecommenderTrainService>();
 
-//    dbContext.Database.Migrate();
-//}
+        recommenderTrainService.TrainProductsModel();
 
-    app.Run();
+        app.Logger.LogInformation(
+            "Model preporuka je uspješno treniran."
+        );
+    }
+    catch (Exception ex)
+    {
+        app.Logger.LogWarning(
+            ex,
+            "Model preporuka nije treniran. API će nastaviti s radom."
+        );
+    }
+}
+
+
+
+app.Run();
