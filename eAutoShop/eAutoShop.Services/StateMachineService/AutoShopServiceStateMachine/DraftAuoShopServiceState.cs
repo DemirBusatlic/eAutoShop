@@ -27,8 +27,16 @@ namespace eAutoShop.Services.StateMachineService.AutoShopServiceStateMachine
 
             _mapper.Map(request, entity);
 
-            entity.Discount = request.Discount ?? 0;
-            entity.DiscountedPrice = entity.Price - (entity.Price * entity.Discount / 100);
+            var discount = request.Discount ?? entity.Discount;
+
+            if (discount < 0 || discount > 1)
+            {
+                throw new UserException("Discount must be between 0 and 1.");
+            }
+
+            entity.Discount = discount;
+
+            entity.DiscountedPrice = discount > 0 ? Math.Round(entity.Price * (1 - discount), 2): entity.Price;
 
             await _context.SaveChangesAsync();
 

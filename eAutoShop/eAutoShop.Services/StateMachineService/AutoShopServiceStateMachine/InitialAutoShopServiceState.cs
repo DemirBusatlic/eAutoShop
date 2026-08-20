@@ -1,4 +1,5 @@
-﻿using eAutoShop.Model.Model;
+﻿using eAutoShop.Model.Exceptions;
+using eAutoShop.Model.Model;
 using eAutoShop.Model.Request;
 using eAutoShop.Services.Database;
 using eAutoShop.Services.Helpers;
@@ -23,8 +24,16 @@ namespace eAutoShop.Services.StateMachineService.AutoShopServiceStateMachine
 
             entity.State = AutoShopServiceStates.Draft;
 
-            entity.Discount = request.Discount ?? 0;
-            entity.DiscountedPrice = entity.Price - (entity.Price * entity.Discount / 100);
+            var discount = request.Discount ?? 0;
+
+            if (discount < 0 || discount > 1)
+            {
+                throw new UserException("Discount must be between 0 and 1.");
+            }
+
+            entity.Discount = discount;
+
+            entity.DiscountedPrice = discount > 0? Math.Round(entity.Price * (1 - discount), 2) : entity.Price;
 
             entity.Image = !string.IsNullOrWhiteSpace(request.ImageData)? Convert.FromBase64String(request.ImageData): Array.Empty<byte>();
 

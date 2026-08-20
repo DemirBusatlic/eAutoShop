@@ -4,6 +4,7 @@ using eAutoShop.Model.Request;
 using eAutoShop.Services.Database;
 using eAutoShop.Services.Helpers;
 using MapsterMapper;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -36,7 +37,7 @@ namespace eAutoShop.Services.StateMachineService.AppointmentStateMachine
             throw new UserException("Action not allowed.");
         }
 
-        public virtual Task<AppointmentModel> Confirm(Appointment entity, DateTime? estimatedCompletionDate)
+        public virtual Task<AppointmentModel> Confirm(Appointment entity, AppointmentConfirmRequest request)
         {
             throw new UserException("Action not allowed.");
         }
@@ -75,7 +76,47 @@ namespace eAutoShop.Services.StateMachineService.AppointmentStateMachine
         {
             return Task.FromResult(new List<string>());
         }
+        protected async Task<bool> IsShopAtCapacity(DateTime reservationStart,TimeSpan duration,int? excludedAppointmentId = null)
+        {
+            var technicianCount = await _context.Users.CountAsync(x =>
+                x.Active &&
+                x.Role.Name == UserRoles.Technician
+            );
 
+            // Ako nema aktivnih tehničara, nema ni slobodnog termina.
+            if (technicianCount == 0)
+            {
+                return true;
+            }
+
+            var reservationEnd = reservationStart.Add(duration);
+
+            // TotalDuration je TimeOnly i ne može predstavljati 24h ili više.
+            var earliestPossibleStart = reservationStart.AddDays(-1);
+
+            var appointments = await _context.Appointments
+                .Where(x =>
+                    (!excludedAppointmentId.HasValue ||
+                     x.Id != excludedAppointmentId.Value) &&
+                    (x.State == AppointmentStates.Pending ||
+                     x.State == AppointmentStates.Confirmed ||
+                     x.State == AppointmentStates.Ongoing) &&
+                    x.ReservationDate >= earliestPossibleStart &&
+                    x.ReservationDate < reservationEnd)
+                .ToListAsync();
+
+            var numberOfOverlappingAppointments = appointments.Count(x =>
+            {
+                var existingAppointmentEnd = x.ReservationDate.Add(
+                    x.TotalDuration.ToTimeSpan()
+                );
+
+                return reservationStart < existingAppointmentEnd &&
+                       reservationEnd > x.ReservationDate;
+            });
+
+            return numberOfOverlappingAppointments >= technicianCount;
+        }
         public BaseAppointmentState CreateState(string? state)
         {
             return state switch

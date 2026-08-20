@@ -24,10 +24,17 @@ namespace eAutoShop.Services.StateMachineService.ProductStateMachine
             var entity = _mapper.Map<Product>(request);
 
             entity.State = ProductStates.Draft;
+            var discount = request.Discount ?? 0;
 
-            var discount = entity.Discount;
+            if (discount < 0 || discount > 1)
+            {
+                throw new UserException("Discount must be between 0 and 1."
+                );
+            }
 
-            entity.DiscountedPrice = discount > 0 ? Math.Round(entity.Price * (1 - (discount / 100.0)),2): entity.Price;
+            entity.Discount = discount;
+
+            entity.DiscountedPrice = discount > 0? Math.Round(entity.Price * (1 - discount), 2): entity.Price;
 
             entity.CarModels = new List<CarModel>();
 

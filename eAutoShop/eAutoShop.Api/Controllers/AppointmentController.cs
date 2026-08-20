@@ -26,9 +26,9 @@ namespace eAutoShop.Api.Controllers
 
         [Authorize(Roles = UserRoles.Manager + "," + UserRoles.Salesperson)]
         [HttpPut("Confirm/{id}/{estimatedCompletionDate}")]
-        public async Task<AppointmentModel> Confirm(int id, DateTime estimatedCompletionDate)
+        public async Task<AppointmentModel> Confirm(int id,[FromBody] AppointmentConfirmRequest request)
         {
-            return await (_service as IAppointmentService)!.Confirm(id, estimatedCompletionDate);
+            return await (_service as IAppointmentService)!.Confirm(id, request);
         }
 
         [Authorize(Roles = UserRoles.Manager + "," + UserRoles.Salesperson)]
@@ -96,7 +96,7 @@ namespace eAutoShop.Api.Controllers
         {
             search ??= new AppointmentSearchObject();
 
-            string? username = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            string? username =User.FindFirst(ClaimTypes.Name)?.Value;
             search.CustomerUsername = username;
 
             return await (_service as IAppointmentService)!.Get(search);

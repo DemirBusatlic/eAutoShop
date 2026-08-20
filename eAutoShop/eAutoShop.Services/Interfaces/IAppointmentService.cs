@@ -11,7 +11,7 @@ namespace eAutoShop.Services.Interfaces
 {
     public interface IAppointmentService: IBaseCRUDService<AppointmentModel, AppointmentSearchObject, AppointmentInsertRequest, AppointmentUpdateRequest>
     {
-        Task<AppointmentModel> Confirm(int id, DateTime? estimatedCompletionDate);
+        Task<AppointmentModel> Confirm(int id,AppointmentConfirmRequest request);
         Task<AppointmentModel> Reject(int id, string reason);
         Task<AppointmentModel> Cancel(int id, string reason);
         Task<AppointmentModel> Start(int id);

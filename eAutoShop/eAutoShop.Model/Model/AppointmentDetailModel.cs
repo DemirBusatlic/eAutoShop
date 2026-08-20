@@ -6,8 +6,8 @@ namespace eAutoShop.Model.Model
 {
     public class AppointmentDetailModel
     {
-        public int AutoShopServiceId { get; set; }
-        public string ServiceName { get; set; }
+        public int ServiceId { get; set; }
+        public string ServiceName { get; set; } = null!;
         public double ServicePrice { get; set; }
         public double ServiceDiscount { get; set; }
         public double ServiceDiscountedPrice { get; set; }

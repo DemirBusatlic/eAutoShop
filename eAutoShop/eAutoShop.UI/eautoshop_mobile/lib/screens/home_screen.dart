@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'master_screen.dart';
 import 'products_screen.dart';
-//import 'services_screen.dart';
+import 'services_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -31,10 +31,10 @@ class HomeScreen extends StatelessWidget {
                 title: 'Usluge',
                 imagePath: 'lib/assets/services.png',
                 onTap: () {
-                  /*Navigator.push(
+                  Navigator.push(
                     context,
                     MaterialPageRoute(builder: (_) => const ServicesScreen()),
-                  );*/
+                  );
                 },
               ),
             ],

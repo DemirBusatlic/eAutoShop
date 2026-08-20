@@ -26,13 +26,18 @@ namespace eAutoShop.Services.StateMachineService.AppointmentStateMachine
         {
             var userIdClaim = _serviceProvider.GetRequiredService<IHttpContextAccessor>().HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            if (string.IsNullOrWhiteSpace(userIdClaim))
+            if (!int.TryParse(userIdClaim, out var userId))
+            {
                 throw new UserException("User not found.");
+            }
 
-            var customer = await _context.Users.FirstOrDefaultAsync(x => x.Username == userIdClaim);
+            var customer = await _context.Users
+                .FirstOrDefaultAsync(x => x.Id == userId);
 
             if (customer == null)
+            {
                 throw new UserException("User not found.");
+            }
 
             var carModel = await _context.CarModels.FirstOrDefaultAsync(x => x.Id == request.CarModelId);
 
@@ -80,10 +85,13 @@ namespace eAutoShop.Services.StateMachineService.AppointmentStateMachine
 
             var reservationEndDate = request.ReservationDate.Add(totalDuration);
 
-            var hasConflict = await _context.Appointments.AnyAsync(x =>x.State != AppointmentStates.Cancelled && x.State != AppointmentStates.Rejected & request.ReservationDate < x.ReservationDate.Add(x.TotalDuration.ToTimeSpan()) && reservationEndDate > x.ReservationDate);
 
-            if (hasConflict)
-                throw new UserException("Selected appointment time is already taken.");
+            var shopIsAtCapacity = await IsShopAtCapacity(request.ReservationDate,totalDuration);
+
+            if (shopIsAtCapacity)
+            {
+                throw new UserException("All technicians are busy during the selected time.");
+            }
 
             var appointment = new Appointment
             {

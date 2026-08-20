@@ -99,7 +99,7 @@ namespace eAutoShop.Services.Services
 
         public override async Task<AppointmentModel> Update(int id, AppointmentUpdateRequest request)
         {
-            var entity = await _context.Appointments.FindAsync(id);
+            var entity = await GetAppointment(id);
 
             if (entity == null)
                 throw new UserException("Appointment doesn't exist.");
@@ -109,13 +109,13 @@ namespace eAutoShop.Services.Services
             return await state.Update(entity, request);
         }
 
-        public async Task<AppointmentModel> Confirm(int id, DateTime? estimatedCompletionDate)
+        public async Task<AppointmentModel> Confirm(int id, AppointmentConfirmRequest request)
         {
             var entity = await GetAppointment(id);
 
             var state = _baseAppointmentState.CreateState(entity.State);
 
-            return await state.Confirm(entity, estimatedCompletionDate);
+            return await state.Confirm(entity, request);
         }
 
         public async Task<AppointmentModel> Reject(int id, string reason)
@@ -183,11 +183,16 @@ namespace eAutoShop.Services.Services
 
         private async Task<Appointment> GetAppointment(int id)
         {
-            var entity = await _context.Appointments.FindAsync(id);
+            var entity = await _context.Appointments
+                .Include(x => x.Customer)
+                .Include(x => x.Employee)
+                .Include(x => x.CarModel)
+                .FirstOrDefaultAsync(x => x.Id == id);
 
             if (entity == null)
-
+            {
                 throw new UserException("Appointment doesn't exist.");
+            }
 
             return entity;
         }

@@ -19,27 +19,32 @@ namespace eAutoShop.Services.StateMachineService.AppointmentStateMachine
         {
         }
 
-        public override async Task<AppointmentModel> Update(Appointment entity,AppointmentUpdateRequest request)
+        public override async Task<AppointmentModel> Update(
+    Appointment entity,
+    AppointmentUpdateRequest request)
         {
             if (request.ReservationDate.HasValue)
             {
-                if (request.ReservationDate.Value <= DateTime.UtcNow)
+                var newReservationDate = request.ReservationDate.Value;
+
+                if (newReservationDate <= DateTime.UtcNow)
                 {
-                    throw new UserException("Reservation date must be in the future.");
+                    throw new UserException(
+                        "Reservation date must be in the future."
+                    );
                 }
 
-                var newReservationDate = request.ReservationDate.Value;
-                var newEndDate = newReservationDate.Add(entity.TotalDuration.ToTimeSpan());
+                var shopIsAtCapacity = await IsShopAtCapacity(
+                    newReservationDate,
+                    entity.TotalDuration.ToTimeSpan(),
+                    entity.Id
+                );
 
-                var hasConflict = await _context.Appointments.AnyAsync(x =>
-                    x.Id != entity.Id &&
-                    x.State != AppointmentStates.Cancelled &&
-                    x.State != AppointmentStates.Rejected &&
-                    newReservationDate < x.ReservationDate.Add(x.TotalDuration.ToTimeSpan()) && newEndDate > x.ReservationDate);
-
-                if (hasConflict)
+                if (shopIsAtCapacity)
                 {
-                    throw new UserException("Selected appointment time is already taken.");
+                    throw new UserException(
+                        "All technicians are busy during the selected time."
+                    );
                 }
 
                 entity.ReservationDate = newReservationDate;
@@ -47,17 +52,23 @@ namespace eAutoShop.Services.StateMachineService.AppointmentStateMachine
 
             if (request.EstimatedCompletionDate.HasValue)
             {
-                if (request.EstimatedCompletionDate.Value <= entity.ReservationDate)
+                if (request.EstimatedCompletionDate.Value <=
+                    entity.ReservationDate)
                 {
-                    throw new UserException("Estimated completion date must be after reservation date.");
+                    throw new UserException(
+                        "Estimated completion date must be after reservation date."
+                    );
                 }
 
-                entity.EstimatedCompletionDate = request.EstimatedCompletionDate.Value;
+                entity.EstimatedCompletionDate =
+                    request.EstimatedCompletionDate.Value;
             }
 
             if (request.CompletionDate.HasValue)
             {
-                throw new UserException("Completion date cannot be set while appointment is pending.");
+                throw new UserException(
+                    "Completion date cannot be set while appointment is pending."
+                );
             }
 
             await _context.SaveChangesAsync();
@@ -65,28 +76,81 @@ namespace eAutoShop.Services.StateMachineService.AppointmentStateMachine
             return _mapper.Map<AppointmentModel>(entity);
         }
 
-        public override async Task<AppointmentModel> Confirm(Appointment entity,DateTime? estimatedCompletionDate)
+        public override async Task<AppointmentModel> Confirm(Appointment entity, AppointmentConfirmRequest request)
         {
-            if (estimatedCompletionDate.HasValue && estimatedCompletionDate.Value <= entity.ReservationDate)
+            if (request.EstimatedCompletionDate.HasValue &&request.EstimatedCompletionDate.Value <= entity.ReservationDate)
             {
                 throw new UserException("Estimated completion date must be after reservation date.");
             }
 
-            var appointmentEndDate = entity.ReservationDate.Add(entity.TotalDuration.ToTimeSpan());
+            var technician = await _context.Users .Include(x => x.Role).FirstOrDefaultAsync(x =>
+                    x.Id == request.EmployeeId &&
+                    x.Active &&
+                    x.Role.Name == UserRoles.Technician
+                );
 
-            var hasConflict = await _context.Appointments.AnyAsync(x =>
-                x.Id != entity.Id &&
-                x.State != AppointmentStates.Cancelled &&
-                x.State != AppointmentStates.Rejected &&
-                entity.ReservationDate < x.ReservationDate.Add(x.TotalDuration.ToTimeSpan()) && appointmentEndDate > x.ReservationDate);
-
-            if (hasConflict)
+            if (technician == null)
             {
-                throw new UserException("Selected appointment time is already taken.");
+                throw new UserException(
+                    "Selected technician does not exist or is not active."
+                );
             }
 
+            var shopIsAtCapacity = await IsShopAtCapacity(
+                entity.ReservationDate,
+                entity.TotalDuration.ToTimeSpan(),
+                entity.Id
+            );
+
+            if (shopIsAtCapacity)
+            {
+                throw new UserException(
+                    "All technicians are busy during the selected time."
+                );
+            }
+
+            var appointmentEndDate = entity.ReservationDate.Add(
+                entity.TotalDuration.ToTimeSpan()
+            );
+
+            var earliestPossibleStart =
+                entity.ReservationDate.AddDays(-1);
+
+            var technicianAppointments =
+                await _context.Appointments
+                    .Where(x =>
+                        x.Id != entity.Id &&
+                        x.EmployeeId == technician.Id &&
+                        (x.State == AppointmentStates.Confirmed ||
+                         x.State == AppointmentStates.Ongoing) &&
+                        x.ReservationDate >= earliestPossibleStart &&
+                        x.ReservationDate < appointmentEndDate)
+                    .ToListAsync();
+
+            var technicianIsBusy = technicianAppointments.Any(x =>
+            {
+                var existingAppointmentEnd =
+                    x.ReservationDate.Add(
+                        x.TotalDuration.ToTimeSpan()
+                    );
+
+                return entity.ReservationDate <
+                           existingAppointmentEnd &&
+                       appointmentEndDate >
+                           x.ReservationDate;
+            });
+
+            if (technicianIsBusy)
+            {
+                throw new UserException(
+                    "Selected technician is busy during this time."
+                );
+            }
+
+            entity.EmployeeId = technician.Id;
             entity.State = AppointmentStates.Confirmed;
-            entity.EstimatedCompletionDate = estimatedCompletionDate;
+            entity.EstimatedCompletionDate =
+                request.EstimatedCompletionDate;
 
             await _context.SaveChangesAsync();
 

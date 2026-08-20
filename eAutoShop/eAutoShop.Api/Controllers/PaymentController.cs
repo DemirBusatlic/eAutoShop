@@ -22,7 +22,7 @@ namespace eAutoShop.Api.Controllers
         [HttpPost("ConfirmPayment")]
         public async Task<IActionResult> ConfirmPayment([FromBody] PaymentCreateRequest request)
         {
-            string? username = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            string? username =User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             request.Username = username;
 
@@ -34,7 +34,7 @@ namespace eAutoShop.Api.Controllers
         [HttpPost("CreatePaymentIntent")]
         public async Task<PaymentIntentResponse> CreatePaymentIntent([FromBody] PaymentCreateRequest request)
         {
-            string? username = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            string? username =User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             request.Username = username;
 

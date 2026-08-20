@@ -2,7 +2,7 @@ import 'package:eautoshop_mobile/providers/auth_provider.dart';
 import 'package:eautoshop_mobile/screens/home_screen.dart';
 import 'package:eautoshop_mobile/screens/login_screen.dart';
 import 'package:eautoshop_mobile/screens/order_history_screen.dart';
-//import 'package:eautoshop_mobile/screens/reservation_history_screen.dart';
+import 'package:eautoshop_mobile/screens/appointment_history_screen.dart';
 import 'package:eautoshop_mobile/screens/user_profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -142,12 +142,12 @@ class MasterScreen extends StatelessWidget {
                     onTap: () {
                       Navigator.pop(context);
 
-                      /*Navigator.push(
+                      Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => const ReservationHistoryScreen(),
+                          builder: (_) => const AppointmentHistoryScreen(),
                         ),
-                      );*/
+                      );
                     },
                   ),
 

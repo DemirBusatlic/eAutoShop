@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace eAutoShop.Services.Services
 {
@@ -18,6 +19,12 @@ namespace eAutoShop.Services.Services
         {
         }
 
+        public override IQueryable<StaffReview> AddInclude(IQueryable<StaffReview> query,StaffReviewSearchObject? search = null)
+        {
+            query = query .Include(x => x.User).Include(x => x.Employee);
+
+            return base.AddInclude(query, search);
+        }
         public override IQueryable<StaffReview> AddFilter(IQueryable<StaffReview> query,StaffReviewSearchObject? search = null)
         {
             if (search?.Rating != null)

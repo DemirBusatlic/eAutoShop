@@ -79,17 +79,16 @@ namespace eAutoShop.Services.StateMachineService.ProductStateMachine
                 }
             }
 
-            var discount = request.Discount?? entity.Discount;
+            var discount = request.Discount ?? entity.Discount;
 
-            if (discount < 0 || discount > 100)
+            if (discount < 0 || discount > 1)
             {
-                throw new UserException("Discount must be between 0 and 100.");
+                throw new UserException("Discount must be between 0 and 1.");
             }
 
             entity.Discount = discount;
 
-            entity.DiscountedPrice = discount > 0 ? Math.Round(entity.Price * (1 - (discount / 100.0)),2)
-             : entity.Price;
+            entity.DiscountedPrice = discount > 0? Math.Round(entity.Price * (1 - discount), 2): entity.Price;
 
             await _context.SaveChangesAsync();
 
