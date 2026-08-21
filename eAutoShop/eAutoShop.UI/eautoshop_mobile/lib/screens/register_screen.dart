@@ -88,27 +88,27 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Future<void> _pickImage() async {
-    final result = await FilePicker.platform.pickFiles(
+    final file = await FilePicker.pickFile(
       type: FileType.custom,
       allowedExtensions: const ['jpg', 'jpeg', 'png'],
-      withData: true,
     );
 
-    if (result == null) return;
+    if (file == null) return;
 
-    final file = result.files.single;
-    if (file.size > _maximumImageSize) {
+    final fileSize = await file.length();
+
+    if (fileSize > _maximumImageSize) {
       _showMessage('Slika ne smije biti veća od 5 MB.');
       return;
     }
 
-    final bytes = file.bytes;
-    if (bytes == null) {
-      _showMessage('Sliku nije moguće učitati. Pokušaj ponovo.');
-      return;
-    }
+    final bytes = await file.readAsBytes();
 
-    setState(() => _imageBytes = bytes);
+    if (!mounted) return;
+
+    setState(() {
+      _imageBytes = bytes;
+    });
   }
 
   Future<void> _register() async {

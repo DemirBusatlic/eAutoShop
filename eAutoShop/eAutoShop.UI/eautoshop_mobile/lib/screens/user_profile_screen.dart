@@ -144,29 +144,26 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   }
 
   Future<void> _pickImage() async {
-    final result = await FilePicker.platform.pickFiles(
+    final file = await FilePicker.pickFile(
       type: FileType.custom,
       allowedExtensions: const ['jpg', 'jpeg', 'png'],
-      withData: true,
     );
 
-    if (result == null) return;
+    if (file == null) return;
 
-    final file = result.files.single;
+    final fileSize = await file.length();
 
-    if (file.size > _maximumImageSize) {
+    if (fileSize > _maximumImageSize) {
       _showMessage('Slika ne smije biti veća od 5 MB.');
       return;
     }
 
-    if (file.bytes == null) {
-      _showMessage('Sliku nije moguće učitati.');
-      return;
-    }
+    final bytes = await file.readAsBytes();
+
+    if (!mounted) return;
 
     setState(() {
-      _imageBytes = file.bytes;
-      _imageChanged = true;
+      _imageBytes = bytes;
     });
   }
 
