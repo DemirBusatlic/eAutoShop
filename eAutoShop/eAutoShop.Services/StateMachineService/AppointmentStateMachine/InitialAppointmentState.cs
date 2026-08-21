@@ -83,8 +83,6 @@ namespace eAutoShop.Services.StateMachineService.AppointmentStateMachine
                 totalDuration += service.Duration.ToTimeSpan();
             }
 
-            var reservationEndDate = request.ReservationDate.Add(totalDuration);
-
 
             var shopIsAtCapacity = await IsShopAtCapacity(request.ReservationDate,totalDuration);
 

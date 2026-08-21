@@ -25,7 +25,7 @@ namespace eAutoShop.Api.Controllers
         }
 
         [Authorize(Roles = UserRoles.Manager + "," + UserRoles.Salesperson)]
-        [HttpPut("Confirm/{id}/{estimatedCompletionDate}")]
+        [HttpPut("Confirm/{id}")]
         public async Task<AppointmentModel> Confirm(int id,[FromBody] AppointmentConfirmRequest request)
         {
             return await (_service as IAppointmentService)!.Confirm(id, request);
