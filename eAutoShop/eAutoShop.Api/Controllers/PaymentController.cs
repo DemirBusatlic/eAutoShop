@@ -1,4 +1,5 @@
-﻿using eAutoShop.Model.Model;
+﻿using eAutoShop.Model.Exceptions;
+using eAutoShop.Model.Model;
 using eAutoShop.Model.Request;
 using eAutoShop.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -7,7 +8,7 @@ using System.Security.Claims;
 
 namespace eAutoShop.Api.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "customer")]
     [ApiController]
     [Route("[controller]")]
     public class PaymentController : ControllerBase
@@ -19,28 +20,38 @@ namespace eAutoShop.Api.Controllers
             _stripeService = stripeService;
         }
 
-        [HttpPost("ConfirmPayment")]
-        public async Task<IActionResult> ConfirmPayment([FromBody] PaymentCreateRequest request)
+        [HttpPost("CreatePaymentIntent")]
+        public async Task<PaymentIntentResponse> CreatePaymentIntent(
+            PaymentCreateRequest request)
         {
-            string? username =User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var customerId = GetCustomerId();
 
-            request.Username = username;
-
-            var confirmation = await _stripeService.ConfirmPayment(request);
-
-            return Ok(confirmation);
+            return await _stripeService.CreatePaymentIntent(
+                request.OrderId,
+                customerId);
         }
 
-        [HttpPost("CreatePaymentIntent")]
-        public async Task<PaymentIntentResponse> CreatePaymentIntent([FromBody] PaymentCreateRequest request)
+        [HttpPost("VerifyPayment/{orderId:int}")]
+        public async Task<OrderModel> VerifyPayment(int orderId)
         {
-            string? username =User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var customerId = GetCustomerId();
 
-            request.Username = username;
+            return await _stripeService.VerifyPayment(
+                orderId,
+                customerId);
+        }
 
-            var intent = await _stripeService.CreatePaymentIntent(request);
+        private int GetCustomerId()
+        {
+            var value = User.FindFirst(
+                ClaimTypes.NameIdentifier)?.Value;
 
-            return intent;
+            if (!int.TryParse(value, out var customerId))
+            {
+                throw new UserException("Unauthorized.");
+            }
+
+            return customerId;
         }
     }
 }

@@ -17,41 +17,7 @@ namespace eAutoShop.Services.StateMachineService.OrderStateMachine
         {
         }
 
-        public override async Task<OrderModel> AddSuccessfulPayment( Order entity,string paymentIntentId)
-        {
-            if (string.IsNullOrWhiteSpace(paymentIntentId))
-            {
-                throw new UserException("Invalid payment intent.");
-            }
 
-            paymentIntentId = paymentIntentId.Trim();
-
-            entity.State = OrderStates.OnHold;
-
-            entity.PaymentIntentId = paymentIntentId;
-
-            await _context.SaveChangesAsync();
-
-            return _mapper.Map<OrderModel>(entity);
-        }
-
-        public override async Task<OrderModel> AddFailedPayment(Order entity,string paymentIntentId)
-        {
-            if (string.IsNullOrWhiteSpace(paymentIntentId))
-            {
-                throw new UserException("Invalid payment intent.");
-            }
-
-            paymentIntentId = paymentIntentId.Trim();
-
-            entity.State = OrderStates.PaymentFailed;
-
-            entity.PaymentIntentId = paymentIntentId;
-
-            await _context.SaveChangesAsync();
-
-            return _mapper.Map<OrderModel>(entity);
-        }
 
         public override async Task<OrderModel> SoftDelete(Order entity,string role)
         {
@@ -81,8 +47,7 @@ namespace eAutoShop.Services.StateMachineService.OrderStateMachine
         {
             var list = await base.AllowedActions();
 
-            list.Add(nameof(AddSuccessfulPayment));
-            list.Add(nameof(AddFailedPayment));
+         
             list.Add(nameof(SoftDelete));
 
             return list;

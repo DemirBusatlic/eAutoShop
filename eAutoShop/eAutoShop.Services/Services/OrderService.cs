@@ -209,29 +209,6 @@ namespace eAutoShop.Services.Services
             return await state.Reject(entity);
         }
 
-        public async Task<OrderModel> AddFailedPayment(int id,string paymentIntentId)
-        {
-            var entity = await _context.Orders.FindAsync(id);
-
-            if (entity == null)
-                throw new UserException("Order not found.");
-
-            var state = _baseOrderState.CreateState(entity.State);
-
-            return await state.AddFailedPayment(entity, paymentIntentId);
-        }
-
-        public async Task<OrderModel> AddSuccessfulPayment(int id,string paymentIntentId)
-        {
-            var entity = await _context.Orders.FindAsync(id);
-
-            if (entity == null)
-                throw new UserException("Order not found.");
-
-            var state = _baseOrderState.CreateState(entity.State);
-
-            return await state.AddSuccessfulPayment(entity, paymentIntentId);
-        }
 
         public async Task<OrderModel> SoftDelete(int id)
         {

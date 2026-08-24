@@ -79,7 +79,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
       case 'paymentfailed':
         return 'Plaćanje neuspješno';
       case 'onhold':
-        return 'Na čekanju';
+        return 'Plaćeno – čeka obradu';
       case 'accepted':
         return 'Prihvaćena';
       case 'rejected':
@@ -548,7 +548,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                               decimal: true,
                             ),
                             decoration: const InputDecoration(
-                              labelText: 'Min. iznos (KM)',
+                              labelText: 'Min. iznos (€)',
                               border: OutlineInputBorder(),
                             ),
                           ),
@@ -561,7 +561,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                               decimal: true,
                             ),
                             decoration: const InputDecoration(
-                              labelText: 'Maks. iznos (KM)',
+                              labelText: 'Maks. iznos (€)',
                               border: OutlineInputBorder(),
                             ),
                           ),
@@ -703,7 +703,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                                                 ),
                                               ),
                                               Text(
-                                                '${order.totalAmount.toStringAsFixed(2)} KM',
+                                                '${order.totalAmount.toStringAsFixed(2)} €',
                                                 style: Theme.of(context)
                                                     .textTheme
                                                     .titleMedium
@@ -821,7 +821,7 @@ class _OrderInfoCard extends StatelessWidget {
             ),
             _InfoRow(
               label: 'Ukupno',
-              value: '${order.totalAmount.toStringAsFixed(2)} KM',
+              value: '${order.totalAmount.toStringAsFixed(2)} €',
             ),
             _InfoRow(label: 'Grad', value: order.shippingCity),
             _InfoRow(label: 'Adresa', value: order.shippingAddress),
@@ -888,9 +888,9 @@ class _OrderItemCard extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text('Količina: ${item.quantity}'),
-            Text('Cijena komada: ${item.unitPrice.toStringAsFixed(2)} KM'),
+            Text('Cijena komada: ${item.unitPrice.toStringAsFixed(2)} €'),
             Text(
-              'Ukupno: ${item.totalItemsPriceDiscounted.toStringAsFixed(2)} KM',
+              'Ukupno: ${item.totalItemsPriceDiscounted.toStringAsFixed(2)} €',
               style: const TextStyle(fontWeight: FontWeight.w600),
             ),
             if (item.discount > 0)

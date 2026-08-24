@@ -16,8 +16,6 @@ namespace eAutoShop.Services.Interfaces
         Task<OrderModel> Reject(int id);
         Task<OrderModel> Cancel(int id);
         Task<OrderModel> Resend(int id);
-        Task<OrderModel> AddFailedPayment(int id, string paymentIntentId);
-        Task<OrderModel> AddSuccessfulPayment(int id, string paymentIntentId);
         Task<List<string>> AllowedActions(int id);
         Task<OrderBasicInfoModel> GetBasicOrderInfo(int id);
         Task<OrderModel> SoftDelete(int id);

@@ -71,9 +71,22 @@ namespace eAutoShop.Services.StateMachineService.OrderStateMachine
 
         public override async Task<OrderModel> Reject(Order entity)
         {
+            if (string.IsNullOrWhiteSpace(entity.PaymentIntentId))
+            {
+                throw new UserException(
+                    "Payment intent does not exist.");
+            }
+
+            await _serviceProvider
+                .GetRequiredService<IStripeService>()
+                .CreateRefundAsync(
+                    entity.PaymentIntentId,
+                    $"order-refund-{entity.Id}");
+
             entity.State = OrderStates.Rejected;
 
-            var appointment = await _context.Appointments.FirstOrDefaultAsync(x => x.OrderId == entity.Id);
+            var appointment = await _context.Appointments
+                .FirstOrDefaultAsync(x => x.OrderId == entity.Id);
 
             if (appointment != null)
             {
@@ -81,17 +94,28 @@ namespace eAutoShop.Services.StateMachineService.OrderStateMachine
             }
 
             await _context.SaveChangesAsync();
-
-            await _serviceProvider.GetRequiredService<IStripeService>().CreateRefundAsync(entity.PaymentIntentId!);
 
             return _mapper.Map<OrderModel>(entity);
         }
 
         public override async Task<OrderModel> Cancel(Order entity)
         {
+            if (string.IsNullOrWhiteSpace(entity.PaymentIntentId))
+            {
+                throw new UserException(
+                    "Payment intent does not exist.");
+            }
+
+            await _serviceProvider
+                .GetRequiredService<IStripeService>()
+                .CreateRefundAsync(
+                    entity.PaymentIntentId,
+                    $"order-refund-{entity.Id}");
+
             entity.State = OrderStates.Cancelled;
 
-            var appointment = await _context.Appointments.FirstOrDefaultAsync(x => x.OrderId == entity.Id);
+            var appointment = await _context.Appointments
+                .FirstOrDefaultAsync(x => x.OrderId == entity.Id);
 
             if (appointment != null)
             {
@@ -99,8 +123,6 @@ namespace eAutoShop.Services.StateMachineService.OrderStateMachine
             }
 
             await _context.SaveChangesAsync();
-
-            await _serviceProvider.GetRequiredService<IStripeService>().CreateRefundAsync(entity.PaymentIntentId!);
 
             return _mapper.Map<OrderModel>(entity);
         }

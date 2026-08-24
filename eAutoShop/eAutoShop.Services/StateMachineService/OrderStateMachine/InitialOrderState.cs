@@ -176,6 +176,12 @@ namespace eAutoShop.Services.StateMachineService.OrderStateMachine
             _context.Orders.Add(entity);
 
             await _context.SaveChangesAsync();
+
+           
+            await _context.Entry(entity)
+                .Reference(x => x.City)
+                .LoadAsync();
+
             await transaction.CommitAsync();
 
             return _mapper.Map<OrderModel>(entity);

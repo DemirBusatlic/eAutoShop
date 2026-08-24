@@ -50,51 +50,53 @@ class OrderProvider extends BaseProvider<Order, OrderInsert> {
   }
 
   Future<Order> insertOrder(OrderInsert order) async {
-    final Order createdOrder = await _createOrder(order);
-
-    final int totalAmountInCents = (createdOrder.totalAmount * 100).round();
-
-    final paymentIntent = await _createPaymentIntent(
-      createdOrder.id,
-      totalAmountInCents,
-    );
-
-    final String clientSecret = paymentIntent['clientSecret'] as String;
-
-    final String paymentIntentId = paymentIntent['paymentIntentId'] as String;
-
     try {
-      await _confirmPayment(clientSecret);
+      final Order createdOrder = await _createOrder(order);
 
-      final Order paidOrder = await _updatePaymentStatus(
-        createdOrder.id,
-        paymentIntentId,
-        successful: true,
-      );
+      final paymentIntent = await _createPaymentIntent(createdOrder.id);
 
-      notifyListeners();
-      return paidOrder;
-    } catch (_) {
-      try {
-        await _updatePaymentStatus(
-          createdOrder.id,
-          paymentIntentId,
-          successful: false,
-        );
-      } catch (_) {
-        // Glavna greška je neuspjelo Stripe plaćanje.
+      final clientSecret = paymentIntent['clientSecret'] as String?;
+
+      if (clientSecret == null || clientSecret.trim().isEmpty) {
+        throw CustomException('Stripe client secret nije pronađen.');
       }
 
-      throw CustomException(
-        'Payment was not successful. The order was saved as a failed payment.',
-      );
+      try {
+        await _confirmPayment(clientSecret);
+      } on StripeException catch (error) {
+        final message =
+            error.error.localizedMessage ?? 'Plaćanje nije završeno.';
+
+        throw CustomException(message);
+      } catch (error) {
+        throw CustomException('Plaćanje nije završeno: $error');
+      }
+
+      try {
+        final paidOrder = await _verifyPayment(createdOrder.id);
+
+        notifyListeners();
+
+        return paidOrder;
+      } catch (error) {
+        throw CustomException(
+          'Stripe plaćanje je poslano, ali server nije '
+          'mogao potvrditi rezultat: $error',
+        );
+      }
+    } on CustomException {
+      rethrow;
+    } catch (error) {
+      throw CustomException('Neočekivana greška prilikom naručivanja: $error');
     }
   }
 
   Future<Order> _createOrder(OrderInsert order) async {
     try {
+      final url = Uri.parse('${BaseProvider.baseUrl}/$endpoint');
+
       final response = await http.post(
-        Uri.parse('${BaseProvider.baseUrl}/$endpoint'),
+        url,
         headers: await createHeaders(),
         body: jsonEncode(order.toJson()),
       );
@@ -103,36 +105,76 @@ class OrderProvider extends BaseProvider<Order, OrderInsert> {
         handleHttpError(response);
       }
 
-      return Order.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+      if (response.body.isEmpty) {
+        throw CustomException('Server nije vratio kreiranu narudžbu.');
+      }
+
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
+
+      return Order.fromJson(data);
     } on CustomException {
       rethrow;
-    } catch (_) {
-      throw CustomException(
-        "Can't reach the server. Please check whether the API is running.",
-      );
+    } catch (error) {
+      throw CustomException('Greška prilikom kreiranja narudžbe: $error');
     }
   }
 
-  Future<Map<String, dynamic>> _createPaymentIntent(
-    int orderId,
-    int totalAmount,
-  ) async {
+  Future<Map<String, dynamic>> _createPaymentIntent(int orderId) async {
     try {
       final response = await http.post(
         Uri.parse('${BaseProvider.baseUrl}/Payment/CreatePaymentIntent'),
         headers: await createHeaders(),
-        body: jsonEncode({'orderId': orderId, 'totalAmount': totalAmount}),
+        body: jsonEncode({'orderId': orderId}),
       );
 
       if (!_isSuccessful(response.statusCode)) {
         handleHttpError(response);
       }
 
-      return jsonDecode(response.body) as Map<String, dynamic>;
+      if (response.body.isEmpty) {
+        throw CustomException('Server nije vratio podatke za plaćanje.');
+      }
+
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
+
+      final clientSecret = data['clientSecret'];
+
+      if (clientSecret == null || clientSecret.toString().trim().isEmpty) {
+        throw CustomException('Server nije vratio Stripe client secret.');
+      }
+
+      return data;
     } on CustomException {
       rethrow;
-    } catch (_) {
-      throw CustomException('Payment could not be initialized.');
+    } catch (error) {
+      throw CustomException('Plaćanje nije moguće inicijalizovati: $error');
+    }
+  }
+
+  Future<Order> _verifyPayment(int orderId) async {
+    try {
+      final url = Uri.parse(
+        '${BaseProvider.baseUrl}/Payment/'
+        'VerifyPayment/$orderId',
+      );
+
+      final response = await http.post(url, headers: await createHeaders());
+
+      if (!_isSuccessful(response.statusCode)) {
+        handleHttpError(response);
+      }
+
+      if (response.body.isEmpty) {
+        throw CustomException('Server nije vratio potvrđenu narudžbu.');
+      }
+
+      return Order.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+    } on CustomException {
+      rethrow;
+    } catch (error) {
+      throw CustomException(
+        'Server trenutno ne može potvrditi plaćanje: $error',
+      );
     }
   }
 
@@ -143,30 +185,6 @@ class OrderProvider extends BaseProvider<Order, OrderInsert> {
         paymentMethodData: PaymentMethodData(),
       ),
     );
-  }
-
-  Future<Order> _updatePaymentStatus(
-    int orderId,
-    String paymentIntentId, {
-    required bool successful,
-  }) async {
-    final endpointSuffix = successful
-        ? 'AddSuccessfulPayment'
-        : 'AddFailedPayment';
-
-    final response = await http.put(
-      Uri.parse(
-        '${BaseProvider.baseUrl}/$endpoint/'
-        '$endpointSuffix/$orderId/$paymentIntentId',
-      ),
-      headers: await createHeaders(),
-    );
-
-    if (!_isSuccessful(response.statusCode)) {
-      handleHttpError(response);
-    }
-
-    return Order.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
   }
 
   Future<void> cancel(int id) async {

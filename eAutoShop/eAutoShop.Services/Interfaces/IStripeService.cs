@@ -10,10 +10,10 @@ namespace eAutoShop.Services.Interfaces
 {
     public interface IStripeService
     {
-        Task<PaymentResponse> ConfirmPayment(PaymentCreateRequest request);
+        Task<PaymentIntentResponse> CreatePaymentIntent(int orderId,int customerId);
 
-        Task<PaymentIntentResponse> CreatePaymentIntent(PaymentCreateRequest request);
+        Task<OrderModel> VerifyPayment(int orderId,int customerId);
 
-        Task CreateRefundAsync(string paymentIntentId);
+        Task CreateRefundAsync(string paymentIntentId,string idempotencyKey);
     }
 }

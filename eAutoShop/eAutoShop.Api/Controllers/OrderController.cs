@@ -69,18 +69,7 @@ namespace eAutoShop.Api.Controllers
         {
             return await (_service as IOrderService)!.SoftDelete(id);
         }
-        [Authorize]
-        [HttpPut("AddFailedPayment/{id}/{paymentIntentId}")]
-        public virtual async Task<OrderModel> AddFailedPayment(int id,string paymentIntentId)
-        {
-            return await (_service as IOrderService)!.AddFailedPayment(id, paymentIntentId);
-        }
-        [Authorize]
-        [HttpPut("AddSuccessfulPayment/{id}/{paymentIntentId}")]
-        public virtual async Task<OrderModel> AddSuccessfulPayment(int id, string paymentIntentId)
-        {
-            return await (_service as IOrderService)!.AddSuccessfulPayment(id, paymentIntentId);
-        }
+ 
 
         [Authorize]
         [HttpGet("AllowedActions/{id}")]

@@ -57,15 +57,6 @@ namespace eAutoShop.Services.StateMachineService.OrderStateMachine
             throw new UserException("Action not allowed.");
         }
 
-        public virtual Task<OrderModel> AddFailedPayment(Order entity,string paymentIntentId)
-        {
-            throw new UserException("Action not allowed.");
-        }
-
-        public virtual Task<OrderModel> AddSuccessfulPayment(Order entity,string paymentIntentId)
-        {
-            throw new UserException("Action not allowed.");
-        }
 
         public virtual Task<OrderModel> Cancel(Order entity)
         {
