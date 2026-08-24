@@ -366,8 +366,6 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
       },
     );
 
-    commentController.dispose();
-
     if (saved == true && mounted) {
       _showMessage('Hvala! Recenzija je uspješno sačuvana.');
     }

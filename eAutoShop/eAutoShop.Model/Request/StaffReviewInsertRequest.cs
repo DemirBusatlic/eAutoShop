@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
+using System.Text.Json.Serialization;
 
 namespace eAutoShop.Model.Request
 {
@@ -13,7 +14,7 @@ namespace eAutoShop.Model.Request
 
         [MaxLength(1000, ErrorMessage = "The comment can't have more than 1000 characters.")]
         public string? Comment { get; set; }
-
+        [JsonIgnore]
         public int? UserId { get; set; }
 
         public int? EmployeeId { get; set; }

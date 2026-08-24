@@ -1,8 +1,10 @@
 import 'package:eautoshop_mobile/models/appointment/appointment.dart';
 import 'package:eautoshop_mobile/models/appointment/appointment_search_object.dart';
 import 'package:eautoshop_mobile/models/appointment/appointment_update.dart';
+import 'package:eautoshop_mobile/models/staff_review/staff_review_insert.dart';
 import 'package:eautoshop_mobile/providers/appointment_detail_provider.dart';
 import 'package:eautoshop_mobile/providers/appointment_provider.dart';
+import 'package:eautoshop_mobile/providers/staff_review_provider.dart';
 import 'package:eautoshop_mobile/screens/master_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -610,6 +612,171 @@ class _ReservationHistoryScreenState extends State<AppointmentHistoryScreen> {
     );
   }
 
+  Future<void> _showStaffReviewDialog(Appointment appointment) async {
+    final employeeId = appointment.employeeId;
+
+    if (employeeId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Rezervaciji nije dodijeljen zaposlenik.'),
+        ),
+      );
+      return;
+    }
+
+    final commentController = TextEditingController();
+    final reviewProvider = context.read<StaffReviewProvider>();
+    var rating = 0;
+    var isSubmitting = false;
+    String? errorMessage;
+
+    final saved = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: const Text(
+                'Ocijeni zaposlenika',
+                textAlign: TextAlign.center,
+              ),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      appointment.employeeUsername ?? 'Zaposlenik',
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(5, (index) {
+                        final value = index + 1;
+
+                        return IconButton(
+                          tooltip: '$value/5',
+                          onPressed: isSubmitting
+                              ? null
+                              : () {
+                                  setDialogState(() {
+                                    rating = value;
+                                    errorMessage = null;
+                                  });
+                                },
+                          iconSize: 36,
+                          color: Colors.amber.shade700,
+                          icon: Icon(
+                            value <= rating ? Icons.star : Icons.star_border,
+                          ),
+                        );
+                      }),
+                    ),
+                    if (errorMessage != null) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        errorMessage!,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.error,
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: commentController,
+                      enabled: !isSubmitting,
+                      minLines: 3,
+                      maxLines: 6,
+                      maxLength: 1000,
+                      decoration: const InputDecoration(
+                        labelText: 'Komentar (nije obavezan)',
+                        alignLabelWithHint: true,
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: isSubmitting
+                      ? null
+                      : () => Navigator.pop(dialogContext, false),
+                  child: const Text('Odustani'),
+                ),
+                FilledButton.icon(
+                  onPressed: isSubmitting
+                      ? null
+                      : () async {
+                          if (rating == 0) {
+                            setDialogState(() {
+                              errorMessage = 'Izaberite ocjenu od 1 do 5.';
+                            });
+                            return;
+                          }
+
+                          FocusScope.of(dialogContext).unfocus();
+                          setDialogState(() {
+                            isSubmitting = true;
+                            errorMessage = null;
+                          });
+
+                          try {
+                            final comment = commentController.text.trim();
+
+                            await reviewProvider.addReview(
+                              StaffReviewInsert(
+                                employeeId: employeeId,
+                                rating: rating,
+                                comment: comment.isEmpty ? null : comment,
+                              ),
+                            );
+
+                            if (dialogContext.mounted) {
+                              Navigator.pop(dialogContext, true);
+                            }
+                          } catch (error) {
+                            if (!dialogContext.mounted) return;
+
+                            setDialogState(() {
+                              isSubmitting = false;
+                              errorMessage = error.toString().replaceFirst(
+                                'Exception: ',
+                                '',
+                              );
+                            });
+                          }
+                        },
+                  icon: isSubmitting
+                      ? const SizedBox.square(
+                          dimension: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.send_outlined),
+                  label: Text(isSubmitting ? 'Šaljem...' : 'Pošalji'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+
+    if (saved == true && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Hvala! Recenzija zaposlenika je uspješno sačuvana.'),
+        ),
+      );
+    }
+  }
+
   Future<void> _cancelAppointment(Appointment appointment) async {
     final reasonController = TextEditingController();
 
@@ -826,6 +993,16 @@ class _ReservationHistoryScreenState extends State<AppointmentHistoryScreen> {
               ),
             ),
             actions: [
+              if (appointment.state.toLowerCase() == 'completed' &&
+                  appointment.employeeId != null)
+                TextButton.icon(
+                  onPressed: () {
+                    Navigator.pop(dialogContext);
+                    _showStaffReviewDialog(appointment);
+                  },
+                  icon: const Icon(Icons.star_outline),
+                  label: const Text('Ocijeni zaposlenika'),
+                ),
               if (appointment.state == 'pending')
                 TextButton(
                   onPressed: () {

@@ -18,6 +18,7 @@ import 'package:eautoshop_mobile/providers/product_review_provider.dart';
 import 'package:eautoshop_mobile/providers/autoshop_service_provider.dart';
 import 'package:eautoshop_mobile/providers/appointment_provider.dart';
 import 'package:eautoshop_mobile/providers/appointment_detail_provider.dart';
+import 'package:eautoshop_mobile/providers/staff_review_provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -76,6 +77,7 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (_) => AutoShopServiceProvider()),
         ChangeNotifierProvider(create: (_) => AppointmentProvider()),
         ChangeNotifierProvider(create: (_) => AppointmentDetailProvider()),
+        ChangeNotifierProvider(create: (_) => StaffReviewProvider()),
       ],
       child: const MyApp(),
     ),
