@@ -11,6 +11,7 @@ namespace eAutoShop.Model.Model
         public int? UserId { get; set; }
 
         public int? EmployeeId { get; set; }
+        public int? AppointmentId { get; set; }
 
         public int? Rating { get; set; }
 

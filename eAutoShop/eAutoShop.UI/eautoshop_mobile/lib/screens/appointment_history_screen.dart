@@ -732,7 +732,7 @@ class _ReservationHistoryScreenState extends State<AppointmentHistoryScreen> {
 
                             await reviewProvider.addReview(
                               StaffReviewInsert(
-                                employeeId: employeeId,
+                                appointmentId: appointment.id,
                                 rating: rating,
                                 comment: comment.isEmpty ? null : comment,
                               ),
@@ -769,6 +769,10 @@ class _ReservationHistoryScreenState extends State<AppointmentHistoryScreen> {
     );
 
     if (saved == true && mounted) {
+      await _loadAppointments();
+
+      if (!mounted) return;
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Hvala! Recenzija zaposlenika je uspješno sačuvana.'),
@@ -994,7 +998,8 @@ class _ReservationHistoryScreenState extends State<AppointmentHistoryScreen> {
             ),
             actions: [
               if (appointment.state.toLowerCase() == 'completed' &&
-                  appointment.employeeId != null)
+                  appointment.employeeId != null &&
+                  !appointment.hasStaffReview)
                 TextButton.icon(
                   onPressed: () {
                     Navigator.pop(dialogContext);

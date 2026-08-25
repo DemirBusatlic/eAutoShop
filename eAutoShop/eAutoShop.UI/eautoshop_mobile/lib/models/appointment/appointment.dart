@@ -9,6 +9,10 @@ class Appointment {
   String customerUsername;
   int? employeeId;
   String? employeeUsername;
+
+  @JsonKey(defaultValue: false)
+  bool hasStaffReview;
+
   int? orderId;
   String carModel;
   String? rejectionReason;
@@ -28,6 +32,7 @@ class Appointment {
     required this.customerUsername,
     this.employeeId,
     this.employeeUsername,
+    this.hasStaffReview = false,
     this.orderId,
     required this.carModel,
     this.rejectionReason,

@@ -1,6 +1,7 @@
 ﻿using eAutoShop.Model.Model;
 using eAutoShop.Model.Request;
 using eAutoShop.Model.SearchObjects;
+using eAutoShop.Model.Exceptions;
 using eAutoShop.Services.Database;
 using eAutoShop.Services.Interfaces;
 using MapsterMapper;
@@ -50,11 +51,48 @@ namespace eAutoShop.Services.Services
             return base.AddFilter(query, search);
         }
 
-        public override Task BeforeInsert(StaffReview db, StaffReviewInsertRequest insert)
+        public override async Task BeforeInsert(StaffReview db,StaffReviewInsertRequest insert)
         {
+            if (insert.UserId == null)
+            {
+                throw new UserException("Prijavljeni korisnik nije pronađen.");
+            }
+
+            var appointment = await _context.Appointments.AsNoTracking().FirstOrDefaultAsync(x => x.Id == insert.AppointmentId);
+
+            if (appointment == null)
+            {
+                throw new UserException("Rezervacija nije pronađena.");
+            }
+
+            if (appointment.CustomerId != insert.UserId.Value)
+            {
+                throw new UserException("Ne možete ocijeniti zaposlenika iz tuđe rezervacije.");
+            }
+
+            if (!string.Equals(appointment.State,"completed", StringComparison.OrdinalIgnoreCase))
+            {
+                throw new UserException("Zaposlenika možete ocijeniti tek nakon završene rezervacije.");
+            }
+
+            if (appointment.EmployeeId == null)
+            {
+                throw new UserException("Rezervaciji nije dodijeljen zaposlenik.");
+            }
+
+            var reviewAlreadyExists = await _context.StaffReviews.AnyAsync(x => x.AppointmentId == appointment.Id);
+
+            if (reviewAlreadyExists)
+            {
+                throw new UserException("Ova rezervacija je već ocijenjena.");
+            }
+
+            db.UserId = insert.UserId.Value;
+            db.EmployeeId = appointment.EmployeeId.Value;
+            db.AppointmentId = appointment.Id;
             db.CreatedAt = DateTime.Now;
 
-            return base.BeforeInsert(db, insert);
+            await base.BeforeInsert(db, insert);
         }
     }
 }

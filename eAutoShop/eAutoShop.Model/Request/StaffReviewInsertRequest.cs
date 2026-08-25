@@ -8,15 +8,17 @@ namespace eAutoShop.Model.Request
 {
     public class StaffReviewInsertRequest
     {
-        [Required(ErrorMessage = "This field can not be empty.")]
-        [Range(1, 5, ErrorMessage = "The rating number can be in a range from 1 to 5.")]
+        [Required(ErrorMessage = "Ocjena je obavezna.")]
+        [Range(1, 5, ErrorMessage = "Ocjena mora biti između 1 i 5.")]
         public int Rating { get; set; }
 
-        [MaxLength(1000, ErrorMessage = "The comment can't have more than 1000 characters.")]
+        [MaxLength(1000,ErrorMessage = "Komentar ne može imati više od 1000 znakova.")]
         public string? Comment { get; set; }
+
         [JsonIgnore]
         public int? UserId { get; set; }
 
-        public int? EmployeeId { get; set; }
+        [Range(1,int.MaxValue,ErrorMessage = "Rezervacija nije ispravna.")]
+        public int AppointmentId { get; set; }
     }
 }

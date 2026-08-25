@@ -50,4 +50,6 @@ public partial class Appointment
     public virtual User? Employee { get; set; }
 
     public virtual Order? Order { get; set; }
+
+    public virtual StaffReview? StaffReview { get; set; }
 }

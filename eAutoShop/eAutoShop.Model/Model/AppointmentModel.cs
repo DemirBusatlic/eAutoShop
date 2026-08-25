@@ -12,7 +12,10 @@ namespace eAutoShop.Model.Model
         public string CustomerUsername { get; set; } = null!;
 
         public int? EmployeeId { get; set; }
+
         public string? EmployeeUsername { get; set; }
+
+        public bool HasStaffReview { get; set; }
 
         public int? OrderId { get; set; }
 

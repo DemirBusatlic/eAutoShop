@@ -31,6 +31,7 @@ namespace eAutoShop.Services.Services
             query = query.Include(x => x.Employee);
             query = query.Include(x => x.CarModel).ThenInclude(x => x.CarManufacturer);
             query = query.Include(x => x.Order);
+            query = query.Include(x => x.StaffReview);
 
             return base.AddInclude(query, search);
         }

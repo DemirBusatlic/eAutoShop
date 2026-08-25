@@ -248,6 +248,8 @@ builder.Services.AddDbContext<AutoShopContext>(options =>
 
 TypeAdapterConfig.GlobalSettings.Scan(typeof(OrderMappingConfig).Assembly);
 
+TypeAdapterConfig.GlobalSettings.ForType<Appointment, AppointmentModel>().Map(destination => destination.HasStaffReview,source => source.StaffReview != null);
+
 builder.Services.AddSingleton(TypeAdapterConfig.GlobalSettings);
 
 builder.Services.AddScoped<IMapper, ServiceMapper>();

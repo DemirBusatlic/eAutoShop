@@ -47,9 +47,6 @@ public partial class AutoShopContext : DbContext
 
     public virtual DbSet<User> Users { get; set; }
 
-//    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-//#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-//        => optionsBuilder.UseSqlServer("Server=localhost,1433;Database=190081;User ID=test;Password=test;TrustServerCertificate=True;MultipleActiveResultSets=true;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -224,15 +221,29 @@ public partial class AutoShopContext : DbContext
 
         modelBuilder.Entity<StaffReview>(entity =>
         {
+            entity.HasIndex(
+                    e => e.AppointmentId,
+                    "UX_StaffReviews_AppointmentId"
+                )
+                .IsUnique()
+                .HasFilter("([AppointmentId] IS NOT NULL)");
+
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");
 
-            entity.HasOne(d => d.Employee).WithMany(p => p.StaffReviewEmployees)
+            entity.HasOne(d => d.Appointment)
+                .WithOne(p => p.StaffReview)
+                .HasForeignKey<StaffReview>(d => d.AppointmentId)
+                .HasConstraintName("FK_StaffReviews_Appointments");
+
+            entity.HasOne(d => d.Employee)
+                .WithMany(p => p.StaffReviewEmployees)
                 .HasForeignKey(d => d.EmployeeId)
                 .HasConstraintName("FK_StaffReviews_EmployeeId");
 
-            entity.HasOne(d => d.User).WithMany(p => p.StaffReviewUsers)
+            entity.HasOne(d => d.User)
+                .WithMany(p => p.StaffReviewUsers)
                 .HasForeignKey(d => d.UserId)
                 .HasConstraintName("FK_StaffReviews_Users");
         });

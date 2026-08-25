@@ -4,12 +4,12 @@ part 'staff_review_insert.g.dart';
 
 @JsonSerializable()
 class StaffReviewInsert {
-  int employeeId;
+  int appointmentId;
   int rating;
   String? comment;
 
   StaffReviewInsert({
-    required this.employeeId,
+    required this.appointmentId,
     required this.rating,
     this.comment,
   });
