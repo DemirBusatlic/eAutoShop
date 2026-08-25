@@ -10,12 +10,15 @@ public partial class ProductReview
     public int? UserId { get; set; }
 
     public int? ProductId { get; set; }
+    public int? OrderItemId { get; set; }
 
     public int? Rating { get; set; }
 
     public string? Comment { get; set; }
 
     public DateTime? CreatedAt { get; set; }
+
+    public virtual OrderItem? OrderItem { get; set; }
 
     public virtual Product? Product { get; set; }
 

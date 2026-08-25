@@ -24,4 +24,6 @@ public partial class OrderItem
     public virtual Order Order { get; set; } = null!;
 
     public virtual Product Product { get; set; } = null!;
+
+    public virtual ProductReview? ProductReview { get; set; }
 }

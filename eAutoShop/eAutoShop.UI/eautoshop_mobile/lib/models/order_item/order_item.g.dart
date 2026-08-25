@@ -16,6 +16,7 @@ OrderItem _$OrderItemFromJson(Map<String, dynamic> json) => OrderItem(
   (json['totalItemsPrice'] as num).toDouble(),
   (json['totalItemsPriceDiscounted'] as num).toDouble(),
   (json['discount'] as num).toDouble(),
+  json['hasProductReview'] as bool? ?? false,
 );
 
 Map<String, dynamic> _$OrderItemToJson(OrderItem instance) => <String, dynamic>{
@@ -28,4 +29,5 @@ Map<String, dynamic> _$OrderItemToJson(OrderItem instance) => <String, dynamic>{
   'totalItemsPrice': instance.totalItemsPrice,
   'totalItemsPriceDiscounted': instance.totalItemsPriceDiscounted,
   'discount': instance.discount,
+  'hasProductReview': instance.hasProductReview,
 };

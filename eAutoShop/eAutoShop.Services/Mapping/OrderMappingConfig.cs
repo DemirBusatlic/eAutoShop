@@ -11,7 +11,9 @@ namespace eAutoShop.Services.Mapping
             config.NewConfig<Order, OrderModel>()
                 .Map(
                     destination => destination.Username,
-                    source => source.Customer.Username
+                    source => source.Customer != null
+                   ? source.Customer.Username
+                   : string.Empty
                 )
                 .Map(
                     destination => destination.ShippingCity,
@@ -23,18 +25,22 @@ namespace eAutoShop.Services.Mapping
                 );
 
             config.NewConfig<OrderItem, OrderItemModel>()
-                .Map(
+                 .Map(
                     destination => destination.ProductName,
-                    source => source.Product.Name
-                )
-                .Map(
-                    destination => destination.TotalItemsPrice,
-                    source => source.TotalItemPrice
-                )
-                .Map(
-                    destination => destination.TotalItemsPriceDiscounted,
-                    source => source.TotalItemPriceDiscounted
-                );
+                     source => source.Product.Name
+                     )
+                  .Map(
+                  destination => destination.TotalItemsPrice,
+                  source => source.TotalItemPrice
+                    )
+                  .Map(
+                   destination => destination.TotalItemsPriceDiscounted,
+                   source => source.TotalItemPriceDiscounted
+                   )
+                   .Map(
+                   destination => destination.HasProductReview,
+                   source => source.ProductReview != null
+                   );
 
             config.NewConfig<Order, OrderBasicInfoModel>()
                 .Map(

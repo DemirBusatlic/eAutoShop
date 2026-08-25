@@ -43,30 +43,45 @@ namespace eAutoShop.Services.Services
             return base.AddFilter(query, search);
         }
 
-        public override async Task BeforeInsert(ProductReview db, ProductReviewInsertRequest insert)
+        public override async Task BeforeInsert(ProductReview db,ProductReviewInsertRequest insert)
         {
-            var userId = GetCurrentUserId();
-
-            var purchasedInFinishedOrder = await _context.OrderItems.AnyAsync(oi =>
-                oi.ProductId == insert.ProductId &&
-                oi.Order.CustomerId == userId &&
-                (oi.Order.State == "completed" || oi.Order.State == "delivered"));
-
-            if (!purchasedInFinishedOrder)
+            if (insert.UserId == null)
             {
-                throw new UserException("Proizvod možete ocijeniti tek nakon završene narudžbe u kojoj je kupljen.");
+                throw new UserException("Prijavljeni korisnik nije pronađen.");
             }
 
-            var alreadyReviewed = await _context.ProductReviews.AnyAsync(x =>x.UserId == userId && x.ProductId == insert.ProductId);
+            var orderItem = await _context.OrderItems.AsNoTracking().Include(x => x.Order).FirstOrDefaultAsync(x => x.Id == insert.OrderItemId);
 
-            if (alreadyReviewed)
-                throw new UserException("Ovaj proizvod ste već ocijenili.");
+            if (orderItem == null)
+            {
+                throw new UserException("Stavka narudžbe nije pronađena.");
+            }
 
-            db.UserId = userId;
-            db.ProductId = insert.ProductId;
-            db.Rating = insert.Rating;
-            db.Comment = string.IsNullOrWhiteSpace(insert.Comment)? null: insert.Comment.Trim();
-            db.CreatedAt = DateTime.UtcNow;
+            if (orderItem.Order.CustomerId != insert.UserId.Value)
+            {
+                throw new UserException( "Ne možete ocijeniti proizvod iz tuđe narudžbe.");
+            }
+
+            var orderState = orderItem.Order.State;
+
+            var canReview =string.Equals(orderState,"completed",StringComparison.OrdinalIgnoreCase) ||string.Equals(orderState,"delivered",StringComparison.OrdinalIgnoreCase);
+
+            if (!canReview)
+            {
+                throw new UserException("Proizvod možete ocijeniti tek nakon završene narudžbe.");
+            }
+
+            var reviewAlreadyExists = await _context.ProductReviews.AnyAsync(x => x.OrderItemId == orderItem.Id);
+
+            if (reviewAlreadyExists)
+            {
+                throw new UserException("Ovaj proizvod iz narudžbe je već ocijenjen.");
+            }
+
+            db.UserId = insert.UserId.Value;
+            db.ProductId = orderItem.ProductId;
+            db.OrderItemId = orderItem.Id;
+            db.CreatedAt = DateTime.Now;
 
             await base.BeforeInsert(db, insert);
         }

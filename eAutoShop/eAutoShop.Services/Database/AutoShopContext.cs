@@ -197,13 +197,28 @@ public partial class AutoShopContext : DbContext
 
         modelBuilder.Entity<ProductReview>(entity =>
         {
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
+            entity.HasIndex(
+                    e => e.OrderItemId,
+                    "UX_ProductReviews_OrderItemId"
+                )
+                .IsUnique()
+                .HasFilter("([OrderItemId] IS NOT NULL)");
 
-            entity.HasOne(d => d.Product).WithMany(p => p.ProductReviews)
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())");
+
+            entity.HasOne(d => d.OrderItem)
+                .WithOne(p => p.ProductReview)
+                .HasForeignKey<ProductReview>(d => d.OrderItemId)
+                .HasConstraintName("FK_ProductReviews_OrderItems");
+
+            entity.HasOne(d => d.Product)
+                .WithMany(p => p.ProductReviews)
                 .HasForeignKey(d => d.ProductId)
                 .HasConstraintName("FK_ProductReviews_Products");
 
-            entity.HasOne(d => d.User).WithMany(p => p.ProductReviews)
+            entity.HasOne(d => d.User)
+                .WithMany(p => p.ProductReviews)
                 .HasForeignKey(d => d.UserId)
                 .HasConstraintName("FK_ProductReviews_Users");
         });

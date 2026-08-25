@@ -243,8 +243,7 @@ builder.Services.AddSwaggerGen(c =>
 builder.Configuration.AddEnvironmentVariables();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddDbContext<AutoShopContext>(options =>
-    options.UseSqlServer(connectionString));
+builder.Services.AddDbContext<AutoShopContext>(options => options.UseSqlServer(connectionString));
 
 TypeAdapterConfig.GlobalSettings.Scan(typeof(OrderMappingConfig).Assembly);
 
@@ -256,7 +255,6 @@ builder.Services.AddScoped<IMapper, ServiceMapper>();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -280,24 +278,16 @@ using (var scope = app.Services.CreateScope())
 {
     try
     {
-        var recommenderTrainService = scope.ServiceProvider
-            .GetRequiredService<IRecommenderTrainService>();
+        var recommenderTrainService = scope.ServiceProvider.GetRequiredService<IRecommenderTrainService>();
 
         recommenderTrainService.TrainProductsModel();
 
-        app.Logger.LogInformation(
-            "Model preporuka je uspješno treniran."
-        );
+        app.Logger.LogInformation("Model preporuka je uspješno treniran.");
     }
     catch (Exception ex)
     {
-        app.Logger.LogWarning(
-            ex,
-            "Model preporuka nije treniran. API će nastaviti s radom."
-        );
+        app.Logger.LogWarning(ex,"Model preporuka nije treniran. API će nastaviti s radom.");
     }
 }
-
-
 
 app.Run();

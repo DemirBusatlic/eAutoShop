@@ -21,9 +21,12 @@ namespace eAutoShop.Services.Services
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public override IQueryable<OrderItem> AddInclude(IQueryable<OrderItem> query, OrderItemSearchObject? search = null)
+        public override IQueryable<OrderItem> AddInclude(IQueryable<OrderItem> query,OrderItemSearchObject? search = null)
         {
-            query = query.Include(x => x.Product);
+                 query = query
+                .Include(x => x.Product)
+                .Include(x => x.ProductReview);
+
             return base.AddInclude(query, search);
         }
 

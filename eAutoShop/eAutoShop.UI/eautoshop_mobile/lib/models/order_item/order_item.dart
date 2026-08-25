@@ -14,6 +14,9 @@ class OrderItem {
   double totalItemsPriceDiscounted;
   double discount;
 
+  @JsonKey(defaultValue: false)
+  bool hasProductReview;
+
   OrderItem(
     this.id,
     this.orderId,
@@ -23,8 +26,9 @@ class OrderItem {
     this.unitPrice,
     this.totalItemsPrice,
     this.totalItemsPriceDiscounted,
-    this.discount,
-  );
+    this.discount, [
+    this.hasProductReview = false,
+  ]);
 
   factory OrderItem.fromJson(Map<String, dynamic> json) =>
       _$OrderItemFromJson(json);

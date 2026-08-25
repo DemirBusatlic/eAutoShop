@@ -4,6 +4,7 @@ using eAutoShop.Model.SearchObjects;
 using eAutoShop.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace eAutoShop.Api.Controllers
 {
@@ -17,6 +18,15 @@ namespace eAutoShop.Api.Controllers
         [Authorize(Roles = "customer")]
         public override Task<ProductReviewModel> Insert([FromBody] ProductReviewInsertRequest insert)
         {
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (!int.TryParse(userIdClaim, out var userId))
+            {
+                throw new UnauthorizedAccessException("Prijavljeni korisnik nije pronađen.");
+            }
+
+            insert.UserId = userId;
+
             return base.Insert(insert);
         }
 

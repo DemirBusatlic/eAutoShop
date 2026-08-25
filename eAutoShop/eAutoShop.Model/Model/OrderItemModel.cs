@@ -11,11 +11,12 @@ namespace eAutoShop.Model.Model
         public int Id { get; set; }
         public int OrderId { get; set; }
         public int ProductId { get; set; }
-        public string ProductName { get; set; }
+        public string ProductName { get; set; } = null!;
         public int Quantity { get; set; }
         public double UnitPrice { get; set; }
         public double TotalItemsPrice { get; set; }
         public double TotalItemsPriceDiscounted { get; set; }
         public double Discount { get; set; }
+        public bool HasProductReview { get; set; }
     }
 }

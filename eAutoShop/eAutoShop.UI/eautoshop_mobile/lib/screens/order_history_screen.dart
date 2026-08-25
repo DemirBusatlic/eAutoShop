@@ -141,75 +141,88 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
         useSafeArea: true,
         showDragHandle: true,
         builder: (sheetContext) {
-          return DraggableScrollableSheet(
-            expand: false,
-            initialChildSize: 0.82,
-            minChildSize: 0.55,
-            maxChildSize: 0.95,
-            builder: (context, scrollController) {
-              return ListView(
-                controller: scrollController,
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-                children: [
-                  Text(
-                    'Narudžba #${order.id}',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  _OrderInfoCard(order: order, formatDate: _formatDate),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Proizvodi',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  if (items.isEmpty)
-                    const Card(
-                      child: Padding(
-                        padding: EdgeInsets.all(16),
-                        child: Text('Narudžba nema stavki.'),
+          return StatefulBuilder(
+            builder: (context, setSheetState) {
+              return DraggableScrollableSheet(
+                expand: false,
+                initialChildSize: 0.82,
+                minChildSize: 0.55,
+                maxChildSize: 0.95,
+                builder: (context, scrollController) {
+                  return ListView(
+                    controller: scrollController,
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                    children: [
+                      Text(
+                        'Narudžba #${order.id}',
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.headlineSmall
+                            ?.copyWith(fontWeight: FontWeight.bold),
                       ),
-                    )
-                  else
-                    ...items.map(
-                      (item) => _OrderItemCard(
-                        item: item,
-                        canReview: _canReview(order.state),
-                        onReview: () => _showReviewDialog(item),
+                      const SizedBox(height: 16),
+                      _OrderInfoCard(order: order, formatDate: _formatDate),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Proizvodi',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                  const SizedBox(height: 16),
-                  if (order.state.toLowerCase() == 'onhold')
-                    FilledButton.icon(
-                      onPressed: () async {
-                        final changed = await _confirmCancel(order.id);
-                        if (changed && sheetContext.mounted) {
-                          Navigator.pop(sheetContext);
-                        }
-                      },
-                      icon: const Icon(Icons.cancel_outlined),
-                      label: const Text('Otkaži narudžbu'),
-                      style: FilledButton.styleFrom(
-                        backgroundColor: Theme.of(context).colorScheme.error,
-                      ),
-                    ),
-                  if (order.state.toLowerCase() == 'completed')
-                    OutlinedButton.icon(
-                      onPressed: () async {
-                        final changed = await _confirmDelete(order.id);
-                        if (changed && sheetContext.mounted) {
-                          Navigator.pop(sheetContext);
-                        }
-                      },
-                      icon: const Icon(Icons.delete_outline),
-                      label: const Text('Ukloni iz moje istorije'),
-                    ),
-                ],
+                      const SizedBox(height: 8),
+                      if (items.isEmpty)
+                        const Card(
+                          child: Padding(
+                            padding: EdgeInsets.all(16),
+                            child: Text('Narudžba nema stavki.'),
+                          ),
+                        )
+                      else
+                        ...items.map(
+                          (item) => _OrderItemCard(
+                            item: item,
+                            canReview: _canReview(order.state),
+                            onReview: () async {
+                              final saved = await _showReviewDialog(item);
+
+                              if (saved && sheetContext.mounted) {
+                                setSheetState(() {
+                                  item.hasProductReview = true;
+                                });
+                              }
+                            },
+                          ),
+                        ),
+                      const SizedBox(height: 16),
+                      if (order.state.toLowerCase() == 'onhold')
+                        FilledButton.icon(
+                          onPressed: () async {
+                            final changed = await _confirmCancel(order.id);
+                            if (changed && sheetContext.mounted) {
+                              Navigator.pop(sheetContext);
+                            }
+                          },
+                          icon: const Icon(Icons.cancel_outlined),
+                          label: const Text('Otkaži narudžbu'),
+                          style: FilledButton.styleFrom(
+                            backgroundColor: Theme.of(
+                              context,
+                            ).colorScheme.error,
+                          ),
+                        ),
+                      if (order.state.toLowerCase() == 'completed')
+                        OutlinedButton.icon(
+                          onPressed: () async {
+                            final changed = await _confirmDelete(order.id);
+                            if (changed && sheetContext.mounted) {
+                              Navigator.pop(sheetContext);
+                            }
+                          },
+                          icon: const Icon(Icons.delete_outline),
+                          label: const Text('Ukloni iz moje istorije'),
+                        ),
+                    ],
+                  );
+                },
               );
             },
           );
@@ -222,7 +235,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
     }
   }
 
-  Future<void> _showReviewDialog(OrderItem item) async {
+  Future<bool> _showReviewDialog(OrderItem item) async {
     final commentController = TextEditingController();
     final reviewProvider = context.read<ProductReviewProvider>();
     var rating = 0;
@@ -330,7 +343,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
 
                             await reviewProvider.addReview(
                               ProductReviewInsert(
-                                item.productId,
+                                item.id,
                                 rating,
                                 comment.isEmpty ? null : comment,
                               ),
@@ -369,6 +382,8 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
     if (saved == true && mounted) {
       _showMessage('Hvala! Recenzija je uspješno sačuvana.');
     }
+
+    return saved == true;
   }
 
   Future<bool> _confirmCancel(int orderId) async {
@@ -893,7 +908,7 @@ class _OrderItemCard extends StatelessWidget {
             ),
             if (item.discount > 0)
               Text('Popust: ${(item.discount * 100).toStringAsFixed(0)}%'),
-            if (canReview) ...[
+            if (canReview && !item.hasProductReview) ...[
               const SizedBox(height: 10),
               Align(
                 alignment: Alignment.centerRight,

@@ -4,11 +4,11 @@ part 'product_review_insert.g.dart';
 
 @JsonSerializable()
 class ProductReviewInsert {
-  int productId;
+  int orderItemId;
   int rating;
   String? comment;
 
-  ProductReviewInsert(this.productId, this.rating, this.comment);
+  ProductReviewInsert(this.orderItemId, this.rating, this.comment);
 
   factory ProductReviewInsert.fromJson(Map<String, dynamic> json) =>
       _$ProductReviewInsertFromJson(json);
