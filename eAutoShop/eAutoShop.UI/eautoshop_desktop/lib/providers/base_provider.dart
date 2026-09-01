@@ -198,11 +198,31 @@ abstract class BaseProvider<T, TInsertUpdate> with ChangeNotifier {
   }
 
   Uri _createUri({String customEndpoint = '', Map<String, dynamic>? filter}) {
-    final queryParameters = <String, String>{};
+    final queryParameters = <String, dynamic>{};
 
     filter?.forEach((key, value) {
-      if (value != null && value.toString().trim().isNotEmpty) {
-        queryParameters[key] = value.toString();
+      if (value == null) {
+        return;
+      }
+
+      if (value is Iterable) {
+        final values = value
+            .where((item) => item != null)
+            .map((item) => item.toString())
+            .where((item) => item.trim().isNotEmpty)
+            .toList();
+
+        if (values.isNotEmpty) {
+          queryParameters[key] = values;
+        }
+
+        return;
+      }
+
+      final stringValue = value.toString().trim();
+
+      if (stringValue.isNotEmpty) {
+        queryParameters[key] = stringValue;
       }
     });
 

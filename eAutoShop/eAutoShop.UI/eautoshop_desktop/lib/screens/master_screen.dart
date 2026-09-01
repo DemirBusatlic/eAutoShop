@@ -3,6 +3,7 @@ import 'package:eautoshop_desktop/providers/auth_provider.dart';
 import 'package:eautoshop_desktop/screens/home_screen.dart';
 import 'package:eautoshop_desktop/screens/user_screen.dart';
 import 'package:eautoshop_desktop/screens/customer_screen.dart';
+import 'package:eautoshop_desktop/screens/product_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -196,7 +197,7 @@ class _MasterScreenState extends State<MasterScreen> {
           key: 'products',
           label: 'Proizvodi',
           icon: Icons.inventory_2_outlined,
-          screen: _SectionPlaceholder(title: 'Proizvodi'),
+          screen: ProductScreen(),
         ),
       const _DesktopDestination(
         key: 'services',

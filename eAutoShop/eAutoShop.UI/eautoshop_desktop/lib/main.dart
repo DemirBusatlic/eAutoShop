@@ -3,6 +3,9 @@ import 'package:eautoshop_desktop/constants.dart';
 import 'package:eautoshop_desktop/providers/auth_provider.dart';
 import 'package:eautoshop_desktop/providers/user_provider.dart';
 import 'package:eautoshop_desktop/providers/city_provider.dart';
+import 'package:eautoshop_desktop/providers/car_models_by_manufacturer_provider.dart';
+import 'package:eautoshop_desktop/providers/product_category_provider.dart';
+import 'package:eautoshop_desktop/providers/product_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
@@ -33,6 +36,11 @@ Future<void> main() async {
         ChangeNotifierProvider.value(value: authProvider),
         ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(create: (_) => CityProvider()),
+        ChangeNotifierProvider(
+          create: (_) => CarModelsByManufacturerProvider(),
+        ),
+        ChangeNotifierProvider(create: (_) => ProductCategoryProvider()),
+        ChangeNotifierProvider(create: (_) => ProductProvider()),
       ],
       child: const MyApp(),
     ),
