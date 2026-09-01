@@ -1,6 +1,8 @@
 import 'package:eautoshop_desktop/constants.dart';
 import 'package:eautoshop_desktop/providers/auth_provider.dart';
 import 'package:eautoshop_desktop/screens/home_screen.dart';
+import 'package:eautoshop_desktop/screens/user_screen.dart';
+import 'package:eautoshop_desktop/screens/customer_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -16,6 +18,7 @@ class _MasterScreenState extends State<MasterScreen> {
   static const Color _contentBackground = Color(0xFFF5F7FB);
 
   int _selectedIndex = 0;
+  bool _isMenuExpanded = false;
 
   @override
   Widget build(BuildContext context) {
@@ -42,6 +45,12 @@ class _MasterScreenState extends State<MasterScreen> {
                       context: context,
                       title: selectedDestination.label,
                       username: authProvider.currentUsername,
+                      isMenuExpanded: _isMenuExpanded,
+                      onMenuPressed: () {
+                        setState(() {
+                          _isMenuExpanded = !_isMenuExpanded;
+                        });
+                      },
                     ),
                     Expanded(child: selectedDestination.screen),
                   ],
@@ -58,13 +67,16 @@ class _MasterScreenState extends State<MasterScreen> {
     required List<_DesktopDestination> destinations,
     required int selectedIndex,
   }) {
-    return Container(
-      width: 250,
-      color: _primaryBlue,
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 220),
+      curve: Curves.easeInOut,
+      width: _isMenuExpanded ? 250 : 76,
+      clipBehavior: Clip.hardEdge,
+      decoration: const BoxDecoration(color: _primaryBlue),
       child: SafeArea(
         child: Column(
           children: [
-            const _BrandHeader(),
+            _BrandHeader(isExpanded: _isMenuExpanded),
             const Divider(height: 1, color: Colors.white24),
             Expanded(
               child: ListView.builder(
@@ -77,6 +89,7 @@ class _MasterScreenState extends State<MasterScreen> {
                     label: destination.label,
                     icon: destination.icon,
                     isSelected: index == selectedIndex,
+                    isExpanded: _isMenuExpanded,
                     onPressed: () {
                       setState(() {
                         _selectedIndex = index;
@@ -91,6 +104,7 @@ class _MasterScreenState extends State<MasterScreen> {
               label: 'Odjava',
               icon: Icons.logout,
               isSelected: false,
+              isExpanded: _isMenuExpanded,
               onPressed: _confirmLogout,
             ),
             const SizedBox(height: AppPadding.small),
@@ -104,6 +118,8 @@ class _MasterScreenState extends State<MasterScreen> {
     required BuildContext context,
     required String title,
     required String? username,
+    required bool isMenuExpanded,
+    required VoidCallback onMenuPressed,
   }) {
     return Container(
       height: 72,
@@ -114,6 +130,15 @@ class _MasterScreenState extends State<MasterScreen> {
       ),
       child: Row(
         children: [
+          IconButton(
+            tooltip: isMenuExpanded ? 'Sklopi meni' : 'Proširi meni',
+            onPressed: onMenuPressed,
+            icon: Icon(
+              isMenuExpanded ? Icons.menu_open : Icons.menu,
+              color: _primaryBlue,
+            ),
+          ),
+          const SizedBox(width: AppPadding.small),
           Text(
             title,
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
@@ -197,13 +222,13 @@ class _MasterScreenState extends State<MasterScreen> {
           key: 'customers',
           label: 'Korisnici',
           icon: Icons.people_outline,
-          screen: _SectionPlaceholder(title: 'Korisnici'),
+          screen: CustomerScreen(),
         ),
         const _DesktopDestination(
           key: 'employees',
           label: 'Zaposlenici',
           icon: Icons.badge_outlined,
-          screen: _SectionPlaceholder(title: 'Zaposlenici'),
+          screen: UserScreen(),
         ),
       ],
       if (!authProvider.isTechnician)
@@ -218,12 +243,6 @@ class _MasterScreenState extends State<MasterScreen> {
         label: 'Izvještaji',
         icon: Icons.bar_chart_outlined,
         screen: _SectionPlaceholder(title: 'Izvještaji'),
-      ),
-      const _DesktopDestination(
-        key: 'profile',
-        label: 'Moj profil',
-        icon: Icons.manage_accounts_outlined,
-        screen: _SectionPlaceholder(title: 'Moj profil'),
       ),
     ];
   }
@@ -279,68 +298,82 @@ class _SideMenuItem extends StatelessWidget {
     required this.label,
     required this.icon,
     required this.isSelected,
+    required this.isExpanded,
     required this.onPressed,
   });
 
   final String label;
   final IconData icon;
   final bool isSelected;
+  final bool isExpanded;
   final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppPadding.small,
-        vertical: 3,
-      ),
-      child: Material(
-        color: isSelected
-            ? Colors.white.withValues(alpha: 0.18)
-            : Colors.transparent,
-        borderRadius: BorderRadius.circular(AppRadius.field),
-        child: InkWell(
-          onTap: onPressed,
+    return Tooltip(
+      message: isExpanded ? '' : label,
+      waitDuration: const Duration(milliseconds: 400),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppPadding.small,
+          vertical: 3,
+        ),
+        child: Material(
+          color: isSelected
+              ? Colors.white.withValues(alpha: 0.18)
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(AppRadius.field),
-          hoverColor: Colors.white.withValues(alpha: 0.10),
-          splashColor: Colors.white.withValues(alpha: 0.12),
-          child: SizedBox(
-            height: 50,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppPadding.small),
-              child: Row(
-                children: [
-                  AnimatedContainer(
-                    duration: const Duration(milliseconds: 180),
-                    width: 4,
-                    height: 28,
-                    decoration: BoxDecoration(
-                      color: isSelected ? Colors.white : Colors.transparent,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                  const SizedBox(width: AppPadding.medium),
-                  Icon(icon, color: Colors.white, size: 22),
-                  const SizedBox(width: AppPadding.medium),
-                  Expanded(
-                    child: Text(
-                      label,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 15,
-                        fontWeight: isSelected
-                            ? FontWeight.w700
-                            : FontWeight.w500,
+          child: InkWell(
+            onTap: onPressed,
+            borderRadius: BorderRadius.circular(AppRadius.field),
+            hoverColor: Colors.white.withValues(alpha: 0.10),
+            splashColor: Colors.white.withValues(alpha: 0.12),
+            child: SizedBox(
+              height: 50,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppPadding.small,
+                ),
+                child: Row(
+                  children: [
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 180),
+                      width: 4,
+                      height: 28,
+                      decoration: BoxDecoration(
+                        color: isSelected ? Colors.white : Colors.transparent,
+                        borderRadius: BorderRadius.circular(2),
                       ),
                     ),
-                  ),
-                  if (isSelected)
-                    const Icon(
-                      Icons.chevron_right,
-                      color: Colors.white,
-                      size: 20,
+                    SizedBox(
+                      width: isExpanded ? AppPadding.medium : AppPadding.small,
                     ),
-                ],
+                    Icon(icon, color: Colors.white, size: 22),
+                    if (isExpanded) ...[
+                      const SizedBox(width: AppPadding.medium),
+                      Expanded(
+                        child: Text(
+                          label,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 15,
+                            fontWeight: isSelected
+                                ? FontWeight.w700
+                                : FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                      if (isSelected)
+                        const Icon(
+                          Icons.chevron_right,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                    ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -351,31 +384,41 @@ class _SideMenuItem extends StatelessWidget {
 }
 
 class _BrandHeader extends StatelessWidget {
-  const _BrandHeader();
+  const _BrandHeader({required this.isExpanded});
+
+  final bool isExpanded;
 
   static const Color _primaryBlue = Color(0xFF2848C7);
 
   @override
   Widget build(BuildContext context) {
-    return const SizedBox(
+    return SizedBox(
       height: 88,
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: AppPadding.medium),
+        padding: EdgeInsets.symmetric(
+          horizontal: isExpanded ? AppPadding.medium : 18,
+        ),
         child: Row(
           children: [
-            CircleAvatar(
+            const CircleAvatar(
               backgroundColor: Colors.white,
               child: Icon(Icons.directions_car_filled, color: _primaryBlue),
             ),
-            SizedBox(width: AppPadding.medium),
-            Text(
-              AppConstants.appName,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
+            if (isExpanded) ...[
+              const SizedBox(width: AppPadding.medium),
+              const Expanded(
+                child: Text(
+                  AppConstants.appName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
               ),
-            ),
+            ],
           ],
         ),
       ),

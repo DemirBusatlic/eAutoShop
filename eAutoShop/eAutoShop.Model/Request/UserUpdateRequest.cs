@@ -23,6 +23,7 @@ namespace eAutoShop.Model.Request
 
         public string? PostalCode { get; set; }
         public int? CityId { get; set; }
-   
+        public int? RoleId { get; set; }
+
     }
 }

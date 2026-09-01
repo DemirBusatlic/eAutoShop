@@ -1,6 +1,8 @@
 import 'package:eautoshop_desktop/app.dart';
 import 'package:eautoshop_desktop/constants.dart';
 import 'package:eautoshop_desktop/providers/auth_provider.dart';
+import 'package:eautoshop_desktop/providers/user_provider.dart';
+import 'package:eautoshop_desktop/providers/city_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
@@ -27,7 +29,11 @@ Future<void> main() async {
 
   runApp(
     MultiProvider(
-      providers: [ChangeNotifierProvider.value(value: authProvider)],
+      providers: [
+        ChangeNotifierProvider.value(value: authProvider),
+        ChangeNotifierProvider(create: (_) => UserProvider()),
+        ChangeNotifierProvider(create: (_) => CityProvider()),
+      ],
       child: const MyApp(),
     ),
   );
