@@ -6,6 +6,8 @@ import 'package:eautoshop_desktop/providers/city_provider.dart';
 import 'package:eautoshop_desktop/providers/car_models_by_manufacturer_provider.dart';
 import 'package:eautoshop_desktop/providers/product_category_provider.dart';
 import 'package:eautoshop_desktop/providers/product_provider.dart';
+import 'package:eautoshop_desktop/providers/order_item_provider.dart';
+import 'package:eautoshop_desktop/providers/order_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
@@ -41,6 +43,8 @@ Future<void> main() async {
         ),
         ChangeNotifierProvider(create: (_) => ProductCategoryProvider()),
         ChangeNotifierProvider(create: (_) => ProductProvider()),
+        ChangeNotifierProvider(create: (_) => OrderItemProvider()),
+        ChangeNotifierProvider(create: (_) => OrderProvider()),
       ],
       child: const MyApp(),
     ),

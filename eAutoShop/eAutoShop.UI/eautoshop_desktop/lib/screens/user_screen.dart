@@ -24,6 +24,7 @@ class _UserScreenState extends State<UserScreen> {
   static const Color _primaryBlue = Color(0xFF2848C7);
 
   final TextEditingController _searchController = TextEditingController();
+  final ScrollController _horizontalScrollController = ScrollController();
 
   bool _initialLoading = true;
   String? _loadError;
@@ -37,6 +38,7 @@ class _UserScreenState extends State<UserScreen> {
   @override
   void dispose() {
     _searchController.dispose();
+    _horizontalScrollController.dispose();
     super.dispose();
   }
 
@@ -303,8 +305,10 @@ class _UserScreenState extends State<UserScreen> {
     }
 
     return Scrollbar(
+      controller: _horizontalScrollController,
       thumbVisibility: true,
       child: SingleChildScrollView(
+        controller: _horizontalScrollController,
         scrollDirection: Axis.horizontal,
         child: SingleChildScrollView(
           child: DataTable(

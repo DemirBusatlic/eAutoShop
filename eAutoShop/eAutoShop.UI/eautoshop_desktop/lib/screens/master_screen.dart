@@ -4,6 +4,7 @@ import 'package:eautoshop_desktop/screens/home_screen.dart';
 import 'package:eautoshop_desktop/screens/user_screen.dart';
 import 'package:eautoshop_desktop/screens/customer_screen.dart';
 import 'package:eautoshop_desktop/screens/product_screen.dart';
+import 'package:eautoshop_desktop/screens/order_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -209,7 +210,7 @@ class _MasterScreenState extends State<MasterScreen> {
         key: 'orders',
         label: 'Narudžbe',
         icon: Icons.receipt_long_outlined,
-        screen: _SectionPlaceholder(title: 'Narudžbe'),
+        screen: OrderScreen(),
       ),
       if (!authProvider.isTechnician)
         const _DesktopDestination(
@@ -335,45 +336,55 @@ class _SideMenuItem extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(
                   horizontal: AppPadding.small,
                 ),
-                child: Row(
-                  children: [
-                    AnimatedContainer(
-                      duration: const Duration(milliseconds: 180),
-                      width: 4,
-                      height: 28,
-                      decoration: BoxDecoration(
-                        color: isSelected ? Colors.white : Colors.transparent,
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
-                    SizedBox(
-                      width: isExpanded ? AppPadding.medium : AppPadding.small,
-                    ),
-                    Icon(icon, color: Colors.white, size: 22),
-                    if (isExpanded) ...[
-                      const SizedBox(width: AppPadding.medium),
-                      Expanded(
-                        child: Text(
-                          label,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 15,
-                            fontWeight: isSelected
-                                ? FontWeight.w700
-                                : FontWeight.w500,
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final showLabel = isExpanded && constraints.maxWidth >= 120;
+
+                    return Row(
+                      children: [
+                        AnimatedContainer(
+                          duration: const Duration(milliseconds: 180),
+                          width: 4,
+                          height: 28,
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? Colors.white
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(2),
                           ),
                         ),
-                      ),
-                      if (isSelected)
-                        const Icon(
-                          Icons.chevron_right,
-                          color: Colors.white,
-                          size: 20,
+                        SizedBox(
+                          width: showLabel
+                              ? AppPadding.medium
+                              : AppPadding.small,
                         ),
-                    ],
-                  ],
+                        Icon(icon, color: Colors.white, size: 22),
+                        if (showLabel) ...[
+                          const SizedBox(width: AppPadding.medium),
+                          Expanded(
+                            child: Text(
+                              label,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 15,
+                                fontWeight: isSelected
+                                    ? FontWeight.w700
+                                    : FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                          if (isSelected)
+                            const Icon(
+                              Icons.chevron_right,
+                              color: Colors.white,
+                              size: 20,
+                            ),
+                        ],
+                      ],
+                    );
+                  },
                 ),
               ),
             ),
@@ -395,33 +406,39 @@ class _BrandHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       height: 88,
-      child: Padding(
-        padding: EdgeInsets.symmetric(
-          horizontal: isExpanded ? AppPadding.medium : 18,
-        ),
-        child: Row(
-          children: [
-            const CircleAvatar(
-              backgroundColor: Colors.white,
-              child: Icon(Icons.directions_car_filled, color: _primaryBlue),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final showTitle = isExpanded && constraints.maxWidth >= 140;
+
+          return Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: showTitle ? AppPadding.medium : 18,
             ),
-            if (isExpanded) ...[
-              const SizedBox(width: AppPadding.medium),
-              const Expanded(
-                child: Text(
-                  AppConstants.appName,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                  ),
+            child: Row(
+              children: [
+                const CircleAvatar(
+                  backgroundColor: Colors.white,
+                  child: Icon(Icons.directions_car_filled, color: _primaryBlue),
                 ),
-              ),
-            ],
-          ],
-        ),
+                if (showTitle) ...[
+                  const SizedBox(width: AppPadding.medium),
+                  const Expanded(
+                    child: Text(
+                      AppConstants.appName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          );
+        },
       ),
     );
   }
