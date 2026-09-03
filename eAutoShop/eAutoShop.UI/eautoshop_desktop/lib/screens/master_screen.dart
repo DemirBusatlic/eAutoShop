@@ -5,6 +5,7 @@ import 'package:eautoshop_desktop/screens/user_screen.dart';
 import 'package:eautoshop_desktop/screens/customer_screen.dart';
 import 'package:eautoshop_desktop/screens/product_screen.dart';
 import 'package:eautoshop_desktop/screens/order_screen.dart';
+import 'package:eautoshop_desktop/screens/service_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -204,7 +205,7 @@ class _MasterScreenState extends State<MasterScreen> {
         key: 'services',
         label: 'Usluge',
         icon: Icons.build_outlined,
-        screen: _SectionPlaceholder(title: 'Usluge'),
+        screen: ServiceScreen(),
       ),
       const _DesktopDestination(
         key: 'orders',

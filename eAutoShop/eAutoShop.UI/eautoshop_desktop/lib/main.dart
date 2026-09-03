@@ -8,6 +8,8 @@ import 'package:eautoshop_desktop/providers/product_category_provider.dart';
 import 'package:eautoshop_desktop/providers/product_provider.dart';
 import 'package:eautoshop_desktop/providers/order_item_provider.dart';
 import 'package:eautoshop_desktop/providers/order_provider.dart';
+import 'package:eautoshop_desktop/providers/service_type_provider.dart';
+import 'package:eautoshop_desktop/providers/auto_shop_service_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
@@ -45,6 +47,8 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (_) => ProductProvider()),
         ChangeNotifierProvider(create: (_) => OrderItemProvider()),
         ChangeNotifierProvider(create: (_) => OrderProvider()),
+        ChangeNotifierProvider(create: (_) => ServiceTypeProvider()),
+        ChangeNotifierProvider(create: (_) => AutoShopServiceProvider()),
       ],
       child: const MyApp(),
     ),
