@@ -1,6 +1,7 @@
 import 'package:eautoshop_desktop/constants.dart';
 import 'package:eautoshop_desktop/providers/auth_provider.dart';
 import 'package:eautoshop_desktop/screens/home_screen.dart';
+import 'package:eautoshop_desktop/screens/appointment_screen.dart';
 import 'package:eautoshop_desktop/screens/user_screen.dart';
 import 'package:eautoshop_desktop/screens/customer_screen.dart';
 import 'package:eautoshop_desktop/screens/product_screen.dart';
@@ -213,12 +214,12 @@ class _MasterScreenState extends State<MasterScreen> {
         icon: Icons.receipt_long_outlined,
         screen: OrderScreen(),
       ),
-      if (!authProvider.isTechnician)
+      if (authProvider.isManager || authProvider.isTechnician)
         const _DesktopDestination(
           key: 'appointments',
           label: 'Rezervacije',
           icon: Icons.calendar_month_outlined,
-          screen: _SectionPlaceholder(title: 'Rezervacije'),
+          screen: AppointmentScreen(),
         ),
       if (authProvider.isManager) ...[
         const _DesktopDestination(

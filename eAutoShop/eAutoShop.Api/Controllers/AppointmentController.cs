@@ -1,4 +1,5 @@
-﻿using eAutoShop.Model.Model;
+﻿using eAutoShop.Model.Exceptions;
+using eAutoShop.Model.Model;
 using eAutoShop.Model.Request;
 using eAutoShop.Model.SearchObjects;
 using eAutoShop.Services.Helpers;
@@ -11,95 +12,143 @@ namespace eAutoShop.Api.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class AppointmentController: BaseCRUDController<AppointmentModel, AppointmentSearchObject, AppointmentInsertRequest, AppointmentUpdateRequest>
+    public class AppointmentController : BaseCRUDController<AppointmentModel, AppointmentSearchObject, AppointmentInsertRequest, AppointmentUpdateRequest>
     {
+        private IAppointmentService AppointmentService => (IAppointmentService)_service;
+
         public AppointmentController(IAppointmentService service,ILogger<BaseCRUDController<AppointmentModel, AppointmentSearchObject, AppointmentInsertRequest, AppointmentUpdateRequest>> logger): base(logger, service)
         {
+        }
+
+        [Authorize(Roles = UserRoles.Manager)]
+        [HttpGet]
+        public override async Task<PageResult<AppointmentModel>> Get([FromQuery] AppointmentSearchObject? search = null)
+        {
+            return await AppointmentService.Get(search);
+        }
+
+        [Authorize(Roles = UserRoles.Manager)]
+        [HttpGet("{id}")]
+        public override async Task<AppointmentModel> GetById(int id)
+        {
+            return await AppointmentService.GetById(id);
         }
 
         [Authorize(Roles = UserRoles.Customer)]
         [HttpPost]
         public override async Task<AppointmentModel> Insert([FromBody] AppointmentInsertRequest request)
         {
-            return await (_service as IAppointmentService)!.Insert(request);
+            return await AppointmentService.Insert(request);
         }
 
-        [Authorize(Roles = UserRoles.Manager + "," + UserRoles.Salesperson)]
-        [HttpPut("Confirm/{id}")]
-        public async Task<AppointmentModel> Confirm(int id,[FromBody] AppointmentConfirmRequest request)
+        [Authorize(Roles = UserRoles.Customer)]
+        [HttpPut("{id}")]
+        public override async Task<AppointmentModel> Update(int id, [FromBody] AppointmentUpdateRequest request)
         {
-            return await (_service as IAppointmentService)!.Confirm(id, request);
+            return await AppointmentService.UpdateForCustomer(id,request,GetRequiredUsername());
         }
 
-        [Authorize(Roles = UserRoles.Manager + "," + UserRoles.Salesperson)]
+        [NonAction]
+        public override Task<IActionResult> Delete(int id)
+        {
+            return base.Delete(id);
+        }
+
+        [Authorize(Roles = UserRoles.Manager)]
+        [HttpPut("Confirm/{id}")]
+        public async Task<AppointmentModel> Confirm(int id, [FromBody] AppointmentConfirmRequest request)
+        {
+            return await AppointmentService.Confirm(id, request);
+        }
+
+        [Authorize(Roles = UserRoles.Manager)]
         [HttpPut("Reject/{id}/{reason}")]
         public async Task<AppointmentModel> Reject(int id, string reason)
         {
-            return await (_service as IAppointmentService)!.Reject(id, reason);
+            return await AppointmentService.Reject(id, reason);
         }
 
-        [Authorize]
+        [Authorize(Roles = UserRoles.Customer)]
         [HttpPut("Cancel/{id}/{reason}")]
         public async Task<AppointmentModel> Cancel(int id, string reason)
         {
-            return await (_service as IAppointmentService)!.Cancel(id, reason);
+            return await AppointmentService.CancelForCustomer(id,reason,GetRequiredUsername());
         }
 
-        [Authorize(Roles = UserRoles.Manager + "," + UserRoles.Salesperson)]
+        [Authorize(Roles = UserRoles.Technician)]
         [HttpPut("Start/{id}")]
         public async Task<AppointmentModel> Start(int id)
         {
-            return await (_service as IAppointmentService)!.Start(id);
+            return await AppointmentService.StartForEmployee(id,GetRequiredUsername());
         }
 
-        [Authorize(Roles = UserRoles.Manager + "," + UserRoles.Salesperson)]
+        [Authorize(Roles = UserRoles.Technician)]
         [HttpPut("UpdateEstimatedDate/{id}/{newEstimatedCompletion}")]
         public async Task<AppointmentModel> UpdateEstimatedDate(int id, DateTime newEstimatedCompletion)
         {
-            return await (_service as IAppointmentService)!.UpdateEstimatedDate(id, newEstimatedCompletion);
+            return await AppointmentService.UpdateEstimatedDateForEmployee(id,newEstimatedCompletion,GetRequiredUsername());
         }
 
-        [Authorize(Roles =UserRoles.Manager + "," + UserRoles.Salesperson)]
+        [Authorize(Roles = UserRoles.Technician)]
         [HttpPut("Complete/{id}")]
         public async Task<AppointmentModel> Complete(int id)
         {
-            return await (_service as IAppointmentService)!.Complete(id);
+            return await AppointmentService.CompleteForEmployee(id,GetRequiredUsername());
         }
 
-        [Authorize]
+        [Authorize(Roles = UserRoles.Customer + "," + UserRoles.Manager)]
         [HttpPut("SoftDelete/{id}")]
         public async Task<AppointmentModel> SoftDelete(int id)
         {
-            string role = User.FindFirst(ClaimTypes.Role)?.Value!;
-            return await (_service as IAppointmentService)!.SoftDelete(id, role);
+            return await AppointmentService.SoftDeleteForUser(id,GetRequiredRole(),GetRequiredUsername());
         }
 
-        [Authorize]
+        [Authorize(Roles = UserRoles.Manager + "," + UserRoles.Technician + "," + UserRoles.Customer)]
         [HttpGet("AllowedActions/{id}")]
         public async Task<List<string>> AllowedActions(int id)
         {
-            return await (_service as IAppointmentService)!.AllowedActions(id);
+            return await AppointmentService.AllowedActionsForUser(id,GetRequiredRole(),GetRequiredUsername());
         }
 
-        [Authorize(Roles = UserRoles.Manager + "," + UserRoles.Salesperson)]
+        [Authorize(Roles = UserRoles.Manager)]
         [HttpGet("GetByShop")]
         public async Task<PageResult<AppointmentModel>> GetByShop([FromQuery] AppointmentSearchObject? search = null)
         {
-            search ??= new AppointmentSearchObject();
+            return await AppointmentService.Get(search);
+        }
 
-            return await (_service as IAppointmentService)!.Get(search);
+        [Authorize(Roles = UserRoles.Technician)]
+        [HttpGet("GetByEmployee")]
+        public async Task<PageResult<AppointmentModel>> GetByEmployee([FromQuery] AppointmentSearchObject? search = null)
+        {
+            return await AppointmentService.GetByEmployee(search,GetRequiredUsername());
         }
 
         [Authorize(Roles = UserRoles.Customer)]
         [HttpGet("GetByCustomer")]
         public async Task<PageResult<AppointmentModel>> GetByCustomer([FromQuery] AppointmentSearchObject? search = null)
         {
-            search ??= new AppointmentSearchObject();
+            return await AppointmentService.GetByCustomer(search,GetRequiredUsername());
+        }
 
-            string? username =User.FindFirst(ClaimTypes.Name)?.Value;
-            search.CustomerUsername = username;
+        private string GetRequiredUsername()
+        {
+            string? username = User.FindFirst(ClaimTypes.Name)?.Value;
 
-            return await (_service as IAppointmentService)!.Get(search);
+            if (string.IsNullOrWhiteSpace(username))
+                throw new UserException("Signed-in user was not found.");
+
+            return username;
+        }
+
+        private string GetRequiredRole()
+        {
+            string? role = User.FindFirst(ClaimTypes.Role)?.Value;
+
+            if (string.IsNullOrWhiteSpace(role))
+                throw new UserException("Signed-in user role was not found.");
+
+            return role;
         }
     }
 }

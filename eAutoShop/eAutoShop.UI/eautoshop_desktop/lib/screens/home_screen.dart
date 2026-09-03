@@ -85,7 +85,7 @@ class HomeScreen extends StatelessWidget {
         description: 'Obrada i praćenje narudžbi kupaca.',
         icon: Icons.receipt_long_outlined,
       ),
-      if (!auth.isTechnician)
+      if (auth.isManager || auth.isTechnician)
         const _HomeModule(
           key: 'appointments',
           title: 'Rezervacije',

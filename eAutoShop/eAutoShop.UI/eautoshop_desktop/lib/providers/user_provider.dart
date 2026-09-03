@@ -13,10 +13,13 @@ class UserProvider extends BaseProvider<User, UserInsert> {
 
   List<User> customers = [];
   List<User> employees = [];
+  List<User> technicians = [];
   User? currentUser;
 
   int countOfItems = 0;
+  int technicianCount = 0;
   bool isLoading = false;
+  bool areTechniciansLoading = false;
 
   Future<void> getCustomers({String? containsUsername, bool? active}) async {
     isLoading = true;
@@ -88,6 +91,44 @@ class UserProvider extends BaseProvider<User, UserInsert> {
       rethrow;
     } finally {
       isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> getTechnicians() async {
+    areTechniciansLoading = true;
+    notifyListeners();
+
+    try {
+      final searchResult = await get(
+        filter: {
+          'Role': 'technician',
+          'Active': true,
+          'Page': 1,
+          'PageSize': 100,
+        },
+        fromJson: User.fromJson,
+      );
+
+      technicians = searchResult.result;
+      technicians.sort((first, second) {
+        final firstName = '${first.name ?? ''} ${first.surname ?? ''}'
+            .trim()
+            .toLowerCase();
+        final secondName = '${second.name ?? ''} ${second.surname ?? ''}'
+            .trim()
+            .toLowerCase();
+
+        return firstName.compareTo(secondName);
+      });
+
+      technicianCount = searchResult.count;
+    } catch (_) {
+      technicians = [];
+      technicianCount = 0;
+      rethrow;
+    } finally {
+      areTechniciansLoading = false;
       notifyListeners();
     }
   }
