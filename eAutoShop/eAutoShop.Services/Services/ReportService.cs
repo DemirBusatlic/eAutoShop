@@ -3,6 +3,7 @@ using eAutoShop.Services.Database;
 using eAutoShop.Services.Interfaces;
 using eAutoShop.Services.Services.eAutoShop.Services.Database;
 using MapsterMapper;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -17,13 +18,15 @@ namespace eAutoShop.Services.Services
         private readonly AutoShopContext _context;
         private readonly RabbitMQService _rabbitMQService;
 
-        private readonly string _sharedVolumePath =
-            @"C:\Users\DT User\Desktop\eAutoShop\eAutoShop\eAutoShop.HelperApi\Reports";
+        private readonly string _sharedVolumePath;
 
-        public ReportService(AutoShopContext context,RabbitMQService rabbitMQService)
+        public ReportService(AutoShopContext context, RabbitMQService rabbitMQService, IConfiguration configuration)
         {
             _context = context;
             _rabbitMQService = rabbitMQService;
+            _sharedVolumePath = configuration["REPORTS_PATH"] ?? "Reports";
+
+            Directory.CreateDirectory(_sharedVolumePath);
         }
 
         public async Task GenerateProductReport(ProductReportRequest request)

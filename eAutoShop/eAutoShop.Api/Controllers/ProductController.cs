@@ -12,11 +12,11 @@ namespace eAutoShop.Api.Controllers
 {
     [AllowAnonymous]
     [ApiController]
-    public class ProductController: BaseCRUDController<ProductModel,ProductSearchObject,ProductInsertRequest,ProductUpdateRequest>
+    public class ProductController : BaseCRUDController<ProductModel, ProductSearchObject, ProductInsertRequest, ProductUpdateRequest>
     {
         private readonly NotificationService _notificationService;
 
-        public ProductController(IProductService service,ILogger<BaseCRUDController<ProductModel,ProductSearchObject,ProductInsertRequest,ProductUpdateRequest>> logger,NotificationService notificationService)
+        public ProductController(IProductService service, ILogger<BaseCRUDController<ProductModel, ProductSearchObject, ProductInsertRequest, ProductUpdateRequest>> logger, NotificationService notificationService)
             : base(logger, service)
         {
             _notificationService = notificationService;
@@ -26,7 +26,7 @@ namespace eAutoShop.Api.Controllers
         [HttpPut("{id}/activate")]
         public async Task<ProductModel> Activate(int id)
         {
-            var activatedProduct =await (_service as IProductService)!.Activate(id);
+            var activatedProduct = await (_service as IProductService)!.Activate(id);
 
             var price = activatedProduct.DiscountedPrice > 0 ? activatedProduct.DiscountedPrice : activatedProduct.Price;
 

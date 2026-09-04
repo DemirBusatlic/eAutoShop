@@ -81,17 +81,17 @@ namespace eAutoShop.Services.Services
             return _mapper.Map<T>(entity);
         }
 
-        public virtual IQueryable<TDb> AddInclude(IQueryable<TDb> query,TSearch? search = null)
+        public virtual IQueryable<TDb> AddInclude(IQueryable<TDb> query, TSearch? search = null)
         {
             return query;
         }
 
-        public virtual IQueryable<TDb> AddFilter(IQueryable<TDb> query,TSearch? search = null)
+        public virtual IQueryable<TDb> AddFilter(IQueryable<TDb> query, TSearch? search = null)
         {
             return query;
         }
 
-        public virtual IQueryable<TDb> AddFilterById(IQueryable<TDb> query,int id)
+        public virtual IQueryable<TDb> AddFilterById(IQueryable<TDb> query, int id)
         {
             return query.Where(x => EF.Property<int>(x, "Id") == id);
         }

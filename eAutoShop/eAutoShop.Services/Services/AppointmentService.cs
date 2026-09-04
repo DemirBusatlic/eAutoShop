@@ -45,7 +45,7 @@ namespace eAutoShop.Services.Services
 
             if (!string.IsNullOrWhiteSpace(search.CustomerUsername))
             {
-                query = query.Where(x =>x.Customer.Username.Contains(search.CustomerUsername) && !x.DeletedByCustomer);
+                query = query.Where(x => x.Customer.Username.Contains(search.CustomerUsername) && !x.DeletedByCustomer);
             }
 
             if (!string.IsNullOrWhiteSpace(search.EmployeeUsername))
@@ -244,7 +244,7 @@ namespace eAutoShop.Services.Services
                 .ToList();
         }
 
-        private async Task<PageResult<AppointmentModel>> GetForUser(AppointmentSearchObject? search,string username,bool isEmployee)
+        private async Task<PageResult<AppointmentModel>> GetForUser(AppointmentSearchObject? search, string username, bool isEmployee)
         {
             search ??= new AppointmentSearchObject();
 
@@ -255,7 +255,7 @@ namespace eAutoShop.Services.Services
             query = AddFilter(query, search);
             query = AddInclude(query, search);
 
-            query = isEmployee ? query.Where(x =>x.Employee != null &&x.Employee.Username == username && !x.DeletedByShop): query.Where(x =>x.Customer.Username == username & !x.DeletedByCustomer);
+            query = isEmployee ? query.Where(x => x.Employee != null && x.Employee.Username == username && !x.DeletedByShop) : query.Where(x => x.Customer.Username == username & !x.DeletedByCustomer);
 
             var count = await query.CountAsync();
             var page = Math.Max(search.Page ?? DefaultPage, DefaultPage);
@@ -296,7 +296,7 @@ namespace eAutoShop.Services.Services
         {
             ValidateUsername(customerUsername);
 
-            if (!string.Equals(appointment.Customer.Username,customerUsername,StringComparison.OrdinalIgnoreCase))
+            if (!string.Equals(appointment.Customer.Username, customerUsername, StringComparison.OrdinalIgnoreCase))
             {
                 throw new UserException("Appointment does not belong to the signed-in customer.");
             }
@@ -307,7 +307,7 @@ namespace eAutoShop.Services.Services
             ValidateUsername(employeeUsername);
 
             if (appointment.Employee == null ||
-                !string.Equals(appointment.Employee.Username,employeeUsername,StringComparison.OrdinalIgnoreCase))
+                !string.Equals(appointment.Employee.Username, employeeUsername, StringComparison.OrdinalIgnoreCase))
             {
                 throw new UserException("Appointment is not assigned to the signed-in employee.");
             }

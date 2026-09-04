@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace eAutoShop.Services.Interfaces
 {
-    public interface ICityService : IBaseCRUDService<CityModel,CitySearchObject,CityInsertRequest,CityUpdateRequest>
+    public interface ICityService : IBaseCRUDService<CityModel, CitySearchObject, CityInsertRequest, CityUpdateRequest>
     {
     }
 }

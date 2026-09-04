@@ -17,11 +17,11 @@ namespace eAutoShop.Services.StateMachineService.OrderStateMachine
 {
     public class OnHoldOrderState : BaseOrderState
     {
-        public OnHoldOrderState(AutoShopContext context,IMapper mapper,IServiceProvider serviceProvider): base(context, mapper, serviceProvider)
+        public OnHoldOrderState(AutoShopContext context, IMapper mapper, IServiceProvider serviceProvider) : base(context, mapper, serviceProvider)
         {
         }
 
-        public override async Task<OrderModel> Update(Order entity,OrderUpdateRequest request)
+        public override async Task<OrderModel> Update(Order entity, OrderUpdateRequest request)
         {
             if (!string.IsNullOrWhiteSpace(request.ShippingAddress))
             {

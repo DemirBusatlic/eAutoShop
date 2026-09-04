@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace eAutoShop.Services.Interfaces
 {
-    public interface IServiceTypeService : IService<ServiceTypeModel,ServiceTypeSearchObject>
+    public interface IServiceTypeService : IService<ServiceTypeModel, ServiceTypeSearchObject>
     {
     }
 }

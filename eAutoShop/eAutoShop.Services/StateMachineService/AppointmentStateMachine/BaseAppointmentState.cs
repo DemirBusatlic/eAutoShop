@@ -20,7 +20,7 @@ namespace eAutoShop.Services.StateMachineService.AppointmentStateMachine
         protected IMapper _mapper;
         protected IServiceProvider _serviceProvider;
 
-        public BaseAppointmentState(AutoShopContext context,IMapper mapper,IServiceProvider serviceProvider)
+        public BaseAppointmentState(AutoShopContext context, IMapper mapper, IServiceProvider serviceProvider)
         {
             _context = context;
             _mapper = mapper;
@@ -76,7 +76,7 @@ namespace eAutoShop.Services.StateMachineService.AppointmentStateMachine
         {
             return Task.FromResult(new List<string>());
         }
-        protected async Task<bool> IsShopAtCapacity(DateTime reservationStart,TimeSpan duration,int? excludedAppointmentId = null)
+        protected async Task<bool> IsShopAtCapacity(DateTime reservationStart, TimeSpan duration, int? excludedAppointmentId = null)
         {
             var technicianCount = await _context.Users.CountAsync(x =>
                 x.Active &&

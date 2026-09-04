@@ -16,25 +16,25 @@ using System.Threading.Tasks;
 
 namespace eAutoShop.Services.Services
 {
-    public class AuthTokenService: BaseCRUDService<AuthTokenModel,AuthToken,AuthTokenSearchObject,AuthTokenInsertRequest,AuthTokenUpdateRequest>,IAuthTokenService
+    public class AuthTokenService : BaseCRUDService<AuthTokenModel, AuthToken, AuthTokenSearchObject, AuthTokenInsertRequest, AuthTokenUpdateRequest>, IAuthTokenService
     {
         private readonly string _secret;
 
-        public AuthTokenService(string secret,AutoShopContext context,IMapper mapper): base(context, mapper)
+        public AuthTokenService(string secret, AutoShopContext context, IMapper mapper) : base(context, mapper)
         {
             _secret = secret;
         }
 
-        public async Task<string> Login(string username,string password)
+        public async Task<string> Login(string username, string password)
         {
-            var user = await _context.Users.Include(x => x.Role).FirstOrDefaultAsync(x =>x.Username == username);
+            var user = await _context.Users.Include(x => x.Role).FirstOrDefaultAsync(x => x.Username == username);
 
             if (user == null)
             {
                 throw new UserException("Incorrect login!");
             }
 
-            var validPassword =BCrypt.Net.BCrypt.Verify(password,user.PasswordHash);
+            var validPassword = BCrypt.Net.BCrypt.Verify(password, user.PasswordHash);
 
             if (!validPassword)
             {
@@ -43,12 +43,12 @@ namespace eAutoShop.Services.Services
 
             if (!user.Active)
             {
-                var manager = await _context.Users.Include(x => x.Role).FirstOrDefaultAsync(x =>x.Role.Name == UserRoles.Manager);
+                var manager = await _context.Users.Include(x => x.Role).FirstOrDefaultAsync(x => x.Role.Name == UserRoles.Manager);
 
-                throw new UserException($"Your account is inactive! " + $"Please contact the administrator! " +$"Phone: {manager?.Phone} " +$"Email: {manager?.Email}");
+                throw new UserException($"Your account is inactive! " + $"Please contact the administrator! " + $"Phone: {manager?.Phone} " + $"Email: {manager?.Email}");
             }
 
-            var authToken =GenerateToken(user, _secret);
+            var authToken = GenerateToken(user, _secret);
 
             if (authToken.Created == default)
             {
@@ -64,7 +64,7 @@ namespace eAutoShop.Services.Services
 
         public async Task RevokeToken(string token)
         {
-            var entity = await _context.AuthTokens.FirstOrDefaultAsync(x =>x.Value == token);
+            var entity = await _context.AuthTokens.FirstOrDefaultAsync(x => x.Value == token);
 
             if (entity == null)
             {

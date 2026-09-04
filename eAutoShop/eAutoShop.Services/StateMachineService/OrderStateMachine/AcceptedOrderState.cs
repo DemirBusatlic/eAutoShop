@@ -13,11 +13,11 @@ namespace eAutoShop.Services.StateMachineService.OrderStateMachine
 {
     public class AcceptedOrderState : BaseOrderState
     {
-        public AcceptedOrderState(AutoShopContext context,IMapper mapper,IServiceProvider serviceProvider): base(context, mapper, serviceProvider)
+        public AcceptedOrderState(AutoShopContext context, IMapper mapper, IServiceProvider serviceProvider) : base(context, mapper, serviceProvider)
         {
         }
 
-        public override async Task<OrderModel> SoftDelete(Order entity,string role)
+        public override async Task<OrderModel> SoftDelete(Order entity, string role)
         {
             role = role?.Trim().ToLowerInvariant()
             ?? throw new UserException("Invalid role.");

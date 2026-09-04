@@ -16,8 +16,8 @@ namespace eAutoShop.Model.SearchObjects
         public DateTime? MaxOrderDate { get; set; }
         public DateTime? MinShippingDate { get; set; }
         public DateTime? MaxShippingDate { get; set; }
-        public bool? HasDiscount { get; set; } 
-        public bool? IncludeItems { get; set; } 
+        public bool? HasDiscount { get; set; }
+        public bool? IncludeItems { get; set; }
     }
 
 }

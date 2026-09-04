@@ -14,15 +14,15 @@ namespace eAutoShop.Services.StateMachineService.AutoShopServiceStateMachine
 {
     public class DraftAutoShopServiceState : BaseAutoShopServiceState
     {
-        public DraftAutoShopServiceState(AutoShopContext context,IMapper mapper,IServiceProvider serviceProvider): base(context, mapper, serviceProvider)
+        public DraftAutoShopServiceState(AutoShopContext context, IMapper mapper, IServiceProvider serviceProvider) : base(context, mapper, serviceProvider)
         {
         }
 
-        public override async Task<AutoShopServiceModel> Update(AutoShopService entity,AutoShopServiceUpdateRequest request)
+        public override async Task<AutoShopServiceModel> Update(AutoShopService entity, AutoShopServiceUpdateRequest request)
         {
             if (request.ImageData != null)
             {
-                entity.Image = !string.IsNullOrWhiteSpace(request.ImageData)? Convert.FromBase64String(request.ImageData): Array.Empty<byte>();
+                entity.Image = !string.IsNullOrWhiteSpace(request.ImageData) ? Convert.FromBase64String(request.ImageData) : Array.Empty<byte>();
             }
 
             _mapper.Map(request, entity);
@@ -36,7 +36,7 @@ namespace eAutoShop.Services.StateMachineService.AutoShopServiceStateMachine
 
             entity.Discount = discount;
 
-            entity.DiscountedPrice = discount > 0 ? Math.Round(entity.Price * (1 - discount), 2): entity.Price;
+            entity.DiscountedPrice = discount > 0 ? Math.Round(entity.Price * (1 - discount), 2) : entity.Price;
 
             await _context.SaveChangesAsync();
 
@@ -45,7 +45,7 @@ namespace eAutoShop.Services.StateMachineService.AutoShopServiceStateMachine
 
         public override async Task<AutoShopServiceModel> Activate(AutoShopService entity)
         {
-            bool validate =!string.IsNullOrWhiteSpace(entity.Description);
+            bool validate = !string.IsNullOrWhiteSpace(entity.Description);
 
             if (!validate)
             {

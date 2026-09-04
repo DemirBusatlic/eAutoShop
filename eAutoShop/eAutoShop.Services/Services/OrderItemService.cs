@@ -16,16 +16,16 @@ namespace eAutoShop.Services.Services
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public OrderItemService(AutoShopContext context,IMapper mapper,IHttpContextAccessor httpContextAccessor): base(context, mapper)
+        public OrderItemService(AutoShopContext context, IMapper mapper, IHttpContextAccessor httpContextAccessor) : base(context, mapper)
         {
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public override IQueryable<OrderItem> AddInclude(IQueryable<OrderItem> query,OrderItemSearchObject? search = null)
+        public override IQueryable<OrderItem> AddInclude(IQueryable<OrderItem> query, OrderItemSearchObject? search = null)
         {
-                 query = query
-                .Include(x => x.Product)
-                .Include(x => x.ProductReview);
+            query = query
+           .Include(x => x.Product)
+           .Include(x => x.ProductReview);
 
             return base.AddInclude(query, search);
         }

@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace eAutoShop.Services.Interfaces
 {
-    public interface IAutoShopServiceService: IBaseCRUDService<AutoShopServiceModel,AutoShopServiceSearchObject,AutoShopServiceInsertRequest,AutoShopServiceUpdateRequest>
+    public interface IAutoShopServiceService : IBaseCRUDService<AutoShopServiceModel, AutoShopServiceSearchObject, AutoShopServiceInsertRequest, AutoShopServiceUpdateRequest>
     {
         Task<AutoShopServiceModel> Activate(int id);
         Task<AutoShopServiceModel> Hide(int id);

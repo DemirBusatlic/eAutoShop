@@ -35,7 +35,7 @@ namespace eAutoShop.Api.Controllers
 
         [Authorize(Roles = "manager")]
         [HttpPut("{id}")]
-        public async override Task<UserModel> Update(int id,[FromBody] UserUpdateRequest request)
+        public async override Task<UserModel> Update(int id, [FromBody] UserUpdateRequest request)
         {
             return await _userService.Update(id, request);
         }
@@ -61,7 +61,7 @@ namespace eAutoShop.Api.Controllers
         [HttpGet("Me")]
         public async Task<UserModel> GetCurrentUser()
         {
-            var userIdClaim =User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             if (!int.TryParse(userIdClaim, out var userId))
             {

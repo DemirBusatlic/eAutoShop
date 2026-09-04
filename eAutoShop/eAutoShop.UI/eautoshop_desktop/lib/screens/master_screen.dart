@@ -8,6 +8,7 @@ import 'package:eautoshop_desktop/screens/product_screen.dart';
 import 'package:eautoshop_desktop/screens/order_screen.dart';
 import 'package:eautoshop_desktop/screens/service_screen.dart';
 import 'package:eautoshop_desktop/screens/review_screen.dart';
+import 'package:eautoshop_desktop/screens/report_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -249,7 +250,7 @@ class _MasterScreenState extends State<MasterScreen> {
         key: 'reports',
         label: 'Izvještaji',
         icon: Icons.bar_chart_outlined,
-        screen: _SectionPlaceholder(title: 'Izvještaji'),
+        screen: ReportScreen(),
       ),
     ];
   }
@@ -444,40 +445,6 @@ class _BrandHeader extends StatelessWidget {
             ),
           );
         },
-      ),
-    );
-  }
-}
-
-class _SectionPlaceholder extends StatelessWidget {
-  const _SectionPlaceholder({required this.title});
-
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Card(
-        child: Padding(
-          padding: const EdgeInsets.all(AppPadding.extraLarge),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(
-                Icons.construction_outlined,
-                size: 54,
-                color: Color(0xFF2848C7),
-              ),
-              const SizedBox(height: AppPadding.medium),
-              Text(
-                '$title – ekran će biti dodan u narednom koraku.',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: const Color(0xFF1B2430),
-                ),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }

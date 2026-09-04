@@ -13,12 +13,12 @@ using System.Security.Claims;
 
 namespace eAutoShop.Services.Services
 {
-    public class OrderService : BaseCRUDService<OrderModel,Order,OrderSearchObject,OrderInsertRequest,OrderUpdateRequest>, IOrderService
+    public class OrderService : BaseCRUDService<OrderModel, Order, OrderSearchObject, OrderInsertRequest, OrderUpdateRequest>, IOrderService
     {
         private readonly BaseOrderState _baseOrderState;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public OrderService(AutoShopContext context, IMapper mapper,BaseOrderState baseOrderState, IHttpContextAccessor httpContextAccessor) : base(context, mapper)
+        public OrderService(AutoShopContext context, IMapper mapper, BaseOrderState baseOrderState, IHttpContextAccessor httpContextAccessor) : base(context, mapper)
         {
             _baseOrderState = baseOrderState;
             _httpContextAccessor = httpContextAccessor;
@@ -38,7 +38,7 @@ namespace eAutoShop.Services.Services
             return base.AddInclude(query, search);
         }
 
-        public override IQueryable<Order> AddFilter(IQueryable<Order> query,OrderSearchObject? search = null)
+        public override IQueryable<Order> AddFilter(IQueryable<Order> query, OrderSearchObject? search = null)
         {
             query = query.OrderByDescending(o => o.Id);
 
@@ -62,7 +62,7 @@ namespace eAutoShop.Services.Services
 
             if (search.HasDiscount.HasValue)
             {
-                query = search.HasDiscount.Value? query.Where(o => o.OrderItems.Any(oi => oi.Discount > 0))
+                query = search.HasDiscount.Value ? query.Where(o => o.OrderItems.Any(oi => oi.Discount > 0))
                     : query.Where(o => !o.OrderItems.Any(oi => oi.Discount > 0));
             }
 
@@ -122,7 +122,7 @@ namespace eAutoShop.Services.Services
 
         private static int GetCurrentUserId(ClaimsPrincipal user)
         {
-            return int.Parse( user.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? throw new UserException("Unauthorized."));
+            return int.Parse(user.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? throw new UserException("Unauthorized."));
         }
 
         public async Task<OrderBasicInfoModel> GetBasicOrderInfo(int id)
@@ -159,7 +159,7 @@ namespace eAutoShop.Services.Services
             return await state.Insert(request);
         }
 
-        public override async Task<OrderModel> Update(int id,OrderUpdateRequest request)
+        public override async Task<OrderModel> Update(int id, OrderUpdateRequest request)
         {
             var entity = await _context.Orders.FindAsync(id);
 
@@ -171,7 +171,7 @@ namespace eAutoShop.Services.Services
             return await state.Update(entity, request);
         }
 
-        public async Task<OrderModel> Accept(int id,OrderAcceptRequest orderAccept)
+        public async Task<OrderModel> Accept(int id, OrderAcceptRequest orderAccept)
         {
             var entity = await _context.Orders.FindAsync(id);
 

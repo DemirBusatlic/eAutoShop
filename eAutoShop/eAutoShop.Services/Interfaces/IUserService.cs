@@ -18,6 +18,6 @@ namespace eAutoShop.Services.Interfaces
         Task ChangePassword(int userId, UserChangePasswordRequest request);
 
         Task ChangeActiveStatus(int id);
-      
+
     }
 }

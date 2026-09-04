@@ -9,6 +9,6 @@ namespace eAutoShop.Services.Interfaces
     public interface IRecommenderTrainService
     {
         void TrainProductsModel();
-       
+
     }
 }

@@ -30,7 +30,7 @@ namespace eAutoShop.Services.StateMachineService.OrderStateMachine
         protected readonly IMapper _mapper;
         protected readonly IServiceProvider _serviceProvider;
 
-        public BaseOrderState( AutoShopContext context, IMapper mapper,IServiceProvider serviceProvider)
+        public BaseOrderState(AutoShopContext context, IMapper mapper, IServiceProvider serviceProvider)
         {
             _context = context;
             _mapper = mapper;
@@ -42,12 +42,12 @@ namespace eAutoShop.Services.StateMachineService.OrderStateMachine
             throw new UserException("Action not allowed.");
         }
 
-        public virtual Task<OrderModel> Update(Order entity,OrderUpdateRequest request)
+        public virtual Task<OrderModel> Update(Order entity, OrderUpdateRequest request)
         {
             throw new UserException("Action not allowed.");
         }
 
-        public virtual Task<OrderModel> Accept(Order entity,OrderAcceptRequest orderAccept)
+        public virtual Task<OrderModel> Accept(Order entity, OrderAcceptRequest orderAccept)
         {
             throw new UserException("Action not allowed.");
         }

@@ -17,7 +17,7 @@ namespace eAutoShop.Services.StateMachineService.OrderStateMachine
         {
         }
 
-        public override async Task<OrderModel> SoftDelete(Order entity,string role)
+        public override async Task<OrderModel> SoftDelete(Order entity, string role)
         {
             role = role?.Trim().ToLowerInvariant()
              ?? throw new UserException("Invalid role.");

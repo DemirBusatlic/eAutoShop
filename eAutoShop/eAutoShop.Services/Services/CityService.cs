@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace eAutoShop.Services.Services
 {
-    public class CityService :BaseCRUDService<CityModel,City,CitySearchObject,CityInsertRequest,CityUpdateRequest>, ICityService
+    public class CityService : BaseCRUDService<CityModel, City, CitySearchObject, CityInsertRequest, CityUpdateRequest>, ICityService
     {
         public CityService(AutoShopContext context, IMapper mapper) : base(context, mapper) { }
     }

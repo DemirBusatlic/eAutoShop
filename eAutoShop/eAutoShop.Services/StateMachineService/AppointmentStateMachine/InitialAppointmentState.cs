@@ -18,7 +18,7 @@ namespace eAutoShop.Services.StateMachineService.AppointmentStateMachine
 {
     public class InitialAppointmentState : BaseAppointmentState
     {
-        public InitialAppointmentState(AutoShopContext context,IMapper mapper,IServiceProvider serviceProvider): base(context, mapper, serviceProvider)
+        public InitialAppointmentState(AutoShopContext context, IMapper mapper, IServiceProvider serviceProvider) : base(context, mapper, serviceProvider)
         {
         }
 
@@ -60,7 +60,7 @@ namespace eAutoShop.Services.StateMachineService.AppointmentStateMachine
                 if (order.CustomerId != customer.Id)
                     throw new UserException($"Order #{request.OrderId} is not made by you.");
 
-                var alreadyUsed = await _context.Appointments.AnyAsync(x =>x.OrderId == order.Id &&x.State != AppointmentStates.Rejected &&x.State != AppointmentStates.Cancelled);
+                var alreadyUsed = await _context.Appointments.AnyAsync(x => x.OrderId == order.Id && x.State != AppointmentStates.Rejected && x.State != AppointmentStates.Cancelled);
 
                 if (alreadyUsed)
                     throw new UserException($"This order is already used for another appointment.");
@@ -84,7 +84,7 @@ namespace eAutoShop.Services.StateMachineService.AppointmentStateMachine
             }
 
 
-            var shopIsAtCapacity = await IsShopAtCapacity(request.ReservationDate,totalDuration);
+            var shopIsAtCapacity = await IsShopAtCapacity(request.ReservationDate, totalDuration);
 
             if (shopIsAtCapacity)
             {

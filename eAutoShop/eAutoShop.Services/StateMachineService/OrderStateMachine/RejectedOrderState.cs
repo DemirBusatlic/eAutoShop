@@ -13,7 +13,7 @@ namespace eAutoShop.Services.StateMachineService.OrderStateMachine
 {
     public class RejectedOrderState : BaseOrderState
     {
-        public RejectedOrderState(AutoShopContext context,IMapper mapper,IServiceProvider serviceProvider): base(context, mapper, serviceProvider)
+        public RejectedOrderState(AutoShopContext context, IMapper mapper, IServiceProvider serviceProvider) : base(context, mapper, serviceProvider)
         {
         }
 

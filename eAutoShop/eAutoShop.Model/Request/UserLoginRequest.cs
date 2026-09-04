@@ -10,7 +10,7 @@ namespace eAutoShop.Model.Request
     {
         public string Username { get; set; }
         public string Password { get; set; }
-    
+
 
     }
 }

@@ -15,8 +15,8 @@ namespace eAutoShop.Model.Model
 
         public string State { get; set; }
 
-        public double Discount { get; set; }          
-        public double DiscountedPrice { get; set; }    
+        public double Discount { get; set; }
+        public double DiscountedPrice { get; set; }
 
         public string? ImageData { get; set; }
         public string? Details { get; set; }

@@ -15,7 +15,7 @@ namespace eAutoShop.Services.StateMachineService.AppointmentStateMachine
 {
     public class PendingAppointmentState : BaseAppointmentState
     {
-        public PendingAppointmentState(AutoShopContext context,IMapper mapper,IServiceProvider serviceProvider): base(context, mapper, serviceProvider)
+        public PendingAppointmentState(AutoShopContext context, IMapper mapper, IServiceProvider serviceProvider) : base(context, mapper, serviceProvider)
         {
         }
 
@@ -78,12 +78,12 @@ namespace eAutoShop.Services.StateMachineService.AppointmentStateMachine
 
         public override async Task<AppointmentModel> Confirm(Appointment entity, AppointmentConfirmRequest request)
         {
-            if (request.EstimatedCompletionDate.HasValue &&request.EstimatedCompletionDate.Value <= entity.ReservationDate)
+            if (request.EstimatedCompletionDate.HasValue && request.EstimatedCompletionDate.Value <= entity.ReservationDate)
             {
                 throw new UserException("Estimated completion date must be after reservation date.");
             }
 
-            var technician = await _context.Users .Include(x => x.Role).FirstOrDefaultAsync(x =>
+            var technician = await _context.Users.Include(x => x.Role).FirstOrDefaultAsync(x =>
                     x.Id == request.EmployeeId &&
                     x.Active &&
                     x.Role.Name == UserRoles.Technician
@@ -182,7 +182,7 @@ namespace eAutoShop.Services.StateMachineService.AppointmentStateMachine
 
             return _mapper.Map<AppointmentModel>(entity);
         }
-        public override async Task<AppointmentModel> SoftDelete(Appointment entity,string role)
+        public override async Task<AppointmentModel> SoftDelete(Appointment entity, string role)
         {
             if (role == UserRoles.Customer)
             {

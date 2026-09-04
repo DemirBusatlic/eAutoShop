@@ -16,7 +16,7 @@ namespace eAutoShop.Api.Controllers
     {
         private IAppointmentService AppointmentService => (IAppointmentService)_service;
 
-        public AppointmentController(IAppointmentService service,ILogger<BaseCRUDController<AppointmentModel, AppointmentSearchObject, AppointmentInsertRequest, AppointmentUpdateRequest>> logger): base(logger, service)
+        public AppointmentController(IAppointmentService service, ILogger<BaseCRUDController<AppointmentModel, AppointmentSearchObject, AppointmentInsertRequest, AppointmentUpdateRequest>> logger) : base(logger, service)
         {
         }
 
@@ -45,7 +45,7 @@ namespace eAutoShop.Api.Controllers
         [HttpPut("{id}")]
         public override async Task<AppointmentModel> Update(int id, [FromBody] AppointmentUpdateRequest request)
         {
-            return await AppointmentService.UpdateForCustomer(id,request,GetRequiredUsername());
+            return await AppointmentService.UpdateForCustomer(id, request, GetRequiredUsername());
         }
 
         [NonAction]
@@ -72,42 +72,42 @@ namespace eAutoShop.Api.Controllers
         [HttpPut("Cancel/{id}/{reason}")]
         public async Task<AppointmentModel> Cancel(int id, string reason)
         {
-            return await AppointmentService.CancelForCustomer(id,reason,GetRequiredUsername());
+            return await AppointmentService.CancelForCustomer(id, reason, GetRequiredUsername());
         }
 
         [Authorize(Roles = UserRoles.Technician)]
         [HttpPut("Start/{id}")]
         public async Task<AppointmentModel> Start(int id)
         {
-            return await AppointmentService.StartForEmployee(id,GetRequiredUsername());
+            return await AppointmentService.StartForEmployee(id, GetRequiredUsername());
         }
 
         [Authorize(Roles = UserRoles.Technician)]
         [HttpPut("UpdateEstimatedDate/{id}/{newEstimatedCompletion}")]
         public async Task<AppointmentModel> UpdateEstimatedDate(int id, DateTime newEstimatedCompletion)
         {
-            return await AppointmentService.UpdateEstimatedDateForEmployee(id,newEstimatedCompletion,GetRequiredUsername());
+            return await AppointmentService.UpdateEstimatedDateForEmployee(id, newEstimatedCompletion, GetRequiredUsername());
         }
 
         [Authorize(Roles = UserRoles.Technician)]
         [HttpPut("Complete/{id}")]
         public async Task<AppointmentModel> Complete(int id)
         {
-            return await AppointmentService.CompleteForEmployee(id,GetRequiredUsername());
+            return await AppointmentService.CompleteForEmployee(id, GetRequiredUsername());
         }
 
         [Authorize(Roles = UserRoles.Customer + "," + UserRoles.Manager)]
         [HttpPut("SoftDelete/{id}")]
         public async Task<AppointmentModel> SoftDelete(int id)
         {
-            return await AppointmentService.SoftDeleteForUser(id,GetRequiredRole(),GetRequiredUsername());
+            return await AppointmentService.SoftDeleteForUser(id, GetRequiredRole(), GetRequiredUsername());
         }
 
         [Authorize(Roles = UserRoles.Manager + "," + UserRoles.Technician + "," + UserRoles.Customer)]
         [HttpGet("AllowedActions/{id}")]
         public async Task<List<string>> AllowedActions(int id)
         {
-            return await AppointmentService.AllowedActionsForUser(id,GetRequiredRole(),GetRequiredUsername());
+            return await AppointmentService.AllowedActionsForUser(id, GetRequiredRole(), GetRequiredUsername());
         }
 
         [Authorize(Roles = UserRoles.Manager)]
@@ -121,14 +121,14 @@ namespace eAutoShop.Api.Controllers
         [HttpGet("GetByEmployee")]
         public async Task<PageResult<AppointmentModel>> GetByEmployee([FromQuery] AppointmentSearchObject? search = null)
         {
-            return await AppointmentService.GetByEmployee(search,GetRequiredUsername());
+            return await AppointmentService.GetByEmployee(search, GetRequiredUsername());
         }
 
         [Authorize(Roles = UserRoles.Customer)]
         [HttpGet("GetByCustomer")]
         public async Task<PageResult<AppointmentModel>> GetByCustomer([FromQuery] AppointmentSearchObject? search = null)
         {
-            return await AppointmentService.GetByCustomer(search,GetRequiredUsername());
+            return await AppointmentService.GetByCustomer(search, GetRequiredUsername());
         }
 
         private string GetRequiredUsername()

@@ -15,7 +15,7 @@ namespace eAutoShop.Services.StateMachineService.OrderStateMachine
 {
     public class InitialOrderState : BaseOrderState
     {
-        public InitialOrderState(AutoShopContext context,IMapper mapper,IServiceProvider serviceProvider): base(context, mapper, serviceProvider)
+        public InitialOrderState(AutoShopContext context, IMapper mapper, IServiceProvider serviceProvider) : base(context, mapper, serviceProvider)
         {
         }
 
@@ -34,7 +34,7 @@ namespace eAutoShop.Services.StateMachineService.OrderStateMachine
                 throw new UserException("Invalid user role.");
             }
 
-           
+
             var employee = await _context.Users
                 .Include(x => x.Role)
                 .Where(x =>
@@ -177,7 +177,7 @@ namespace eAutoShop.Services.StateMachineService.OrderStateMachine
 
             await _context.SaveChangesAsync();
 
-           
+
             await _context.Entry(entity)
                 .Reference(x => x.City)
                 .LoadAsync();

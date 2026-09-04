@@ -10,7 +10,7 @@ namespace eAutoShop.Api.Controllers
     [ApiController]
     public class OrderItemController : BaseCRUDController<OrderItemModel, OrderItemSearchObject, OrderItemInsertRequest, OrderItemUpdateRequest>
     {
-        public OrderItemController(IOrderItemService service, ILogger<BaseCRUDController<OrderItemModel, OrderItemSearchObject, OrderItemInsertRequest, OrderItemUpdateRequest>> logger) : base(logger,service)
+        public OrderItemController(IOrderItemService service, ILogger<BaseCRUDController<OrderItemModel, OrderItemSearchObject, OrderItemInsertRequest, OrderItemUpdateRequest>> logger) : base(logger, service)
         {
         }
     }

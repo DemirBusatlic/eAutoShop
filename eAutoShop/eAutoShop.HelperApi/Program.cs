@@ -15,11 +15,11 @@ builder.Services.AddScoped<IGenerateProductReportService, GenerateProductReportS
 
 builder.Services.AddSingleton<IConnectionFactory>(sp =>
 {
-    var hostName = Environment.GetEnvironmentVariable("RABBITMQ_HOST")?? builder.Configuration["RabbitMQ:HostName"]?? "localhost";
+    var hostName = Environment.GetEnvironmentVariable("RABBITMQ_HOST") ?? builder.Configuration["RabbitMQ:HostName"] ?? "localhost";
 
-    var userName = Environment.GetEnvironmentVariable("RABBITMQ_USERNAME")?? builder.Configuration["RabbitMQ:UserName"]?? "guest";
+    var userName = Environment.GetEnvironmentVariable("RABBITMQ_USERNAME") ?? builder.Configuration["RabbitMQ:UserName"] ?? "guest";
 
-    var password = Environment.GetEnvironmentVariable("RABBITMQ_PASSWORD")?? builder.Configuration["RabbitMQ:Password"]?? "guest";
+    var password = Environment.GetEnvironmentVariable("RABBITMQ_PASSWORD") ?? builder.Configuration["RabbitMQ:Password"] ?? "guest";
 
     return new ConnectionFactory
     {

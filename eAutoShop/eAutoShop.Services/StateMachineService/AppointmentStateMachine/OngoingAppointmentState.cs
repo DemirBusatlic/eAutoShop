@@ -13,7 +13,7 @@ namespace eAutoShop.Services.StateMachineService.AppointmentStateMachine
 {
     public class OngoingAppointmentState : BaseAppointmentState
     {
-        public OngoingAppointmentState(AutoShopContext context,IMapper mapper,IServiceProvider serviceProvider): base(context, mapper, serviceProvider)
+        public OngoingAppointmentState(AutoShopContext context, IMapper mapper, IServiceProvider serviceProvider) : base(context, mapper, serviceProvider)
         {
         }
 
@@ -28,7 +28,7 @@ namespace eAutoShop.Services.StateMachineService.AppointmentStateMachine
             return _mapper.Map<AppointmentModel>(entity);
         }
 
-        public override async Task<AppointmentModel> UpdateEstimatedDate(Appointment entity,DateTime newEstimatedCompletion)
+        public override async Task<AppointmentModel> UpdateEstimatedDate(Appointment entity, DateTime newEstimatedCompletion)
         {
             if (newEstimatedCompletion <= DateTime.UtcNow)
             {

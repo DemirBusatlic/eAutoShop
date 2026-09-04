@@ -8,7 +8,7 @@ namespace eAutoShop.Api.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class BaseController<T, TSearch>: ControllerBase where T : class where TSearch : BaseSearchObject, new()
+    public class BaseController<T, TSearch> : ControllerBase where T : class where TSearch : BaseSearchObject, new()
     {
         protected readonly IService<T, TSearch> _service;
 

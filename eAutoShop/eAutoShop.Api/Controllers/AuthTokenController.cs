@@ -17,7 +17,7 @@ namespace eAutoShop.Api.Controllers
 
         private readonly IAuthTokenService _authTokenService;
 
-        public AuthTokenController(IAuthTokenService service,ILogger<AuthTokenController> logger)
+        public AuthTokenController(IAuthTokenService service, ILogger<AuthTokenController> logger)
         {
             _authTokenService = service;
             _logger = logger;
@@ -27,7 +27,7 @@ namespace eAutoShop.Api.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] UserLoginRequest credentials)
         {
-            var token = await _authTokenService.Login(credentials.Username,credentials.Password);
+            var token = await _authTokenService.Login(credentials.Username, credentials.Password);
 
             return Ok(new { token });
         }
@@ -47,7 +47,7 @@ namespace eAutoShop.Api.Controllers
 
             await _authTokenService.RevokeToken(token);
 
-            return Ok(new{ message = "Logout successful."});
+            return Ok(new { message = "Logout successful." });
         }
     }
 

@@ -11,7 +11,7 @@ namespace eAutoShop.Api.Controllers
     [ApiController]
     public class ProductReviewController : BaseCRUDController<ProductReviewModel, ProductReviewSearchObject, ProductReviewInsertRequest, ProductReviewUpdateRequest>
     {
-        public ProductReviewController(ILogger<BaseController<ProductReviewModel, ProductReviewSearchObject>> logger, IProductReviewService service): base(logger, service)
+        public ProductReviewController(ILogger<BaseController<ProductReviewModel, ProductReviewSearchObject>> logger, IProductReviewService service) : base(logger, service)
         {
         }
 

@@ -12,7 +12,7 @@ namespace eAutoShop.Services.StateMachineService.AppointmentStateMachine
 {
     public class ConfirmedAppointmentState : BaseAppointmentState
     {
-        public ConfirmedAppointmentState(AutoShopContext context,IMapper mapper,IServiceProvider serviceProvider): base(context, mapper, serviceProvider)
+        public ConfirmedAppointmentState(AutoShopContext context, IMapper mapper, IServiceProvider serviceProvider) : base(context, mapper, serviceProvider)
         {
         }
 

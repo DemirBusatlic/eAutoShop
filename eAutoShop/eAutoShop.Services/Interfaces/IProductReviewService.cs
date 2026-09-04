@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace eAutoShop.Services.Interfaces
 {
-    public interface IProductReviewService : IBaseCRUDService<ProductReviewModel,ProductReviewSearchObject,ProductReviewInsertRequest,ProductReviewUpdateRequest>
+    public interface IProductReviewService : IBaseCRUDService<ProductReviewModel, ProductReviewSearchObject, ProductReviewInsertRequest, ProductReviewUpdateRequest>
     {
     }
 }

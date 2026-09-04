@@ -13,7 +13,7 @@ namespace eAutoShop.Api.Controllers
         private readonly IRecommenderTrainService _recommenderTrainService;
         private readonly IRecommenderPredictService _recommenderPredictService;
 
-        public RecommenderController(IRecommenderTrainService recommenderTrainService,IRecommenderPredictService recommenderPredictService)
+        public RecommenderController(IRecommenderTrainService recommenderTrainService, IRecommenderPredictService recommenderPredictService)
         {
             _recommenderTrainService = recommenderTrainService;
             _recommenderPredictService = recommenderPredictService;

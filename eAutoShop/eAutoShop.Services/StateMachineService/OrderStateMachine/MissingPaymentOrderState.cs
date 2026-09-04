@@ -13,15 +13,15 @@ namespace eAutoShop.Services.StateMachineService.OrderStateMachine
 {
     public class MissingPaymentOrderState : BaseOrderState
     {
-        public MissingPaymentOrderState(AutoShopContext context,IMapper mapper,IServiceProvider serviceProvider): base(context, mapper, serviceProvider)
+        public MissingPaymentOrderState(AutoShopContext context, IMapper mapper, IServiceProvider serviceProvider) : base(context, mapper, serviceProvider)
         {
         }
 
 
 
-        public override async Task<OrderModel> SoftDelete(Order entity,string role)
+        public override async Task<OrderModel> SoftDelete(Order entity, string role)
         {
-            role = role?.Trim().ToLowerInvariant()?? throw new UserException("Invalid role.");
+            role = role?.Trim().ToLowerInvariant() ?? throw new UserException("Invalid role.");
 
             if (role == UserRoles.Salesperson ||
                 role == UserRoles.Technician ||
@@ -47,7 +47,7 @@ namespace eAutoShop.Services.StateMachineService.OrderStateMachine
         {
             var list = await base.AllowedActions();
 
-         
+
             list.Add(nameof(SoftDelete));
 
             return list;

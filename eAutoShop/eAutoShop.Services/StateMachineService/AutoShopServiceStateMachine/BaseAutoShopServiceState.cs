@@ -19,7 +19,7 @@ namespace eAutoShop.Services.StateMachineService.AutoShopServiceStateMachine
         protected readonly IMapper _mapper;
         protected readonly IServiceProvider _serviceProvider;
 
-        public BaseAutoShopServiceState(AutoShopContext context,IMapper mapper,IServiceProvider serviceProvider)
+        public BaseAutoShopServiceState(AutoShopContext context, IMapper mapper, IServiceProvider serviceProvider)
         {
             _context = context;
             _mapper = mapper;
@@ -31,7 +31,7 @@ namespace eAutoShop.Services.StateMachineService.AutoShopServiceStateMachine
             throw new UserException("Action not allowed.");
         }
 
-        public virtual async Task<AutoShopServiceModel> Update(AutoShopService entity,AutoShopServiceUpdateRequest request)
+        public virtual async Task<AutoShopServiceModel> Update(AutoShopService entity, AutoShopServiceUpdateRequest request)
         {
             throw new UserException("Action not allowed.");
         }

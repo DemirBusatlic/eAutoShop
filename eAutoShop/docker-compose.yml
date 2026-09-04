@@ -18,11 +18,15 @@ services:
     networks:
       - autoshopnet
     healthcheck:
-     test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'QWElkj132!' -C -Q \"IF DB_ID(N'190081') IS NULL THROW 50000, 'Database not ready', 1; SELECT 1\" >/dev/null 2>&1 || exit 1"]
-     interval: 10s
-     timeout: 5s
-     retries: 20
-     start_period: 60s
+      test:
+        [
+          "CMD-SHELL",
+          "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'QWElkj132!' -C -Q \"IF DB_ID(N'190081') IS NULL THROW 50000, 'Database not ready', 1; SELECT 1\" >/dev/null 2>&1 || exit 1"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 60s
 
   rabbitmq:
     image: rabbitmq:4-management
@@ -47,17 +51,6 @@ services:
       retries: 10
       start_period: 30s
 
-  report-init:
-    image: busybox
-    container_name: eautoshop-report-init
-    command: /bin/sh -c "cp -r /pre-existing-reports/. /reports/"
-    volumes:
-      - ./eAutoShop.HelperApi/Reports:/pre-existing-reports:ro
-      - report-storage:/reports
-    networks:
-      - autoshopnet
-    restart: "no"
-
   eautoshop-api:
     container_name: eautoshop-api
     restart: unless-stopped
@@ -74,6 +67,7 @@ services:
       RABBITMQ_HOST: "rabbitmq"
       RABBITMQ_USERNAME: "guest"
       RABBITMQ_PASSWORD: "guest"
+      REPORTS_PATH: "/app/reports"
     ports:
       - "5236:5236"
     networks:
@@ -83,11 +77,9 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
-      report-init:
-        condition: service_completed_successfully
     volumes:
       - ./eAutoShop.Api/RecommenderModels:/app/RecommenderModels
-      - report-storage:/app/reports
+      - ./eAutoShop.HelperApi/Reports:/app/reports
 
   eautoshop-helperapi:
     container_name: eautoshop-helperapi
@@ -101,6 +93,7 @@ services:
       RABBITMQ_HOST: "rabbitmq"
       RABBITMQ_USERNAME: "guest"
       RABBITMQ_PASSWORD: "guest"
+      REPORTS_PATH: "/app/reports"
     ports:
       - "5233:5233"
     networks:
@@ -110,15 +103,12 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
-      report-init:
-        condition: service_completed_successfully
     volumes:
-      - report-storage:/app/reports
+      - ./eAutoShop.HelperApi/Reports:/app/reports
 
 volumes:
   sql-data:
   rabbitmq-data:
-  report-storage:
 
 networks:
   autoshopnet:

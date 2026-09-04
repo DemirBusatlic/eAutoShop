@@ -10,9 +10,9 @@ using System.Security.Claims;
 namespace eAutoShop.Api.Controllers
 {
     [ApiController]
-    public class StaffReviewController: BaseCRUDController<StaffReviewModel,StaffReviewSearchObject,StaffReviewInsertRequest,StaffReviewUpdateRequest>
+    public class StaffReviewController : BaseCRUDController<StaffReviewModel, StaffReviewSearchObject, StaffReviewInsertRequest, StaffReviewUpdateRequest>
     {
-        public StaffReviewController(ILogger<BaseController<StaffReviewModel, StaffReviewSearchObject>> logger,IStaffReviewService service): base(logger, service)
+        public StaffReviewController(ILogger<BaseController<StaffReviewModel, StaffReviewSearchObject>> logger, IStaffReviewService service) : base(logger, service)
         {
         }
 

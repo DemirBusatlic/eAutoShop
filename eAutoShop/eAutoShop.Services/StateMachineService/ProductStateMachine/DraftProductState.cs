@@ -21,11 +21,11 @@ namespace eAutoShop.Services.StateMachineService.ProductStateMachine
 {
     public class DraftProductState : BaseProductState
     {
-        public DraftProductState(AutoShopContext context,IMapper mapper,IServiceProvider serviceProvider): base(context, mapper, serviceProvider)
+        public DraftProductState(AutoShopContext context, IMapper mapper, IServiceProvider serviceProvider) : base(context, mapper, serviceProvider)
         {
         }
 
-        public override async Task<ProductModel> Update(Product entity,ProductUpdateRequest request)
+        public override async Task<ProductModel> Update(Product entity, ProductUpdateRequest request)
         {
             if (request.Name != null)
             {
@@ -88,7 +88,7 @@ namespace eAutoShop.Services.StateMachineService.ProductStateMachine
 
             entity.Discount = discount;
 
-            entity.DiscountedPrice = discount > 0? Math.Round(entity.Price * (1 - discount), 2): entity.Price;
+            entity.DiscountedPrice = discount > 0 ? Math.Round(entity.Price * (1 - discount), 2) : entity.Price;
 
             await _context.SaveChangesAsync();
 

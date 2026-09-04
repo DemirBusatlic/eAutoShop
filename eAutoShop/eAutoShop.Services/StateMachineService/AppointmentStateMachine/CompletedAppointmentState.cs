@@ -12,11 +12,11 @@ namespace eAutoShop.Services.StateMachineService.AppointmentStateMachine
 {
     public class CompletedAppointmentState : BaseAppointmentState
     {
-        public CompletedAppointmentState(AutoShopContext context,IMapper mapper,IServiceProvider serviceProvider): base(context, mapper, serviceProvider)
+        public CompletedAppointmentState(AutoShopContext context, IMapper mapper, IServiceProvider serviceProvider) : base(context, mapper, serviceProvider)
         {
         }
 
-        public override async Task<AppointmentModel> SoftDelete(Appointment entity,string role)
+        public override async Task<AppointmentModel> SoftDelete(Appointment entity, string role)
         {
             if (role == UserRoles.Customer)
             {

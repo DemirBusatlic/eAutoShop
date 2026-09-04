@@ -12,16 +12,16 @@ using System.Security.Claims;
 
 namespace eAutoShop.Services.Services
 {
-    public class StaffReviewService: BaseCRUDService<StaffReviewModel,StaffReview,StaffReviewSearchObject,StaffReviewInsertRequest,StaffReviewUpdateRequest>,IStaffReviewService
+    public class StaffReviewService : BaseCRUDService<StaffReviewModel, StaffReview, StaffReviewSearchObject, StaffReviewInsertRequest, StaffReviewUpdateRequest>, IStaffReviewService
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public StaffReviewService(AutoShopContext context,IMapper mapper,IHttpContextAccessor httpContextAccessor): base(context, mapper)
+        public StaffReviewService(AutoShopContext context, IMapper mapper, IHttpContextAccessor httpContextAccessor) : base(context, mapper)
         {
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public override IQueryable<StaffReview> AddInclude(IQueryable<StaffReview> query,StaffReviewSearchObject? search = null)
+        public override IQueryable<StaffReview> AddInclude(IQueryable<StaffReview> query, StaffReviewSearchObject? search = null)
         {
             query = query
                 .Include(x => x.User)
@@ -30,7 +30,7 @@ namespace eAutoShop.Services.Services
             return base.AddInclude(query, search);
         }
 
-        public override IQueryable<StaffReview> AddFilter(IQueryable<StaffReview> query,StaffReviewSearchObject? search = null)
+        public override IQueryable<StaffReview> AddFilter(IQueryable<StaffReview> query, StaffReviewSearchObject? search = null)
         {
             if (search?.Rating != null)
             {
@@ -57,7 +57,7 @@ namespace eAutoShop.Services.Services
             return base.AddFilter(query, search);
         }
 
-        public override async Task BeforeInsert(StaffReview db,StaffReviewInsertRequest insert)
+        public override async Task BeforeInsert(StaffReview db, StaffReviewInsertRequest insert)
         {
             if (insert.UserId == null)
             {
@@ -76,7 +76,7 @@ namespace eAutoShop.Services.Services
                 throw new UserException("Ne možete ocijeniti zaposlenika iz tuđe rezervacije.");
             }
 
-            if (!string.Equals(appointment.State,"completed",StringComparison.OrdinalIgnoreCase))
+            if (!string.Equals(appointment.State, "completed", StringComparison.OrdinalIgnoreCase))
             {
                 throw new UserException("Zaposlenika možete ocijeniti tek nakon završene rezervacije.");
             }
@@ -105,7 +105,7 @@ namespace eAutoShop.Services.Services
         {
             EnsureOwnerOrManager(db);
 
-            db.Comment = string.IsNullOrWhiteSpace(update.Comment)? null : update.Comment.Trim();
+            db.Comment = string.IsNullOrWhiteSpace(update.Comment) ? null : update.Comment.Trim();
 
             await base.BeforeUpdate(db, update);
         }
@@ -117,11 +117,11 @@ namespace eAutoShop.Services.Services
             await base.BeforeRemove(db);
         }
 
-        private ClaimsPrincipal CurrentUser =>_httpContextAccessor.HttpContext?.User ?? throw new UserException("Unauthorized.");
+        private ClaimsPrincipal CurrentUser => _httpContextAccessor.HttpContext?.User ?? throw new UserException("Unauthorized.");
 
         private int GetCurrentUserId()
         {
-            var value = CurrentUser.FindFirst(ClaimTypes.NameIdentifier) ?.Value;
+            var value = CurrentUser.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             if (!int.TryParse(value, out var userId))
             {
@@ -133,7 +133,7 @@ namespace eAutoShop.Services.Services
 
         private void EnsureOwnerOrManager(StaffReview review)
         {
-            var role = CurrentUser.FindFirst(ClaimTypes.Role)?.Value ?.Trim().ToLowerInvariant();
+            var role = CurrentUser.FindFirst(ClaimTypes.Role)?.Value?.Trim().ToLowerInvariant();
 
             if (role == UserRoles.Manager)
             {

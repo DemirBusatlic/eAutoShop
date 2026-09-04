@@ -17,17 +17,17 @@ using System.Threading.Tasks;
 
 namespace eAutoShop.Services.Services
 {
-    public class ProductsService: BaseCRUDService<ProductModel, Product, ProductSearchObject, ProductInsertRequest, ProductUpdateRequest>,IProductService
+    public class ProductsService : BaseCRUDService<ProductModel, Product, ProductSearchObject, ProductInsertRequest, ProductUpdateRequest>, IProductService
     {
         private readonly BaseProductState _baseProductState;
 
-        public ProductsService(AutoShopContext context,IMapper mapper,BaseProductState baseProductState)
+        public ProductsService(AutoShopContext context, IMapper mapper, BaseProductState baseProductState)
             : base(context, mapper)
         {
             _baseProductState = baseProductState;
         }
 
-        public override IQueryable<Product> AddInclude(IQueryable<Product> query,ProductSearchObject? search = null)
+        public override IQueryable<Product> AddInclude(IQueryable<Product> query, ProductSearchObject? search = null)
         {
             query = query
                 .Include(x => x.ProductCategory)
@@ -36,7 +36,7 @@ namespace eAutoShop.Services.Services
             return query;
         }
 
-        public override IQueryable<Product> AddFilter(IQueryable<Product> query,ProductSearchObject? search = null)
+        public override IQueryable<Product> AddFilter(IQueryable<Product> query, ProductSearchObject? search = null)
         {
             if (!string.IsNullOrWhiteSpace(search?.Starts))
             {
@@ -105,7 +105,7 @@ namespace eAutoShop.Services.Services
             return await state.Insert(request);
         }
 
-        public override async Task<ProductModel> Update(int id,ProductUpdateRequest request)
+        public override async Task<ProductModel> Update(int id, ProductUpdateRequest request)
         {
             var entity = await _context.Products
                 .Include(x => x.CarModels)

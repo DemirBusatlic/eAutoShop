@@ -8,11 +8,11 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace eAutoShop.Api.Controllers
 {
-    
+
     [ApiController]
-    public class RoleController : BaseCRUDController<RoleModel,RoleSearchObject,RoleInsertRequest,RoleUpdateRequest>
+    public class RoleController : BaseCRUDController<RoleModel, RoleSearchObject, RoleInsertRequest, RoleUpdateRequest>
     {
-        public RoleController(IRoleService service, ILogger<BaseCRUDController<RoleModel, RoleSearchObject, RoleInsertRequest, RoleUpdateRequest>> logger) : base(logger,service)
+        public RoleController(IRoleService service, ILogger<BaseCRUDController<RoleModel, RoleSearchObject, RoleInsertRequest, RoleUpdateRequest>> logger) : base(logger, service)
         {
         }
     }

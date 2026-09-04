@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:eautoshop_desktop/providers/base_provider.dart';
+import 'package:eautoshop_desktop/services/report_notification_service.dart';
 import 'package:eautoshop_desktop/utilities/custom_exception.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
@@ -9,6 +10,9 @@ class AuthProvider extends BaseProvider<Object?, Object?> {
   AuthProvider() : super('AuthToken');
 
   static const _desktopRoles = {'manager', 'salesperson', 'technician'};
+
+  final ReportNotificationService _reportNotificationService =
+      ReportNotificationService();
 
   bool _isLoggedIn = false;
   bool _isLoading = false;
@@ -24,6 +28,9 @@ class AuthProvider extends BaseProvider<Object?, Object?> {
   bool get isSalesperson => _currentRole == 'salesperson';
   bool get isTechnician => _currentRole == 'technician';
 
+  ReportNotificationService get reportNotificationService =>
+      _reportNotificationService;
+
   Future<void> initialize() async {
     final token = await storage.read(key: 'jwt_token');
 
@@ -33,9 +40,13 @@ class AuthProvider extends BaseProvider<Object?, Object?> {
 
     try {
       final user = await _getCurrentUser();
+
       _applyAuthenticatedUser(user);
+
+      await _startReportNotificationConnection(token);
     } catch (error) {
       debugPrint('Existing desktop session is not valid: $error');
+
       await _clearLocalSession(notify: false);
     }
   }
@@ -58,6 +69,7 @@ class AuthProvider extends BaseProvider<Object?, Object?> {
       }
 
       final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
+
       final token = responseBody['token']?.toString();
 
       if (token == null || token.trim().isEmpty) {
@@ -68,14 +80,19 @@ class AuthProvider extends BaseProvider<Object?, Object?> {
 
       try {
         final user = await _getCurrentUser();
+
         _applyAuthenticatedUser(user);
+
+        await _startReportNotificationConnection(token);
       } on CustomException {
         await _revokeTokenBestEffort();
         await _clearLocalSession();
         rethrow;
       } catch (error) {
         await _clearLocalSession();
+
         debugPrint('Loading current desktop user failed: $error');
+
         throw const CustomException(
           'Prijava je uspjela, ali podaci korisnika nisu učitani.',
         );
@@ -84,8 +101,10 @@ class AuthProvider extends BaseProvider<Object?, Object?> {
       rethrow;
     } catch (error) {
       debugPrint('Desktop login failed: $error');
+
       throw const CustomException(
-        'Nije moguće pristupiti serveru. Provjerite da li je API pokrenut.',
+        'Nije moguće pristupiti serveru. '
+        'Provjerite da li je API pokrenut.',
       );
     } finally {
       _setLoading(false);
@@ -115,14 +134,25 @@ class AuthProvider extends BaseProvider<Object?, Object?> {
 
     if (role == null || !_desktopRoles.contains(role)) {
       throw const CustomException(
-        'Ovaj korisnički nalog nema pristup desktop aplikaciji.',
+        'Ovaj korisnički nalog nema pristup '
+        'desktop aplikaciji.',
       );
     }
 
     _currentRole = role;
     _currentUsername = user['username']?.toString();
+
     _isLoggedIn = true;
+
     notifyListeners();
+  }
+
+  Future<void> _startReportNotificationConnection(String token) async {
+    try {
+      await _reportNotificationService.initConnection(token);
+    } catch (error) {
+      debugPrint('Report SignalR connection failed: $error');
+    }
   }
 
   Future<void> _revokeTokenBestEffort() async {
@@ -143,7 +173,10 @@ class AuthProvider extends BaseProvider<Object?, Object?> {
   }
 
   Future<void> _clearLocalSession({bool notify = true}) async {
+    await _reportNotificationService.stopConnection();
+
     await storage.delete(key: 'jwt_token');
+
     _isLoggedIn = false;
     _currentRole = null;
     _currentUsername = null;
@@ -159,6 +192,7 @@ class AuthProvider extends BaseProvider<Object?, Object?> {
     }
 
     _isLoading = value;
+
     notifyListeners();
   }
 }

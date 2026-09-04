@@ -8,10 +8,10 @@ using System.Threading.Tasks;
 
 namespace eAutoShop.Services.Interfaces
 {
-        public interface IService<T, TSearch> where TSearch : class
-        {
-            Task<PageResult<T>> Get(TSearch? search = null);
-            Task<T> GetById(int id);
-        }
-    
+    public interface IService<T, TSearch> where TSearch : class
+    {
+        Task<PageResult<T>> Get(TSearch? search = null);
+        Task<T> GetById(int id);
+    }
+
 }

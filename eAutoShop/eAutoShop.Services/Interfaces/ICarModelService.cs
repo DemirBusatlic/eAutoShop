@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace eAutoShop.Services.Interfaces
 {
-    public interface ICarModelService :IService<CarModelModel,CarModelSearchObject>
+    public interface ICarModelService : IService<CarModelModel, CarModelSearchObject>
     {
         Task<PageResult<CarModelGetByManufacturerModel>> GetByManufacturerAll();
     }

@@ -14,7 +14,7 @@ namespace eAutoShop.Services.StateMachineService.AutoShopServiceStateMachine
 {
     public class InitialAutoShopServiceState : BaseAutoShopServiceState
     {
-        public InitialAutoShopServiceState(AutoShopContext context,IMapper mapper,IServiceProvider serviceProvider): base(context, mapper, serviceProvider)
+        public InitialAutoShopServiceState(AutoShopContext context, IMapper mapper, IServiceProvider serviceProvider) : base(context, mapper, serviceProvider)
         {
         }
 
@@ -33,9 +33,9 @@ namespace eAutoShop.Services.StateMachineService.AutoShopServiceStateMachine
 
             entity.Discount = discount;
 
-            entity.DiscountedPrice = discount > 0? Math.Round(entity.Price * (1 - discount), 2) : entity.Price;
+            entity.DiscountedPrice = discount > 0 ? Math.Round(entity.Price * (1 - discount), 2) : entity.Price;
 
-            entity.Image = !string.IsNullOrWhiteSpace(request.ImageData)? Convert.FromBase64String(request.ImageData): Array.Empty<byte>();
+            entity.Image = !string.IsNullOrWhiteSpace(request.ImageData) ? Convert.FromBase64String(request.ImageData) : Array.Empty<byte>();
 
             _context.AutoShopServices.Add(entity);
 

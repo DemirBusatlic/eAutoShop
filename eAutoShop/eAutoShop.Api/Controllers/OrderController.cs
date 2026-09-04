@@ -11,9 +11,9 @@ namespace eAutoShop.Api.Controllers
 {
 
     [ApiController]
-    public class OrderController : BaseCRUDController<OrderModel,OrderSearchObject,OrderInsertRequest,OrderUpdateRequest>
+    public class OrderController : BaseCRUDController<OrderModel, OrderSearchObject, OrderInsertRequest, OrderUpdateRequest>
     {
-        public OrderController(IOrderService service,ILogger<BaseCRUDController<OrderModel,OrderSearchObject,OrderInsertRequest,OrderUpdateRequest>> logger) : base(logger, service)
+        public OrderController(IOrderService service, ILogger<BaseCRUDController<OrderModel, OrderSearchObject, OrderInsertRequest, OrderUpdateRequest>> logger) : base(logger, service)
         {
         }
 
@@ -30,7 +30,7 @@ namespace eAutoShop.Api.Controllers
 
         [Authorize(Roles = "manager,salesperson")]
         [HttpPut("Accept/{id}")]
-        public virtual async Task<OrderModel> Accept(int id,OrderAcceptRequest orderAccept)
+        public virtual async Task<OrderModel> Accept(int id, OrderAcceptRequest orderAccept)
         {
             return await (_service as IOrderService)!.Accept(id, orderAccept);
         }
@@ -69,7 +69,7 @@ namespace eAutoShop.Api.Controllers
         {
             return await (_service as IOrderService)!.SoftDelete(id);
         }
- 
+
 
         [Authorize]
         [HttpGet("AllowedActions/{id}")]

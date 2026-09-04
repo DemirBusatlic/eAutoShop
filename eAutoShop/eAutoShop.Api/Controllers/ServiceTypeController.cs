@@ -7,10 +7,10 @@ using Microsoft.AspNetCore.Mvc;
 namespace eAutoShop.Api.Controllers
 {
     [ApiController]
-    public class ServiceTypeController: BaseController<ServiceTypeModel, ServiceTypeSearchObject>
+    public class ServiceTypeController : BaseController<ServiceTypeModel, ServiceTypeSearchObject>
     {
-        public ServiceTypeController(IServiceTypeService service, ILogger<BaseController<ServiceTypeModel, ServiceTypeSearchObject>> logger) : base(logger, service) 
-        { 
+        public ServiceTypeController(IServiceTypeService service, ILogger<BaseController<ServiceTypeModel, ServiceTypeSearchObject>> logger) : base(logger, service)
+        {
 
         }
     }

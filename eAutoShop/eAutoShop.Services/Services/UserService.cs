@@ -232,12 +232,12 @@ namespace eAutoShop.Services.Services
 
             if (request.Address != null)
             {
-                entity.Address = string.IsNullOrWhiteSpace(request.Address)? null: request.Address.Trim();
+                entity.Address = string.IsNullOrWhiteSpace(request.Address) ? null : request.Address.Trim();
             }
 
             if (request.PostalCode != null)
             {
-                entity.PostalCode = string.IsNullOrWhiteSpace(request.PostalCode)? null: request.PostalCode.Trim();
+                entity.PostalCode = string.IsNullOrWhiteSpace(request.PostalCode) ? null : request.PostalCode.Trim();
             }
 
             if (request.CityId.HasValue)

@@ -21,7 +21,7 @@ namespace eAutoShop.Services.StateMachineService.ProductStateMachine
 
         protected readonly IServiceProvider _serviceProvider;
 
-        public BaseProductState(AutoShopContext context,IMapper mapper,IServiceProvider serviceProvider)
+        public BaseProductState(AutoShopContext context, IMapper mapper, IServiceProvider serviceProvider)
         {
             _context = context;
             _mapper = mapper;
@@ -33,7 +33,7 @@ namespace eAutoShop.Services.StateMachineService.ProductStateMachine
             throw new UserException("Action not allowed.");
         }
 
-        public virtual Task<ProductModel> Update(Product entity,ProductUpdateRequest request)
+        public virtual Task<ProductModel> Update(Product entity, ProductUpdateRequest request)
         {
             throw new UserException("Action not allowed.");
         }
@@ -48,7 +48,7 @@ namespace eAutoShop.Services.StateMachineService.ProductStateMachine
             throw new UserException("Action not allowed.");
         }
 
-        public virtual Task<bool> Delete( Product entity)
+        public virtual Task<bool> Delete(Product entity)
         {
             throw new UserException("Action not allowed.");
         }
@@ -64,12 +64,12 @@ namespace eAutoShop.Services.StateMachineService.ProductStateMachine
 
             return key switch
             {
-                null or ProductStates.Initial =>_serviceProvider.GetRequiredService<InitialProductState>(),
+                null or ProductStates.Initial => _serviceProvider.GetRequiredService<InitialProductState>(),
 
                 ProductStates.Draft => _serviceProvider.GetRequiredService<DraftProductState>(),
 
                 ProductStates.Active => _serviceProvider.GetRequiredService<ActiveProductState>(),
-                _=> throw new UserException($"Unknown product state: '{state}'")
+                _ => throw new UserException($"Unknown product state: '{state}'")
             };
         }
     }

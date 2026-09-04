@@ -8,9 +8,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace eAutoShop.Api.Controllers
 {
-   
+
     [ApiController]
-    public class CityController : BaseCRUDController<CityModel,CitySearchObject,CityInsertRequest,CityUpdateRequest>
+    public class CityController : BaseCRUDController<CityModel, CitySearchObject, CityInsertRequest, CityUpdateRequest>
     {
         public CityController(ICityService service, ILogger<BaseCRUDController<CityModel, CitySearchObject, CityInsertRequest, CityUpdateRequest>> logger) : base(logger, service)
         {

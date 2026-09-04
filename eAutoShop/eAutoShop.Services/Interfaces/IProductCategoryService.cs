@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace eAutoShop.Services.Interfaces
 {
-    public interface IProductCategoryService:IService<ProductCategoryModel,ProductCategorySearchObject>
+    public interface IProductCategoryService : IService<ProductCategoryModel, ProductCategorySearchObject>
     {
     }
 }

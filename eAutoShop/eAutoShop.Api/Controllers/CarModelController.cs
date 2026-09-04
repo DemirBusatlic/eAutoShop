@@ -10,7 +10,7 @@ namespace eAutoShop.Api.Controllers
     public class CarModelController : BaseController<CarModelModel, CarModelSearchObject>
     {
         public CarModelController(ICarModelService service, ILogger<BaseController<CarModelModel, CarModelSearchObject>> logger) : base(logger, service)
-        { 
+        {
         }
 
         [HttpGet("/GetByManufacturerAll")]

@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace eAutoShop.Services.Interfaces
 {
-    public  interface IAuthTokenService : IBaseCRUDService<AuthTokenModel,AuthTokenSearchObject,AuthTokenInsertRequest,AuthTokenUpdateRequest>
+    public interface IAuthTokenService : IBaseCRUDService<AuthTokenModel, AuthTokenSearchObject, AuthTokenInsertRequest, AuthTokenUpdateRequest>
     {
         Task<string> Login(string username, string passowrd);
         Task RevokeToken(string token);

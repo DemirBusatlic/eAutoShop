@@ -17,7 +17,7 @@ namespace eAutoShop.HelperApi.Services
         private IConnection? _connection;
         private IChannel? _channel;
 
-        public RabbitMqListener(IConnectionFactory connectionFactory,IServiceProvider serviceProvider)
+        public RabbitMqListener(IConnectionFactory connectionFactory, IServiceProvider serviceProvider)
         {
             _connectionFactory = connectionFactory;
             _serviceProvider = serviceProvider;
@@ -76,7 +76,7 @@ namespace eAutoShop.HelperApi.Services
                 var message = Encoding.UTF8.GetString(body);
 
                 var reportRequest = JsonSerializer.Deserialize<ReportRequest>(message);
-                var productreportRequest= JsonSerializer.Deserialize<ProductReportRequest>(message);
+                var productreportRequest = JsonSerializer.Deserialize<ProductReportRequest>(message);
 
                 if (reportRequest == null)
                     return;

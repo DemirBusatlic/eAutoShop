@@ -29,14 +29,14 @@ namespace eAutoShop.Services.Services
                 .ToListAsync();
 
             var result = manufacturers.Select(manufacturer => new CarModelGetByManufacturerModel
-                {
-                    Manufacturer = _mapper.Map<CarManufacturerModel>(manufacturer),
+            {
+                Manufacturer = _mapper.Map<CarManufacturerModel>(manufacturer),
 
-                    Models = _mapper.Map<List<CarModelModel>>(
+                Models = _mapper.Map<List<CarModelModel>>(
                         manufacturer.CarModels
                             .OrderBy(x => x.Name)
                             .ToList())
-                }).ToList();
+            }).ToList();
 
             return new PageResult<CarModelGetByManufacturerModel>
             {

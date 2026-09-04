@@ -1,2 +1,13 @@
 ProductId,ProductName,Category,Price,Discount,DiscountedPrice,TotalSold,TotalRevenue
-5,Alu Felga R17 Srebrna,Rims / Wheels,120,0,05,114,0,0,00
+1,Sonax Klima Clean (bomba),Car Care / Cosmetics,12.5,0,12.5,1,12.50
+2,Premium Wiper Blade 22",Wipers,9.99,0.05,9.49,5,47.45
+3,Kožna Ručica Mjenjača,Gear Knobs & Interior Trim,19.95,0,19.95,1,19.95
+4,Polishing Paste Medium Cut 250ml,Polishing Compounds / Pastes,15,0.1,13.5,0,0.00
+5,Alu Felga R17 Srebrna,Rims / Wheels,120,0.05,114,8,912.00
+6,205/55R16 Ljetna Guma,Tires,60,0.1,54,9,486.00
+7,5W30 Sintetičko Ulje 1L,Fluids & Lubricants,8.5,0,8.5,13,110.50
+8,Kabinski Filter Univerzalni,Filters,12,0,12,4,48.00
+9,Gumene Patosnice Set,Interior Accessories,35,0,35,0,0.00
+10,OBD2 Dijagnostički Skener,Electronics / Diagnostics,49.99,0.2,39.99,1,39.99
+11,195/65R15 Zimska Guma,Tires,55,0.15,46.75,7,327.25
+12,Alu Felga R18 Mat Crna,Rims / Wheels,140,0.1,126,0,0.00

@@ -12,7 +12,7 @@ namespace eAutoShop.Services.StateMachineService.ProductStateMachine
 {
     public class ActiveProductState : BaseProductState
     {
-        public ActiveProductState(AutoShopContext context,IMapper mapper,IServiceProvider serviceProvider): base(context, mapper, serviceProvider)
+        public ActiveProductState(AutoShopContext context, IMapper mapper, IServiceProvider serviceProvider) : base(context, mapper, serviceProvider)
         {
         }
 

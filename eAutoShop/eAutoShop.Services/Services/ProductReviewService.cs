@@ -16,17 +16,17 @@ namespace eAutoShop.Services.Services
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public ProductReviewService(AutoShopContext context, IMapper mapper, IHttpContextAccessor httpContextAccessor): base(context, mapper)
+        public ProductReviewService(AutoShopContext context, IMapper mapper, IHttpContextAccessor httpContextAccessor) : base(context, mapper)
         {
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public override IQueryable<ProductReview> AddInclude(IQueryable<ProductReview> query,ProductReviewSearchObject? search = null)
+        public override IQueryable<ProductReview> AddInclude(IQueryable<ProductReview> query, ProductReviewSearchObject? search = null)
         {
             return base.AddInclude(query.Include(x => x.User).Include(x => x.Product), search);
         }
 
-        public override IQueryable<ProductReview> AddFilter(IQueryable<ProductReview> query,ProductReviewSearchObject? search = null)
+        public override IQueryable<ProductReview> AddFilter(IQueryable<ProductReview> query, ProductReviewSearchObject? search = null)
         {
             if (search?.Rating != null)
                 query = query.Where(x => x.Rating == search.Rating);
@@ -43,7 +43,7 @@ namespace eAutoShop.Services.Services
             return base.AddFilter(query, search);
         }
 
-        public override async Task BeforeInsert(ProductReview db,ProductReviewInsertRequest insert)
+        public override async Task BeforeInsert(ProductReview db, ProductReviewInsertRequest insert)
         {
             if (insert.UserId == null)
             {
@@ -59,12 +59,12 @@ namespace eAutoShop.Services.Services
 
             if (orderItem.Order.CustomerId != insert.UserId.Value)
             {
-                throw new UserException( "Ne možete ocijeniti proizvod iz tuđe narudžbe.");
+                throw new UserException("Ne možete ocijeniti proizvod iz tuđe narudžbe.");
             }
 
             var orderState = orderItem.Order.State;
 
-            var canReview =string.Equals(orderState,"completed",StringComparison.OrdinalIgnoreCase) ||string.Equals(orderState,"delivered",StringComparison.OrdinalIgnoreCase);
+            var canReview = string.Equals(orderState, "completed", StringComparison.OrdinalIgnoreCase) || string.Equals(orderState, "delivered", StringComparison.OrdinalIgnoreCase);
 
             if (!canReview)
             {
@@ -89,7 +89,7 @@ namespace eAutoShop.Services.Services
         public override async Task BeforeUpdate(ProductReview db, ProductReviewUpdateRequest update)
         {
             EnsureOwnerOrManager(db);
-            db.Comment = string.IsNullOrWhiteSpace(update.Comment)? null : update.Comment.Trim();
+            db.Comment = string.IsNullOrWhiteSpace(update.Comment) ? null : update.Comment.Trim();
 
             await base.BeforeUpdate(db, update);
         }
@@ -100,7 +100,7 @@ namespace eAutoShop.Services.Services
             await base.BeforeRemove(db);
         }
 
-        private ClaimsPrincipal CurrentUser =>_httpContextAccessor.HttpContext?.User ?? throw new UserException("Unauthorized.");
+        private ClaimsPrincipal CurrentUser => _httpContextAccessor.HttpContext?.User ?? throw new UserException("Unauthorized.");
 
         private int GetCurrentUserId()
         {

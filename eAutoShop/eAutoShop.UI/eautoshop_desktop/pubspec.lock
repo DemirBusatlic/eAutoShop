@@ -153,6 +153,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.7"
+  csv:
+    dependency: "direct main"
+    description:
+      name: csv
+      sha256: c6aa2679b2a18cb57652920f674488d89712efaf4d3fdf2e537215b35fc19d6c
+      url: "https://pub.dev"
+    source: hosted
+    version: "6.0.0"
   cupertino_icons:
     dependency: "direct main"
     description:
@@ -169,6 +177,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.1.13"
+  equatable:
+    dependency: transitive
+    description:
+      name: equatable
+      sha256: "3bce007a596ff8b3119c45d68aaef631272537c03d30e5d4534dd24bf4c5eaa2"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.1.0"
   fake_async:
     dependency: transitive
     description:
@@ -273,6 +289,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.1"
+  fl_chart:
+    dependency: "direct main"
+    description:
+      name: fl_chart
+      sha256: "74959b99b92b9eebeed1a4049426fd67c4abc3c5a0f4d12e2877097d6a11ae08"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.69.2"
   flutter:
     dependency: "direct main"
     description: flutter
@@ -392,6 +416,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.1.2"
+  intl:
+    dependency: "direct main"
+    description:
+      name: intl
+      sha256: d6f56758b7d3014a48af9701c085700aac781a92a87a62b1333b46d8879661cf
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.19.0"
   io:
     dependency: transitive
     description:
@@ -496,6 +528,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.13.0"
+  message_pack_dart:
+    dependency: transitive
+    description:
+      name: message_pack_dart
+      sha256: "71b9f0ff60e5896e60b337960bb535380d7dba3297b457ac763ccae807385b59"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.1"
   meta:
     dependency: transitive
     description:
@@ -704,6 +744,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.0"
+  signalr_netcore:
+    dependency: "direct main"
+    description:
+      name: signalr_netcore
+      sha256: "8d59dc61284c5ff8aa27c4e3e802fcf782367f06cf42b39d5ded81680b72f8b8"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.4.4"
   sky_engine:
     dependency: transitive
     description: flutter
@@ -733,6 +781,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.10.2"
+  sse:
+    dependency: transitive
+    description:
+      name: sse
+      sha256: a9a804dbde8bfd369da3b4aa241d44d63a6486a97388c54ec166073d88c52302
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.2.0"
+  sse_channel:
+    dependency: transitive
+    description:
+      name: sse_channel
+      sha256: "9aad5d4eef63faf6ecdefb636c0f857bd6f74146d2196087dcf4b17ab5b49b1b"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.1"
   stack_trace:
     dependency: transitive
     description:
@@ -781,6 +845,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.7.12"
+  tuple:
+    dependency: transitive
+    description:
+      name: tuple
+      sha256: a97ce2013f240b2f3807bcbaf218765b6f301c3eff91092bcfa23a039e7dd151
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.2"
   typed_data:
     dependency: transitive
     description:
@@ -789,6 +861,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.4.0"
+  uuid:
+    dependency: transitive
+    description:
+      name: uuid
+      sha256: "9b129329f58692f6e6578329498a8fe9fbe98f090beb764ffbb8ee2eadd01dcd"
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.6.0"
   vector_math:
     dependency: transitive
     description:

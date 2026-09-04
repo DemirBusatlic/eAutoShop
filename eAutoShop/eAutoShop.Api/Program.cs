@@ -1,12 +1,12 @@
 using eAutoShop.Api.Filters;
 using eAutoShop.Api.RabbitMQListener;
 using eAutoShop.Api.SignalR;
-using eAutoShop.Model.Utilities;
 using eAutoShop.Model.Model;
+using eAutoShop.Model.Utilities;
 using eAutoShop.Services;
-using eAutoShop.Services.Mapping;
 using eAutoShop.Services.Database;
 using eAutoShop.Services.Interfaces;
+using eAutoShop.Services.Mapping;
 using eAutoShop.Services.Services;
 using eAutoShop.Services.Services.eAutoShop.Services.Database;
 using eAutoShop.Services.StateMachineService.AppointmentStateMachine;
@@ -16,6 +16,7 @@ using eAutoShop.Services.StateMachineService.ProductStateMachine;
 using Mapster;
 using MapsterMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -90,6 +91,9 @@ builder.Services.AddScoped<CancelledAppointmentState>();
 builder.Services.AddScoped<CompletedAppointmentState>();
 
 builder.Services.AddSignalR();
+
+builder.Services.AddSingleton<IUserIdProvider, UsernameUserIdProvider>();
+
 builder.Services.AddScoped<NotificationService>();
 builder.Services.AddScoped<ReportNotificationService>();
 
@@ -180,19 +184,19 @@ builder.Services.AddAuthentication(options =>
 
 
 
-    OnMessageReceived = context =>
-        {
-            var accessToken = context.Request.Query["access_token"];
-
-            var path = context.HttpContext.Request.Path;
-            if (!string.IsNullOrEmpty(accessToken) &&
-            (path.StartsWithSegments("/chathub") || path.StartsWithSegments("/reportNotificationHub") || path.StartsWithSegments("/notificationHub")))
+        OnMessageReceived = context =>
             {
-                context.Token = accessToken;
-            }
+                var accessToken = context.Request.Query["access_token"];
 
-            return Task.CompletedTask;
-        }
+                var path = context.HttpContext.Request.Path;
+                if (!string.IsNullOrEmpty(accessToken) &&
+                (path.StartsWithSegments("/chathub") || path.StartsWithSegments("/reportNotificationHub") || path.StartsWithSegments("/notificationHub")))
+                {
+                    context.Token = accessToken;
+                }
+
+                return Task.CompletedTask;
+            }
     };
 });
 builder.Services.AddControllers(x =>
@@ -247,7 +251,7 @@ builder.Services.AddDbContext<AutoShopContext>(options => options.UseSqlServer(c
 
 TypeAdapterConfig.GlobalSettings.Scan(typeof(OrderMappingConfig).Assembly);
 
-TypeAdapterConfig.GlobalSettings.ForType<Appointment, AppointmentModel>().Map(destination => destination.HasStaffReview,source => source.StaffReview != null);
+TypeAdapterConfig.GlobalSettings.ForType<Appointment, AppointmentModel>().Map(destination => destination.HasStaffReview, source => source.StaffReview != null);
 
 builder.Services.AddSingleton(TypeAdapterConfig.GlobalSettings);
 
@@ -286,7 +290,7 @@ using (var scope = app.Services.CreateScope())
     }
     catch (Exception ex)
     {
-        app.Logger.LogWarning(ex,"Model preporuka nije treniran. API će nastaviti s radom.");
+        app.Logger.LogWarning(ex, "Model preporuka nije treniran. API će nastaviti s radom.");
     }
 }
 

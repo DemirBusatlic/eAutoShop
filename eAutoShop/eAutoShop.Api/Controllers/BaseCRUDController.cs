@@ -8,11 +8,11 @@ namespace eAutoShop.Api.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class BaseCRUDController<T, TSearch, TInsert, TUpdate>: BaseController<T, TSearch> where T : class where TSearch : BaseSearchObject, new()where TInsert : class where TUpdate : class
+    public class BaseCRUDController<T, TSearch, TInsert, TUpdate> : BaseController<T, TSearch> where T : class where TSearch : BaseSearchObject, new() where TInsert : class where TUpdate : class
     {
         protected readonly IBaseCRUDService<T, TSearch, TInsert, TUpdate> _crudService;
 
-        public BaseCRUDController(ILogger<BaseController<T, TSearch>> logger,IBaseCRUDService<T, TSearch, TInsert, TUpdate> service): base(logger, service)
+        public BaseCRUDController(ILogger<BaseController<T, TSearch>> logger, IBaseCRUDService<T, TSearch, TInsert, TUpdate> service) : base(logger, service)
         {
             _crudService = service;
         }

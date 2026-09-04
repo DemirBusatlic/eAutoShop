@@ -16,23 +16,23 @@ using System.Threading.Tasks;
 
 namespace eAutoShop.Services.Services
 {
-    public class AutoShopServiceService: BaseCRUDService<AutoShopServiceModel, AutoShopService, AutoShopServiceSearchObject, AutoShopServiceInsertRequest, AutoShopServiceUpdateRequest>, IAutoShopServiceService
+    public class AutoShopServiceService : BaseCRUDService<AutoShopServiceModel, AutoShopService, AutoShopServiceSearchObject, AutoShopServiceInsertRequest, AutoShopServiceUpdateRequest>, IAutoShopServiceService
     {
         private readonly BaseAutoShopServiceState _baseAutoShopServiceState;
 
-        public AutoShopServiceService(AutoShopContext context,IMapper mapper,BaseAutoShopServiceState baseAutoShopServiceState) : base(context, mapper)
+        public AutoShopServiceService(AutoShopContext context, IMapper mapper, BaseAutoShopServiceState baseAutoShopServiceState) : base(context, mapper)
         {
             _baseAutoShopServiceState = baseAutoShopServiceState;
         }
 
-        public override IQueryable<AutoShopService> AddInclude(IQueryable<AutoShopService> query,AutoShopServiceSearchObject? search = null)
+        public override IQueryable<AutoShopService> AddInclude(IQueryable<AutoShopService> query, AutoShopServiceSearchObject? search = null)
         {
             query = query.Include(x => x.ServiceType);
 
             return base.AddInclude(query, search);
         }
 
-        public override IQueryable<AutoShopService> AddFilter(IQueryable<AutoShopService> query,AutoShopServiceSearchObject? search = null)
+        public override IQueryable<AutoShopService> AddFilter(IQueryable<AutoShopService> query, AutoShopServiceSearchObject? search = null)
         {
             if (search != null)
             {
@@ -69,7 +69,7 @@ namespace eAutoShop.Services.Services
 
         public override async Task<AutoShopServiceModel> Insert(AutoShopServiceInsertRequest request)
         {
-            if (request.ServiceTypeId <= 0 ||string.IsNullOrWhiteSpace(request.Name) ||request.Price <= 0 || string.IsNullOrWhiteSpace(request.Duration))
+            if (request.ServiceTypeId <= 0 || string.IsNullOrWhiteSpace(request.Name) || request.Price <= 0 || string.IsNullOrWhiteSpace(request.Duration))
             {
                 throw new UserException("Please insert all required service properties.");
             }

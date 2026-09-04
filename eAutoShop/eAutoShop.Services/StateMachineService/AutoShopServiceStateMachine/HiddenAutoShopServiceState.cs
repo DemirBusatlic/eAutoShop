@@ -14,15 +14,15 @@ namespace eAutoShop.Services.StateMachineService.AutoShopServiceStateMachine
 {
     public class HiddenAutoShopServiceState : BaseAutoShopServiceState
     {
-        public HiddenAutoShopServiceState(AutoShopContext context,IMapper mapper,IServiceProvider serviceProvider): base(context, mapper, serviceProvider)
+        public HiddenAutoShopServiceState(AutoShopContext context, IMapper mapper, IServiceProvider serviceProvider) : base(context, mapper, serviceProvider)
         {
         }
 
-        public override async Task<AutoShopServiceModel> Update(AutoShopService entity,AutoShopServiceUpdateRequest request)
+        public override async Task<AutoShopServiceModel> Update(AutoShopService entity, AutoShopServiceUpdateRequest request)
         {
             if (request.ImageData != null)
             {
-                entity.Image = !string.IsNullOrWhiteSpace(request.ImageData)? Convert.FromBase64String(request.ImageData) : Array.Empty<byte>();
+                entity.Image = !string.IsNullOrWhiteSpace(request.ImageData) ? Convert.FromBase64String(request.ImageData) : Array.Empty<byte>();
             }
 
             _mapper.Map(request, entity);

@@ -23,7 +23,7 @@ namespace eAutoShop.Services.Services
         private readonly AutoShopContext _context;
         private readonly IMapper _mapper;
 
-        public StripeService(IOptions<StripeSettings> stripeSettings,AutoShopContext context,IMapper mapper)
+        public StripeService(IOptions<StripeSettings> stripeSettings, AutoShopContext context, IMapper mapper)
         {
             _stripeSettings = stripeSettings.Value;
             _context = context;
@@ -32,7 +32,7 @@ namespace eAutoShop.Services.Services
             StripeConfiguration.ApiKey = _stripeSettings.SecretKey;
         }
 
-        public async Task CreateRefundAsync(string paymentIntentId,string idempotencyKey)
+        public async Task CreateRefundAsync(string paymentIntentId, string idempotencyKey)
         {
             if (string.IsNullOrWhiteSpace(paymentIntentId))
             {
@@ -142,9 +142,9 @@ namespace eAutoShop.Services.Services
             };
         }
 
-        public async Task<OrderModel> VerifyPayment(int orderId,int customerId)
+        public async Task<OrderModel> VerifyPayment(int orderId, int customerId)
         {
-            var order = await _context.Orders.Include(x => x.Customer).Include(x => x.City).FirstOrDefaultAsync(x => x.Id == orderId)?? throw new UserException("Order not found.");
+            var order = await _context.Orders.Include(x => x.Customer).Include(x => x.City).FirstOrDefaultAsync(x => x.Id == orderId) ?? throw new UserException("Order not found.");
 
             if (order.CustomerId != customerId)
             {

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace eAutoShop.Services.Interfaces
 {
-    public interface IBaseCRUDService<T, TSearch, TInsert, TUpdate>: IService<T, TSearch>where T : class where TSearch : BaseSearchObject, new()where TInsert : class where TUpdate : class
+    public interface IBaseCRUDService<T, TSearch, TInsert, TUpdate> : IService<T, TSearch> where T : class where TSearch : BaseSearchObject, new() where TInsert : class where TUpdate : class
     {
         Task<T> Insert(TInsert insert);
 

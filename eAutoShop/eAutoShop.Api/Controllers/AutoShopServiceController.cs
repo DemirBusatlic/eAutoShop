@@ -11,11 +11,11 @@ namespace eAutoShop.Api.Controllers
     [ApiController]
     [Route("[controller]")]
     [Authorize]
-    public class AutoShopServiceController: BaseCRUDController<AutoShopServiceModel,AutoShopServiceSearchObject,AutoShopServiceInsertRequest,AutoShopServiceUpdateRequest>
+    public class AutoShopServiceController : BaseCRUDController<AutoShopServiceModel, AutoShopServiceSearchObject, AutoShopServiceInsertRequest, AutoShopServiceUpdateRequest>
     {
         private readonly IAutoShopServiceService _autoShopServiceService;
 
-        public AutoShopServiceController(ILogger<BaseController<AutoShopServiceModel, AutoShopServiceSearchObject>> logger,IAutoShopServiceService service): base(logger, service)
+        public AutoShopServiceController(ILogger<BaseController<AutoShopServiceModel, AutoShopServiceSearchObject>> logger, IAutoShopServiceService service) : base(logger, service)
         {
             _autoShopServiceService = service;
         }
@@ -41,5 +41,5 @@ namespace eAutoShop.Api.Controllers
             return await _autoShopServiceService.AllowedActions(id);
         }
     }
-   
+
 }

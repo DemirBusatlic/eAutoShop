@@ -15,7 +15,7 @@ namespace eAutoShop.Services.StateMachineService.ProductStateMachine
 {
     public class InitialProductState : BaseProductState
     {
-        public InitialProductState(AutoShopContext context,IMapper mapper,IServiceProvider serviceProvider): base(context, mapper, serviceProvider)
+        public InitialProductState(AutoShopContext context, IMapper mapper, IServiceProvider serviceProvider) : base(context, mapper, serviceProvider)
         {
         }
 
@@ -34,7 +34,7 @@ namespace eAutoShop.Services.StateMachineService.ProductStateMachine
 
             entity.Discount = discount;
 
-            entity.DiscountedPrice = discount > 0? Math.Round(entity.Price * (1 - discount), 2): entity.Price;
+            entity.DiscountedPrice = discount > 0 ? Math.Round(entity.Price * (1 - discount), 2) : entity.Price;
 
             entity.CarModels = new List<CarModel>();
 
@@ -42,7 +42,7 @@ namespace eAutoShop.Services.StateMachineService.ProductStateMachine
 
             if (request.CarModelIds != null && request.CarModelIds.Any())
             {
-                await SetProductCarModels( entity, request.CarModelIds);
+                await SetProductCarModels(entity, request.CarModelIds);
             }
 
             await _context.SaveChangesAsync();
@@ -50,7 +50,7 @@ namespace eAutoShop.Services.StateMachineService.ProductStateMachine
             return _mapper.Map<ProductModel>(entity);
         }
 
-        internal async Task SetProductCarModels(Product product,List<int> carModelIds)
+        internal async Task SetProductCarModels(Product product, List<int> carModelIds)
         {
             carModelIds ??= new List<int>();
 
