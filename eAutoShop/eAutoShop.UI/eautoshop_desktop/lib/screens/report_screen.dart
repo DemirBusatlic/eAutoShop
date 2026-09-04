@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'dart:typed_data';
 
 import 'package:eautoshop_desktop/models/product/product.dart';
 import 'package:eautoshop_desktop/models/product_category/product_category.dart';
@@ -15,6 +16,7 @@ import 'package:eautoshop_desktop/providers/product_provider.dart';
 import 'package:eautoshop_desktop/providers/report_provider.dart';
 import 'package:eautoshop_desktop/services/report_notification_service.dart';
 import 'package:eautoshop_desktop/utilities/custom_exception.dart';
+import 'package:file_selector/file_selector.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -99,6 +101,8 @@ class _ReportScreenState extends State<ReportScreen> {
   String? _filterLoadError;
 
   bool _isGenerating = false;
+  bool _isDownloading = false;
+
   String? _expectedNotificationType;
 
   List<ProductReportItem> _productReport = [];
@@ -519,6 +523,83 @@ class _ReportScreenState extends State<ReportScreen> {
       });
 
       _showMessage(_cleanError(error), isError: true);
+    }
+  }
+
+  Future<void> _downloadReport() async {
+    if (!_hasData || _isDownloading) {
+      return;
+    }
+
+    setState(() {
+      _isDownloading = true;
+    });
+
+    try {
+      final provider = context.read<ReportProvider>();
+
+      late final Uint8List bytes;
+      late final String fileName;
+
+      switch (_selectedReport) {
+        case ReportType.products:
+          bytes = await provider.downloadProductReport();
+          fileName = 'product_report.csv';
+          break;
+
+        case ReportType.topSellingProducts:
+          bytes = await provider.downloadTopSellingProductsReport();
+          fileName = 'top_selling_products_report.csv';
+          break;
+
+        case ReportType.salesByCategory:
+          bytes = await provider.downloadSalesByCategoryReport();
+          fileName = 'sales_by_category_report.csv';
+          break;
+
+        case ReportType.monthlyRevenue:
+          bytes = await provider.downloadMonthlyRevenueReport();
+          fileName = 'monthly_revenue_report.csv';
+          break;
+
+        case ReportType.topCustomers:
+          bytes = await provider.downloadTopCustomersReport();
+          fileName = 'top_customers_report.csv';
+          break;
+      }
+
+      const csvType = XTypeGroup(label: 'CSV', extensions: ['csv']);
+
+      final location = await getSaveLocation(
+        suggestedName: fileName,
+        acceptedTypeGroups: const [csvType],
+      );
+
+      if (location == null) {
+        return;
+      }
+
+      final file = XFile.fromData(bytes, mimeType: 'text/csv', name: fileName);
+
+      await file.saveTo(location.path);
+
+      if (!mounted) {
+        return;
+      }
+
+      _showMessage('Izvještaj je uspješno sačuvan.');
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+
+      _showMessage(_cleanError(error), isError: true);
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isDownloading = false;
+        });
+      }
     }
   }
 
@@ -1529,13 +1610,30 @@ class _ReportScreenState extends State<ReportScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
-              Icon(Icons.table_chart_outlined, color: _primaryBlue),
-              SizedBox(width: 8),
-              Text(
-                'Detalji izvještaja',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+              const Icon(Icons.table_chart_outlined, color: _primaryBlue),
+              const SizedBox(width: 8),
+              const Expanded(
+                child: Text(
+                  'Detalji izvještaja',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                ),
+              ),
+              OutlinedButton.icon(
+                onPressed: _isDownloading ? null : _downloadReport,
+                icon: _isDownloading
+                    ? const SizedBox(
+                        width: 17,
+                        height: 17,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.download_outlined),
+                label: Text(_isDownloading ? 'Preuzimanje...' : 'Preuzmi CSV'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: _primaryBlue,
+                  side: const BorderSide(color: _primaryBlue),
+                ),
               ),
             ],
           ),

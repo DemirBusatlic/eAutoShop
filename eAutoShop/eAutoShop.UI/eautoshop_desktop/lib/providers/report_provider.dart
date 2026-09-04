@@ -39,6 +39,10 @@ class ReportProvider with ChangeNotifier {
     return _parseProductReport(csv);
   }
 
+  Future<Uint8List> downloadProductReport() {
+    return _getReportBytes('GetProductReport');
+  }
+
   Future<void> generateTopSellingProductsReport(
     ProductReportRequest request,
   ) async {
@@ -51,6 +55,10 @@ class ReportProvider with ChangeNotifier {
     return _parseTopSellingProductsReport(csv);
   }
 
+  Future<Uint8List> downloadTopSellingProductsReport() {
+    return _getReportBytes('GetTopSellingProductsReport');
+  }
+
   Future<void> generateSalesByCategoryReport(ReportRequest request) async {
     await _generate('GenerateSalesByCategoryReport', request.toJson());
   }
@@ -59,6 +67,10 @@ class ReportProvider with ChangeNotifier {
     final csv = await _getCsv('GetSalesByCategoryReport');
 
     return _parseSalesByCategoryReport(csv);
+  }
+
+  Future<Uint8List> downloadSalesByCategoryReport() {
+    return _getReportBytes('GetSalesByCategoryReport');
   }
 
   Future<void> generateMonthlyRevenueReport(ReportRequest request) async {
@@ -71,6 +83,10 @@ class ReportProvider with ChangeNotifier {
     return _parseMonthlyRevenueReport(csv);
   }
 
+  Future<Uint8List> downloadMonthlyRevenueReport() {
+    return _getReportBytes('GetMonthlyRevenueReport');
+  }
+
   Future<void> generateTopCustomersReport(ReportRequest request) async {
     await _generate('GenerateTopCustomersReport', request.toJson());
   }
@@ -79,6 +95,10 @@ class ReportProvider with ChangeNotifier {
     final csv = await _getCsv('GetTopCustomersReport');
 
     return _parseTopCustomersReport(csv);
+  }
+
+  Future<Uint8List> downloadTopCustomersReport() {
+    return _getReportBytes('GetTopCustomersReport');
   }
 
   Future<void> _generate(String endpoint, Map<String, dynamic> body) async {
@@ -95,7 +115,7 @@ class ReportProvider with ChangeNotifier {
     }
   }
 
-  Future<String> _getCsv(String endpoint) async {
+  Future<Uint8List> _getReportBytes(String endpoint) async {
     final headers = await _headers();
 
     headers['Accept'] = 'text/csv';
@@ -109,7 +129,13 @@ class ReportProvider with ChangeNotifier {
       throw Exception(_getErrorMessage(response, 'Izvještaj nije pronađen.'));
     }
 
-    return utf8.decode(response.bodyBytes);
+    return response.bodyBytes;
+  }
+
+  Future<String> _getCsv(String endpoint) async {
+    final bytes = await _getReportBytes(endpoint);
+
+    return utf8.decode(bytes);
   }
 
   String _getErrorMessage(http.Response response, String fallback) {
