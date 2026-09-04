@@ -195,31 +195,33 @@ class _MasterScreenState extends State<MasterScreen> {
         icon: Icons.dashboard_outlined,
         screen: HomeScreen(onOpenModule: _openModule),
       ),
-      if (!authProvider.isTechnician)
-        const _DesktopDestination(
-          key: 'products',
-          label: 'Proizvodi',
-          icon: Icons.inventory_2_outlined,
-          screen: ProductScreen(),
-        ),
+      const _DesktopDestination(
+        key: 'products',
+        label: 'Proizvodi',
+        icon: Icons.inventory_2_outlined,
+        screen: ProductScreen(),
+      ),
       const _DesktopDestination(
         key: 'services',
         label: 'Usluge',
         icon: Icons.build_outlined,
         screen: ServiceScreen(),
       ),
-      const _DesktopDestination(
-        key: 'orders',
-        label: 'Narudžbe',
-        icon: Icons.receipt_long_outlined,
-        screen: OrderScreen(),
-      ),
-      if (authProvider.isManager || authProvider.isTechnician)
+      if (!authProvider.isTechnician)
         const _DesktopDestination(
+          key: 'orders',
+          label: 'Narudžbe',
+          icon: Icons.receipt_long_outlined,
+          screen: OrderScreen(),
+        ),
+      if (authProvider.isManager || authProvider.isTechnician)
+        _DesktopDestination(
           key: 'appointments',
-          label: 'Rezervacije',
-          icon: Icons.calendar_month_outlined,
-          screen: AppointmentScreen(),
+          label: authProvider.isTechnician ? 'Zaduženja' : 'Rezervacije',
+          icon: authProvider.isTechnician
+              ? Icons.assignment_outlined
+              : Icons.calendar_month_outlined,
+          screen: const AppointmentScreen(),
         ),
       if (authProvider.isManager) ...[
         const _DesktopDestination(

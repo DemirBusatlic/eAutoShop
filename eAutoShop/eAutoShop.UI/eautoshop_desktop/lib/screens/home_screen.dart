@@ -66,31 +66,35 @@ class HomeScreen extends StatelessWidget {
 
   List<_HomeModule> _modulesFor(AuthProvider auth) {
     return [
-      if (!auth.isTechnician)
-        const _HomeModule(
-          key: 'products',
-          title: 'Proizvodi',
-          description: 'Pregled i upravljanje ponudom proizvoda.',
-          icon: Icons.inventory_2_outlined,
-        ),
+      const _HomeModule(
+        key: 'products',
+        title: 'Proizvodi',
+        description: 'Pregled i upravljanje ponudom proizvoda.',
+        icon: Icons.inventory_2_outlined,
+      ),
       const _HomeModule(
         key: 'services',
         title: 'Usluge',
         description: 'Pregled i upravljanje uslugama auto shopa.',
         icon: Icons.build_outlined,
       ),
-      const _HomeModule(
-        key: 'orders',
-        title: 'Narudžbe',
-        description: 'Obrada i praćenje narudžbi kupaca.',
-        icon: Icons.receipt_long_outlined,
-      ),
-      if (auth.isManager || auth.isTechnician)
+      if (!auth.isTechnician)
         const _HomeModule(
+          key: 'orders',
+          title: 'Narudžbe',
+          description: 'Obrada i praćenje narudžbi kupaca.',
+          icon: Icons.receipt_long_outlined,
+        ),
+      if (auth.isManager || auth.isTechnician)
+        _HomeModule(
           key: 'appointments',
-          title: 'Rezervacije',
-          description: 'Pregled i obrada zakazanih termina.',
-          icon: Icons.calendar_month_outlined,
+          title: auth.isTechnician ? 'Zaduženja' : 'Rezervacije',
+          description: auth.isTechnician
+              ? 'Pregled i obrada dodijeljenih rezervacija.'
+              : 'Pregled, dodjela i obrada zakazanih termina.',
+          icon: auth.isTechnician
+              ? Icons.assignment_outlined
+              : Icons.calendar_month_outlined,
         ),
       if (auth.isManager) ...[
         const _HomeModule(
