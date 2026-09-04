@@ -1,31 +1,35 @@
-﻿using eAutoShop.Model.Model;
+﻿using eAutoShop.Model.Exceptions;
+using eAutoShop.Model.Model;
 using eAutoShop.Model.Request;
 using eAutoShop.Model.SearchObjects;
-using eAutoShop.Model.Exceptions;
 using eAutoShop.Services.Database;
+using eAutoShop.Services.Helpers;
 using eAutoShop.Services.Interfaces;
 using MapsterMapper;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace eAutoShop.Services.Services
 {
-    public class StaffReviewService : BaseCRUDService<StaffReviewModel,StaffReview,StaffReviewSearchObject,StaffReviewInsertRequest,StaffReviewUpdateRequest>,IStaffReviewService
+    public class StaffReviewService: BaseCRUDService<StaffReviewModel,StaffReview,StaffReviewSearchObject,StaffReviewInsertRequest,StaffReviewUpdateRequest>,IStaffReviewService
     {
-        public StaffReviewService(AutoShopContext context, IMapper mapper) : base(context, mapper)
+        private readonly IHttpContextAccessor _httpContextAccessor;
+
+        public StaffReviewService(AutoShopContext context,IMapper mapper,IHttpContextAccessor httpContextAccessor): base(context, mapper)
         {
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public override IQueryable<StaffReview> AddInclude(IQueryable<StaffReview> query,StaffReviewSearchObject? search = null)
         {
-            query = query .Include(x => x.User).Include(x => x.Employee);
+            query = query
+                .Include(x => x.User)
+                .Include(x => x.Employee);
 
             return base.AddInclude(query, search);
         }
+
         public override IQueryable<StaffReview> AddFilter(IQueryable<StaffReview> query,StaffReviewSearchObject? search = null)
         {
             if (search?.Rating != null)
@@ -45,7 +49,9 @@ namespace eAutoShop.Services.Services
 
             if (!string.IsNullOrWhiteSpace(search?.CommentFTS))
             {
-                query = query.Where(x => x.Comment != null && x.Comment.Contains(search.CommentFTS));
+                query = query.Where(
+                    x => x.Comment != null &&
+                         x.Comment.Contains(search.CommentFTS));
             }
 
             return base.AddFilter(query, search);
@@ -70,7 +76,7 @@ namespace eAutoShop.Services.Services
                 throw new UserException("Ne možete ocijeniti zaposlenika iz tuđe rezervacije.");
             }
 
-            if (!string.Equals(appointment.State,"completed", StringComparison.OrdinalIgnoreCase))
+            if (!string.Equals(appointment.State,"completed",StringComparison.OrdinalIgnoreCase))
             {
                 throw new UserException("Zaposlenika možete ocijeniti tek nakon završene rezervacije.");
             }
@@ -93,6 +99,51 @@ namespace eAutoShop.Services.Services
             db.CreatedAt = DateTime.Now;
 
             await base.BeforeInsert(db, insert);
+        }
+
+        public override async Task BeforeUpdate(StaffReview db, StaffReviewUpdateRequest update)
+        {
+            EnsureOwnerOrManager(db);
+
+            db.Comment = string.IsNullOrWhiteSpace(update.Comment)? null : update.Comment.Trim();
+
+            await base.BeforeUpdate(db, update);
+        }
+
+        public override async Task BeforeRemove(StaffReview db)
+        {
+            EnsureOwnerOrManager(db);
+
+            await base.BeforeRemove(db);
+        }
+
+        private ClaimsPrincipal CurrentUser =>_httpContextAccessor.HttpContext?.User ?? throw new UserException("Unauthorized.");
+
+        private int GetCurrentUserId()
+        {
+            var value = CurrentUser.FindFirst(ClaimTypes.NameIdentifier) ?.Value;
+
+            if (!int.TryParse(value, out var userId))
+            {
+                throw new UserException("Unauthorized.");
+            }
+
+            return userId;
+        }
+
+        private void EnsureOwnerOrManager(StaffReview review)
+        {
+            var role = CurrentUser.FindFirst(ClaimTypes.Role)?.Value ?.Trim().ToLowerInvariant();
+
+            if (role == UserRoles.Manager)
+            {
+                return;
+            }
+
+            if (review.UserId != GetCurrentUserId())
+            {
+                throw new UserException("Ne možete mijenjati ili brisati tuđu recenziju.");
+            }
         }
     }
 }

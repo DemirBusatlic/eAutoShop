@@ -12,6 +12,8 @@ import 'package:eautoshop_desktop/providers/service_type_provider.dart';
 import 'package:eautoshop_desktop/providers/auto_shop_service_provider.dart';
 import 'package:eautoshop_desktop/providers/appointment_detail_provider.dart';
 import 'package:eautoshop_desktop/providers/appointment_provider.dart';
+import 'package:eautoshop_desktop/providers/product_review_provider.dart';
+import 'package:eautoshop_desktop/providers/staff_review_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
@@ -53,6 +55,8 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (_) => AutoShopServiceProvider()),
         ChangeNotifierProvider(create: (_) => AppointmentDetailProvider()),
         ChangeNotifierProvider(create: (_) => AppointmentProvider()),
+        ChangeNotifierProvider(create: (_) => ProductReviewProvider()),
+        ChangeNotifierProvider(create: (_) => StaffReviewProvider()),
       ],
       child: const MyApp(),
     ),

@@ -7,6 +7,7 @@ import 'package:eautoshop_desktop/screens/customer_screen.dart';
 import 'package:eautoshop_desktop/screens/product_screen.dart';
 import 'package:eautoshop_desktop/screens/order_screen.dart';
 import 'package:eautoshop_desktop/screens/service_screen.dart';
+import 'package:eautoshop_desktop/screens/review_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -238,11 +239,11 @@ class _MasterScreenState extends State<MasterScreen> {
         ),
       ],
       if (!authProvider.isTechnician)
-        const _DesktopDestination(
+        _DesktopDestination(
           key: 'reviews',
           label: 'Recenzije',
           icon: Icons.reviews_outlined,
-          screen: _SectionPlaceholder(title: 'Recenzije'),
+          screen: ReviewScreen(showStaffReviews: authProvider.isManager),
         ),
       const _DesktopDestination(
         key: 'reports',
