@@ -12,6 +12,8 @@ namespace eAutoShop.Model.SearchObjects
 
         public int? ProductId { get; set; }
 
+        public int? OrderItemId { get; set; }
+
         public string? CommentFTS { get; set; }
     }
 }

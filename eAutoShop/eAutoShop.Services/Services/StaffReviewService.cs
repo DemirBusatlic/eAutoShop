@@ -47,6 +47,11 @@ namespace eAutoShop.Services.Services
                 query = query.Where(x => x.EmployeeId == search.EmployeeId);
             }
 
+            if (search?.AppointmentId != null)
+            {
+                query = query.Where(x => x.AppointmentId == search.AppointmentId);
+            }
+
             if (!string.IsNullOrWhiteSpace(search?.CommentFTS))
             {
                 query = query.Where(

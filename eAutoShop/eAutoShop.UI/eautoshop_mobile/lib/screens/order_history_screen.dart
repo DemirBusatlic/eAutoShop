@@ -3,7 +3,9 @@ import 'dart:math' as math;
 import 'package:eautoshop_mobile/models/order/order.dart';
 import 'package:eautoshop_mobile/models/order/order_search_object.dart';
 import 'package:eautoshop_mobile/models/order_item/order_item.dart';
+import 'package:eautoshop_mobile/models/product_review/product_review.dart';
 import 'package:eautoshop_mobile/models/product_review/product_review_insert.dart';
+import 'package:eautoshop_mobile/models/product_review/product_review_update.dart';
 import 'package:eautoshop_mobile/providers/order_item_provider.dart';
 import 'package:eautoshop_mobile/providers/order_provider.dart';
 import 'package:eautoshop_mobile/providers/product_review_provider.dart';
@@ -190,6 +192,18 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                                 });
                               }
                             },
+                            onEditReview: () async {
+                              await _editProductReview(item);
+                            },
+                            onDeleteReview: () async {
+                              final deleted = await _deleteProductReview(item);
+
+                              if (deleted && sheetContext.mounted) {
+                                setSheetState(() {
+                                  item.hasProductReview = false;
+                                });
+                              }
+                            },
                           ),
                         ),
                       const SizedBox(height: 16),
@@ -197,6 +211,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                         FilledButton.icon(
                           onPressed: () async {
                             final changed = await _confirmCancel(order.id);
+
                             if (changed && sheetContext.mounted) {
                               Navigator.pop(sheetContext);
                             }
@@ -213,6 +228,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                         OutlinedButton.icon(
                           onPressed: () async {
                             final changed = await _confirmDelete(order.id);
+
                             if (changed && sheetContext.mounted) {
                               Navigator.pop(sheetContext);
                             }
@@ -229,18 +245,28 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
         },
       );
     } catch (e) {
-      if (mounted) _showMessage(e.toString(), isError: true);
+      if (mounted) {
+        _showMessage(e.toString(), isError: true);
+      }
     } finally {
-      if (mounted) setState(() => _loadingOrderId = null);
+      if (mounted) {
+        setState(() => _loadingOrderId = null);
+      }
     }
   }
 
-  Future<bool> _showReviewDialog(OrderItem item) async {
-    final commentController = TextEditingController();
+  Future<bool> _showReviewDialog(
+    OrderItem item, {
+    ProductReview? existingReview,
+  }) async {
     final reviewProvider = context.read<ProductReviewProvider>();
-    var rating = 0;
+
+    var rating = existingReview?.rating ?? 0;
+    var comment = existingReview?.comment ?? '';
     var isSubmitting = false;
     String? errorMessage;
+
+    final isEditing = existingReview != null;
 
     final saved = await showDialog<bool>(
       context: context,
@@ -249,8 +275,8 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return AlertDialog(
-              title: const Text(
-                'Ocijeni proizvod',
+              title: Text(
+                isEditing ? 'Uredi recenziju' : 'Ocijeni proizvod',
                 textAlign: TextAlign.center,
               ),
               content: SingleChildScrollView(
@@ -270,6 +296,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: List.generate(5, (index) {
                         final value = index + 1;
+
                         return IconButton(
                           tooltip: '$value/5',
                           onPressed: isSubmitting
@@ -299,12 +326,15 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                       ),
                     ],
                     const SizedBox(height: 12),
-                    TextField(
-                      controller: commentController,
+                    TextFormField(
+                      initialValue: comment,
                       enabled: !isSubmitting,
                       minLines: 3,
                       maxLines: 6,
                       maxLength: 1000,
+                      onChanged: (value) {
+                        comment = value;
+                      },
                       decoration: const InputDecoration(
                         labelText: 'Komentar (nije obavezan)',
                         alignLabelWithHint: true,
@@ -333,21 +363,36 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                           }
 
                           FocusScope.of(dialogContext).unfocus();
+
                           setDialogState(() {
                             isSubmitting = true;
                             errorMessage = null;
                           });
 
                           try {
-                            final comment = commentController.text.trim();
+                            final trimmedComment = comment.trim();
 
-                            await reviewProvider.addReview(
-                              ProductReviewInsert(
-                                item.id,
-                                rating,
-                                comment.isEmpty ? null : comment,
-                              ),
-                            );
+                            if (isEditing) {
+                              await reviewProvider.updateReview(
+                                existingReview.id,
+                                ProductReviewUpdate(
+                                  rating: rating,
+                                  comment: trimmedComment.isEmpty
+                                      ? null
+                                      : trimmedComment,
+                                ),
+                              );
+                            } else {
+                              await reviewProvider.addReview(
+                                ProductReviewInsert(
+                                  item.id,
+                                  rating,
+                                  trimmedComment.isEmpty
+                                      ? null
+                                      : trimmedComment,
+                                ),
+                              );
+                            }
 
                             if (dialogContext.mounted) {
                               Navigator.pop(dialogContext, true);
@@ -369,8 +414,16 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                           dimension: 18,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Icon(Icons.send_outlined),
-                  label: Text(isSubmitting ? 'Šaljem...' : 'Pošalji'),
+                      : Icon(
+                          isEditing ? Icons.save_outlined : Icons.send_outlined,
+                        ),
+                  label: Text(
+                    isSubmitting
+                        ? 'Spremam...'
+                        : isEditing
+                        ? 'Sačuvaj'
+                        : 'Pošalji',
+                  ),
                 ),
               ],
             );
@@ -380,10 +433,94 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
     );
 
     if (saved == true && mounted) {
-      _showMessage('Hvala! Recenzija je uspješno sačuvana.');
+      _showMessage(
+        isEditing
+            ? 'Recenzija je uspješno izmijenjena.'
+            : 'Hvala! Recenzija je uspješno sačuvana.',
+      );
     }
 
     return saved == true;
+  }
+
+  Future<bool> _editProductReview(OrderItem item) async {
+    try {
+      final review = await context.read<ProductReviewProvider>().getByOrderItem(
+        item.id,
+      );
+
+      if (!mounted) return false;
+
+      if (review == null) {
+        _showMessage('Recenzija nije pronađena.', isError: true);
+        return false;
+      }
+
+      return await _showReviewDialog(item, existingReview: review);
+    } catch (e) {
+      if (mounted) {
+        _showMessage(e.toString(), isError: true);
+      }
+      return false;
+    }
+  }
+
+  Future<bool> _deleteProductReview(OrderItem item) async {
+    try {
+      final review = await context.read<ProductReviewProvider>().getByOrderItem(
+        item.id,
+      );
+
+      if (!mounted) return false;
+
+      if (review == null) {
+        _showMessage('Recenzija nije pronađena.', isError: true);
+        return false;
+      }
+
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) {
+          return AlertDialog(
+            title: const Text('Brisanje recenzije'),
+            content: Text(
+              'Da li ste sigurni da želite obrisati recenziju za "${item.productName}"?',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext, false),
+                child: const Text('Odustani'),
+              ),
+              FilledButton.icon(
+                onPressed: () => Navigator.pop(dialogContext, true),
+                icon: const Icon(Icons.delete_outline),
+                label: const Text('Obriši'),
+                style: FilledButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.error,
+                ),
+              ),
+            ],
+          );
+        },
+      );
+
+      if (confirmed != true || !mounted) {
+        return false;
+      }
+
+      await context.read<ProductReviewProvider>().deleteReview(review.id);
+
+      if (mounted) {
+        _showMessage('Recenzija je uspješno obrisana.');
+      }
+
+      return true;
+    } catch (e) {
+      if (mounted) {
+        _showMessage(e.toString(), isError: true);
+      }
+      return false;
+    }
   }
 
   Future<bool> _confirmCancel(int orderId) async {
@@ -410,10 +547,16 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
     try {
       await context.read<OrderProvider>().cancel(orderId);
       await _loadOrders();
-      if (mounted) _showMessage('Narudžba je otkazana.');
+
+      if (mounted) {
+        _showMessage('Narudžba je otkazana.');
+      }
+
       return true;
     } catch (e) {
-      if (mounted) _showMessage(e.toString(), isError: true);
+      if (mounted) {
+        _showMessage(e.toString(), isError: true);
+      }
       return false;
     }
   }
@@ -444,10 +587,16 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
     try {
       await context.read<OrderProvider>().delete(orderId);
       await _loadOrders();
-      if (mounted) _showMessage('Narudžba je uklonjena iz istorije.');
+
+      if (mounted) {
+        _showMessage('Narudžba je uklonjena iz istorije.');
+      }
+
       return true;
     } catch (e) {
-      if (mounted) _showMessage(e.toString(), isError: true);
+      if (mounted) {
+        _showMessage(e.toString(), isError: true);
+      }
       return false;
     }
   }
@@ -512,14 +661,20 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                           child: Text('Plaćanje neuspješno'),
                         ),
                       ],
-                      onChanged: (value) =>
-                          setModalState(() => _stateFilter = value),
+                      onChanged: (value) {
+                        setModalState(() {
+                          _stateFilter = value;
+                        });
+                      },
                     ),
                     Align(
                       alignment: Alignment.centerRight,
                       child: TextButton(
-                        onPressed: () =>
-                            setModalState(() => _stateFilter = null),
+                        onPressed: () {
+                          setModalState(() {
+                            _stateFilter = null;
+                          });
+                        },
                         child: const Text('Očisti status'),
                       ),
                     ),
@@ -541,14 +696,20 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                           child: Text('Bez popusta'),
                         ),
                       ],
-                      onChanged: (value) =>
-                          setModalState(() => _discountFilter = value),
+                      onChanged: (value) {
+                        setModalState(() {
+                          _discountFilter = value;
+                        });
+                      },
                     ),
                     Align(
                       alignment: Alignment.centerRight,
                       child: TextButton(
-                        onPressed: () =>
-                            setModalState(() => _discountFilter = null),
+                        onPressed: () {
+                          setModalState(() {
+                            _discountFilter = null;
+                          });
+                        },
                         child: const Text('Očisti popust'),
                       ),
                     ),
@@ -624,6 +785,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<OrderProvider>();
+
     final totalPages = math.max(1, (provider.countOfItems / _pageSize).ceil());
 
     return MasterScreen(
@@ -877,11 +1039,15 @@ class _OrderItemCard extends StatelessWidget {
   final OrderItem item;
   final bool canReview;
   final VoidCallback onReview;
+  final VoidCallback onEditReview;
+  final VoidCallback onDeleteReview;
 
   const _OrderItemCard({
     required this.item,
     required this.canReview,
     required this.onReview,
+    required this.onEditReview,
+    required this.onDeleteReview,
   });
 
   @override
@@ -916,6 +1082,40 @@ class _OrderItemCard extends StatelessWidget {
                   onPressed: onReview,
                   icon: const Icon(Icons.star_outline),
                   label: const Text('Ocijeni proizvod'),
+                ),
+              ),
+            ],
+            if (canReview && item.hasProductReview) ...[
+              const SizedBox(height: 10),
+              Text(
+                'Proizvod je ocijenjen.',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.primary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Align(
+                alignment: Alignment.centerRight,
+                child: Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  alignment: WrapAlignment.end,
+                  children: [
+                    OutlinedButton.icon(
+                      onPressed: onEditReview,
+                      icon: const Icon(Icons.edit_outlined),
+                      label: const Text('Uredi'),
+                    ),
+                    OutlinedButton.icon(
+                      onPressed: onDeleteReview,
+                      icon: const Icon(Icons.delete_outline),
+                      label: const Text('Obriši'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Theme.of(context).colorScheme.error,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],

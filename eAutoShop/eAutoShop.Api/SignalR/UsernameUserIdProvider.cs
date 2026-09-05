@@ -7,9 +7,7 @@ namespace eAutoShop.Api.SignalR
     {
         public string? GetUserId(HubConnectionContext connection)
         {
-            return connection.User?
-                .FindFirst(ClaimTypes.Name)?
-                .Value;
+            return connection.User?.FindFirst(ClaimTypes.Name)?.Value;
         }
     }
 }

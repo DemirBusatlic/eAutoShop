@@ -1,7 +1,14 @@
-import 'package:eautoshop_mobile/models/product_review/product_review_insert.dart';
-import 'package:eautoshop_mobile/providers/base_provider.dart';
+import 'dart:convert';
 
-class ProductReviewProvider extends BaseProvider<Object, ProductReviewInsert> {
+import 'package:eautoshop_mobile/models/product_review/product_review.dart';
+import 'package:eautoshop_mobile/models/product_review/product_review_insert.dart';
+import 'package:eautoshop_mobile/models/product_review/product_review_update.dart';
+import 'package:eautoshop_mobile/providers/base_provider.dart';
+import 'package:eautoshop_mobile/utilities/custom_exception.dart';
+import 'package:http/http.dart' as http;
+
+class ProductReviewProvider
+    extends BaseProvider<ProductReview, ProductReviewInsert> {
   bool isSubmitting = false;
 
   ProductReviewProvider() : super('ProductReview');
@@ -12,6 +19,57 @@ class ProductReviewProvider extends BaseProvider<Object, ProductReviewInsert> {
 
     try {
       await insert(review, toJson: (value) => value.toJson());
+    } finally {
+      isSubmitting = false;
+      notifyListeners();
+    }
+  }
+
+  Future<ProductReview?> getByOrderItem(int orderItemId) async {
+    final result = await get(
+      filter: {'OrderItemId': orderItemId, 'PageSize': 1},
+      fromJson: ProductReview.fromJson,
+    );
+
+    if (result.result.isEmpty) {
+      return null;
+    }
+
+    return result.result.first;
+  }
+
+  Future<void> updateReview(int id, ProductReviewUpdate review) async {
+    isSubmitting = true;
+    notifyListeners();
+
+    try {
+      final response = await http.put(
+        Uri.parse('${BaseProvider.baseUrl}/$endpoint/$id'),
+        headers: await createHeaders(),
+        body: jsonEncode(review.toJson()),
+      );
+
+      if (response.statusCode < 200 || response.statusCode >= 300) {
+        handleHttpError(response);
+      }
+    } on CustomException {
+      rethrow;
+    } catch (_) {
+      throw CustomException(
+        "Can't reach the server. Please check whether the API is running.",
+      );
+    } finally {
+      isSubmitting = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> deleteReview(int id) async {
+    isSubmitting = true;
+    notifyListeners();
+
+    try {
+      await delete(id);
     } finally {
       isSubmitting = false;
       notifyListeners();

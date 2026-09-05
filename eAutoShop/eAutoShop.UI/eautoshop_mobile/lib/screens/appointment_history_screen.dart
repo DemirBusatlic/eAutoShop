@@ -1,7 +1,9 @@
 import 'package:eautoshop_mobile/models/appointment/appointment.dart';
 import 'package:eautoshop_mobile/models/appointment/appointment_search_object.dart';
 import 'package:eautoshop_mobile/models/appointment/appointment_update.dart';
+import 'package:eautoshop_mobile/models/staff_review/staff_review.dart';
 import 'package:eautoshop_mobile/models/staff_review/staff_review_insert.dart';
+import 'package:eautoshop_mobile/models/staff_review/staff_review_update.dart';
 import 'package:eautoshop_mobile/providers/appointment_detail_provider.dart';
 import 'package:eautoshop_mobile/providers/appointment_provider.dart';
 import 'package:eautoshop_mobile/providers/staff_review_provider.dart';
@@ -612,158 +614,28 @@ class _ReservationHistoryScreenState extends State<AppointmentHistoryScreen> {
     );
   }
 
-  Future<void> _showStaffReviewDialog(Appointment appointment) async {
-    final employeeId = appointment.employeeId;
-
-    if (employeeId == null) {
+  Future<bool> _showStaffReviewDialog(
+    Appointment appointment, {
+    StaffReview? existingReview,
+  }) async {
+    if (appointment.employeeId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Rezervaciji nije dodijeljen zaposlenik.'),
         ),
       );
-      return;
+      return false;
     }
 
-    final commentController = TextEditingController();
-    final reviewProvider = context.read<StaffReviewProvider>();
-    var rating = 0;
-    var isSubmitting = false;
-    String? errorMessage;
+    final isEditing = existingReview != null;
 
     final saved = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
       builder: (dialogContext) {
-        return StatefulBuilder(
-          builder: (context, setDialogState) {
-            return AlertDialog(
-              title: const Text(
-                'Ocijeni zaposlenika',
-                textAlign: TextAlign.center,
-              ),
-              content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Text(
-                      appointment.employeeUsername ?? 'Zaposlenik',
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: List.generate(5, (index) {
-                        final value = index + 1;
-
-                        return IconButton(
-                          tooltip: '$value/5',
-                          onPressed: isSubmitting
-                              ? null
-                              : () {
-                                  setDialogState(() {
-                                    rating = value;
-                                    errorMessage = null;
-                                  });
-                                },
-                          iconSize: 36,
-                          color: Colors.amber.shade700,
-                          icon: Icon(
-                            value <= rating ? Icons.star : Icons.star_border,
-                          ),
-                        );
-                      }),
-                    ),
-                    if (errorMessage != null) ...[
-                      const SizedBox(height: 4),
-                      Text(
-                        errorMessage!,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.error,
-                        ),
-                      ),
-                    ],
-                    const SizedBox(height: 12),
-                    TextField(
-                      controller: commentController,
-                      enabled: !isSubmitting,
-                      minLines: 3,
-                      maxLines: 6,
-                      maxLength: 1000,
-                      decoration: const InputDecoration(
-                        labelText: 'Komentar (nije obavezan)',
-                        alignLabelWithHint: true,
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: isSubmitting
-                      ? null
-                      : () => Navigator.pop(dialogContext, false),
-                  child: const Text('Odustani'),
-                ),
-                FilledButton.icon(
-                  onPressed: isSubmitting
-                      ? null
-                      : () async {
-                          if (rating == 0) {
-                            setDialogState(() {
-                              errorMessage = 'Izaberite ocjenu od 1 do 5.';
-                            });
-                            return;
-                          }
-
-                          FocusScope.of(dialogContext).unfocus();
-                          setDialogState(() {
-                            isSubmitting = true;
-                            errorMessage = null;
-                          });
-
-                          try {
-                            final comment = commentController.text.trim();
-
-                            await reviewProvider.addReview(
-                              StaffReviewInsert(
-                                appointmentId: appointment.id,
-                                rating: rating,
-                                comment: comment.isEmpty ? null : comment,
-                              ),
-                            );
-
-                            if (dialogContext.mounted) {
-                              Navigator.pop(dialogContext, true);
-                            }
-                          } catch (error) {
-                            if (!dialogContext.mounted) return;
-
-                            setDialogState(() {
-                              isSubmitting = false;
-                              errorMessage = error.toString().replaceFirst(
-                                'Exception: ',
-                                '',
-                              );
-                            });
-                          }
-                        },
-                  icon: isSubmitting
-                      ? const SizedBox.square(
-                          dimension: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.send_outlined),
-                  label: Text(isSubmitting ? 'Šaljem...' : 'Pošalji'),
-                ),
-              ],
-            );
-          },
+        return _StaffReviewDialog(
+          appointment: appointment,
+          existingReview: existingReview,
         );
       },
     );
@@ -771,28 +643,138 @@ class _ReservationHistoryScreenState extends State<AppointmentHistoryScreen> {
     if (saved == true && mounted) {
       await _loadAppointments();
 
-      if (!mounted) return;
+      if (!mounted) {
+        return true;
+      }
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Hvala! Recenzija zaposlenika je uspješno sačuvana.'),
+        SnackBar(
+          content: Text(
+            isEditing
+                ? 'Recenzija zaposlenika je uspješno izmijenjena.'
+                : 'Hvala! Recenzija zaposlenika je uspješno sačuvana.',
+          ),
         ),
       );
+    }
+
+    return saved == true;
+  }
+
+  Future<bool> _editStaffReview(Appointment appointment) async {
+    try {
+      final review = await context.read<StaffReviewProvider>().getByAppointment(
+        appointment.id,
+      );
+
+      if (!mounted) {
+        return false;
+      }
+
+      if (review == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Recenzija nije pronađena.')),
+        );
+        return false;
+      }
+
+      return await _showStaffReviewDialog(appointment, existingReview: review);
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(error.toString())));
+      }
+
+      return false;
+    }
+  }
+
+  Future<bool> _deleteStaffReview(Appointment appointment) async {
+    try {
+      final review = await context.read<StaffReviewProvider>().getByAppointment(
+        appointment.id,
+      );
+
+      if (!mounted) {
+        return false;
+      }
+
+      if (review == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Recenzija nije pronađena.')),
+        );
+        return false;
+      }
+
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) {
+          return AlertDialog(
+            title: const Text('Brisanje recenzije'),
+            content: const Text(
+              'Da li ste sigurni da želite obrisati recenziju zaposlenika?',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext, false),
+                child: const Text('Odustani'),
+              ),
+              FilledButton.icon(
+                onPressed: () => Navigator.pop(dialogContext, true),
+                icon: const Icon(Icons.delete_outline),
+                label: const Text('Obriši'),
+                style: FilledButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.error,
+                ),
+              ),
+            ],
+          );
+        },
+      );
+
+      if (confirmed != true || !mounted) {
+        return false;
+      }
+
+      await context.read<StaffReviewProvider>().deleteReview(review.id);
+      await _loadAppointments();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Recenzija zaposlenika je uspješno obrisana.'),
+          ),
+        );
+      }
+
+      return true;
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(error.toString())));
+      }
+
+      return false;
     }
   }
 
   Future<void> _cancelAppointment(Appointment appointment) async {
-    final reasonController = TextEditingController();
+    var reasonValue = '';
 
     final reason = await showDialog<String>(
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
           title: const Text('Otkazivanje rezervacije'),
-          content: TextField(
-            controller: reasonController,
+          content: TextFormField(
+            initialValue: reasonValue,
             maxLength: 500,
             maxLines: 3,
+            onChanged: (value) {
+              reasonValue = value;
+            },
             decoration: const InputDecoration(
               labelText: 'Razlog otkazivanja',
               border: OutlineInputBorder(),
@@ -805,12 +787,13 @@ class _ReservationHistoryScreenState extends State<AppointmentHistoryScreen> {
             ),
             FilledButton(
               onPressed: () {
-                final value = reasonController.text.trim();
+                final value = reasonValue.trim();
 
                 if (value.isEmpty) {
                   return;
                 }
 
+                FocusManager.instance.primaryFocus?.unfocus();
                 Navigator.pop(dialogContext, value);
               },
               child: const Text('Otkaži rezervaciju'),
@@ -819,8 +802,6 @@ class _ReservationHistoryScreenState extends State<AppointmentHistoryScreen> {
         );
       },
     );
-
-    reasonController.dispose();
 
     if (reason == null || !mounted) {
       return;
@@ -1007,6 +988,31 @@ class _ReservationHistoryScreenState extends State<AppointmentHistoryScreen> {
                   },
                   icon: const Icon(Icons.star_outline),
                   label: const Text('Ocijeni zaposlenika'),
+                ),
+              if (appointment.state.toLowerCase() == 'completed' &&
+                  appointment.employeeId != null &&
+                  appointment.hasStaffReview)
+                TextButton.icon(
+                  onPressed: () {
+                    Navigator.pop(dialogContext);
+                    _editStaffReview(appointment);
+                  },
+                  icon: const Icon(Icons.edit_outlined),
+                  label: const Text('Uredi recenziju'),
+                ),
+              if (appointment.state.toLowerCase() == 'completed' &&
+                  appointment.employeeId != null &&
+                  appointment.hasStaffReview)
+                TextButton.icon(
+                  onPressed: () {
+                    Navigator.pop(dialogContext);
+                    _deleteStaffReview(appointment);
+                  },
+                  icon: const Icon(Icons.delete_outline),
+                  label: const Text('Obriši recenziju'),
+                  style: TextButton.styleFrom(
+                    foregroundColor: Theme.of(context).colorScheme.error,
+                  ),
                 ),
               if (appointment.state == 'pending')
                 TextButton(
@@ -1225,5 +1231,190 @@ class _ReservationHistoryScreenState extends State<AppointmentHistoryScreen> {
     _minAmountController.dispose();
     _maxAmountController.dispose();
     super.dispose();
+  }
+}
+
+class _StaffReviewDialog extends StatefulWidget {
+  final Appointment appointment;
+  final StaffReview? existingReview;
+
+  const _StaffReviewDialog({required this.appointment, this.existingReview});
+
+  @override
+  State<_StaffReviewDialog> createState() => _StaffReviewDialogState();
+}
+
+class _StaffReviewDialogState extends State<_StaffReviewDialog> {
+  late final TextEditingController _commentController;
+
+  int _rating = 0;
+  bool _isSubmitting = false;
+  String? _errorMessage;
+
+  bool get _isEditing => widget.existingReview != null;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _rating = widget.existingReview?.rating ?? 0;
+    _commentController = TextEditingController(
+      text: widget.existingReview?.comment ?? '',
+    );
+  }
+
+  @override
+  void dispose() {
+    _commentController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submit() async {
+    if (_rating == 0) {
+      setState(() {
+        _errorMessage = 'Izaberite ocjenu od 1 do 5.';
+      });
+      return;
+    }
+
+    FocusManager.instance.primaryFocus?.unfocus();
+
+    setState(() {
+      _isSubmitting = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final provider = context.read<StaffReviewProvider>();
+      final comment = _commentController.text.trim();
+
+      if (_isEditing) {
+        await provider.updateReview(
+          widget.existingReview!.id,
+          StaffReviewUpdate(
+            rating: _rating,
+            comment: comment.isEmpty ? null : comment,
+          ),
+        );
+      } else {
+        await provider.addReview(
+          StaffReviewInsert(
+            appointmentId: widget.appointment.id,
+            rating: _rating,
+            comment: comment.isEmpty ? null : comment,
+          ),
+        );
+      }
+
+      if (!mounted) {
+        return;
+      }
+
+      Navigator.of(context).pop(true);
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _isSubmitting = false;
+        _errorMessage = error.toString().replaceFirst('Exception: ', '');
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(
+        _isEditing ? 'Uredi recenziju' : 'Ocijeni zaposlenika',
+        textAlign: TextAlign.center,
+      ),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              widget.appointment.employeeUsername ?? 'Zaposlenik',
+              textAlign: TextAlign.center,
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(5, (index) {
+                final value = index + 1;
+
+                return IconButton(
+                  tooltip: '$value/5',
+                  onPressed: _isSubmitting
+                      ? null
+                      : () {
+                          setState(() {
+                            _rating = value;
+                            _errorMessage = null;
+                          });
+                        },
+                  iconSize: 36,
+                  color: Colors.amber.shade700,
+                  icon: Icon(value <= _rating ? Icons.star : Icons.star_border),
+                );
+              }),
+            ),
+            if (_errorMessage != null) ...[
+              const SizedBox(height: 4),
+              Text(
+                _errorMessage!,
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Theme.of(context).colorScheme.error),
+              ),
+            ],
+            const SizedBox(height: 12),
+            TextField(
+              controller: _commentController,
+              enabled: !_isSubmitting,
+              minLines: 3,
+              maxLines: 6,
+              maxLength: 1000,
+              decoration: const InputDecoration(
+                labelText: 'Komentar (nije obavezan)',
+                alignLabelWithHint: true,
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: _isSubmitting
+              ? null
+              : () {
+                  FocusManager.instance.primaryFocus?.unfocus();
+                  Navigator.of(context).pop(false);
+                },
+          child: const Text('Odustani'),
+        ),
+        FilledButton.icon(
+          onPressed: _isSubmitting ? null : _submit,
+          icon: _isSubmitting
+              ? const SizedBox.square(
+                  dimension: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : Icon(_isEditing ? Icons.save_outlined : Icons.send_outlined),
+          label: Text(
+            _isSubmitting
+                ? 'Spremam...'
+                : _isEditing
+                ? 'Sačuvaj'
+                : 'Pošalji',
+          ),
+        ),
+      ],
+    );
   }
 }

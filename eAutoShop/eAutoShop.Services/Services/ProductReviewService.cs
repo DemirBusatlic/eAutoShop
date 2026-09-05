@@ -37,6 +37,9 @@ namespace eAutoShop.Services.Services
             if (search?.ProductId != null)
                 query = query.Where(x => x.ProductId == search.ProductId);
 
+            if (search?.OrderItemId != null)
+                query = query.Where(x => x.OrderItemId == search.OrderItemId);
+
             if (!string.IsNullOrWhiteSpace(search?.CommentFTS))
                 query = query.Where(x => x.Comment != null && x.Comment.Contains(search.CommentFTS));
 

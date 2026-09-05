@@ -12,6 +12,8 @@ namespace eAutoShop.Model.SearchObjects
 
         public int? EmployeeId { get; set; }
 
+        public int? AppointmentId { get; set; }
+
         public string? CommentFTS { get; set; }
     }
 }
