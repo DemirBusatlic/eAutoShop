@@ -72,94 +72,107 @@ namespace eAutoShop.HelperApi.Services
 
             consumer.ReceivedAsync += async (sender, ea) =>
             {
-                var body = ea.Body.ToArray();
-                var message = Encoding.UTF8.GetString(body);
-
-                var reportRequest = JsonSerializer.Deserialize<ReportRequest>(message);
-                var productreportRequest = JsonSerializer.Deserialize<ProductReportRequest>(message);
-
-                if (reportRequest == null)
-                    return;
-
-                using var scope = _serviceProvider.CreateScope();
-
-                var generateReportService =
-                    scope.ServiceProvider.GetRequiredService<IGenerateProductReportService>();
-
-                if (ea.RoutingKey == "generate_product_report")
+                try
                 {
-                    var request = JsonSerializer.Deserialize<ProductReportRequest>(message);
+                    var body = ea.Body.ToArray();
+                    var message = Encoding.UTF8.GetString(body);
 
-                    if (request == null)
-                        return;
+                    using var scope = _serviceProvider.CreateScope();
 
-                    await generateReportService.GenerateReport(request);
+                    var generateReportService =scope.ServiceProvider.GetRequiredService<IGenerateProductReportService>();
+
+                    if (ea.RoutingKey == "generate_product_report")
+                    {
+                        var request =
+                            JsonSerializer.Deserialize<ProductReportRequest>(message)
+                            ?? throw new JsonException("Neispravan zahtjev za izvještaj.");
+
+                        await generateReportService.GenerateReport(request);
+                    }
+                    else if (ea.RoutingKey ==
+                             "generate_top_selling_products_report")
+                    {
+                        var request =
+                            JsonSerializer.Deserialize<ProductReportRequest>(message)
+                            ?? throw new JsonException("Neispravan zahtjev za izvještaj.");
+
+                        await generateReportService
+                            .GenerateTopSellingProductsReport(request);
+                    }
+                    else if (ea.RoutingKey ==
+                             "generate_monthly_revenue_report")
+                    {
+                        var request =
+                            JsonSerializer.Deserialize<ReportRequest>(message)
+                            ?? throw new JsonException("Neispravan zahtjev za izvještaj.");
+
+                        await generateReportService
+                            .GenerateMonthlyRevenueReport(request);
+                    }
+                    else if (ea.RoutingKey ==
+                             "generate_sales_by_category_report")
+                    {
+                        var request =
+                            JsonSerializer.Deserialize<ReportRequest>(message)
+                            ?? throw new JsonException("Neispravan zahtjev za izvještaj.");
+
+                        await generateReportService
+                            .GenerateSalesByCategoryReport(request);
+                    }
+                    else if (ea.RoutingKey =="generate_top_customers_report")
+                    {
+                        var request =JsonSerializer.Deserialize<ReportRequest>(message)
+                            ?? throw new JsonException("Neispravan zahtjev za izvještaj.");
+
+                        await generateReportService.GenerateTopCustomersReport(request);
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException($"Nepoznat RabbitMQ routing key: {ea.RoutingKey}");
+                    }
+
+                    await _channel.BasicAckAsync(
+                        deliveryTag: ea.DeliveryTag,
+                        multiple: false);
                 }
-                else if (ea.RoutingKey == "generate_top_selling_products_report")
+                catch (Exception exception)
                 {
-                    var request = JsonSerializer.Deserialize<ProductReportRequest>(message);
+                    Console.WriteLine($"Greška prilikom obrade RabbitMQ poruke: {exception.Message}");
 
-                    if (request == null)
-                        return;
-
-                    await generateReportService.GenerateTopSellingProductsReport(request);
-                }
-                else if (ea.RoutingKey == "generate_monthly_revenue_report")
-                {
-                    var request = JsonSerializer.Deserialize<ReportRequest>(message);
-
-                    if (request == null)
-                        return;
-
-                    await generateReportService.GenerateMonthlyRevenueReport(request);
-                }
-                else if (ea.RoutingKey == "generate_sales_by_category_report")
-                {
-                    var request = JsonSerializer.Deserialize<ReportRequest>(message);
-
-                    if (request == null)
-                        return;
-
-                    await generateReportService.GenerateSalesByCategoryReport(request);
-                }
-                else if (ea.RoutingKey == "generate_top_customers_report")
-                {
-                    var request = JsonSerializer.Deserialize<ReportRequest>(message);
-
-                    if (request == null)
-                        return;
-
-                    await generateReportService.GenerateTopCustomersReport(request);
+                    await _channel.BasicNackAsync(
+                        deliveryTag: ea.DeliveryTag,
+                        multiple: false,
+                        requeue: false);
                 }
             };
 
             await _channel.BasicConsumeAsync(
                 queue: "generate_product_report",
-                autoAck: true,
+                autoAck: false,
                 consumer: consumer,
                 cancellationToken: stoppingToken);
 
             await _channel.BasicConsumeAsync(
                 queue: "generate_top_selling_products_report",
-                autoAck: true,
+                autoAck: false,
                 consumer: consumer,
                 cancellationToken: stoppingToken);
 
             await _channel.BasicConsumeAsync(
                 queue: "generate_monthly_revenue_report",
-                autoAck: true,
+                autoAck: false,
                 consumer: consumer,
                 cancellationToken: stoppingToken);
 
             await _channel.BasicConsumeAsync(
                 queue: "generate_sales_by_category_report",
-                autoAck: true,
+                autoAck: false,
                 consumer: consumer,
                 cancellationToken: stoppingToken);
 
             await _channel.BasicConsumeAsync(
                 queue: "generate_top_customers_report",
-                autoAck: true,
+                autoAck: false,
                 consumer: consumer,
                 cancellationToken: stoppingToken);
         }

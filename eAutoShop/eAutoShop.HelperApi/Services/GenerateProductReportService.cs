@@ -2,6 +2,7 @@
 using eAutoShop.Model.Model;
 using eAutoShop.Model.Request;
 using eAutoShop.Services.Database;
+using eAutoShop.Services.Helpers;
 using Microsoft.EntityFrameworkCore;
 using System.Text;
 
@@ -14,11 +15,7 @@ namespace eAutoShop.HelperApi.Services
         private readonly ILogger<GenerateProductReportService> _logger;
         private readonly string _reportsPath;
 
-        public GenerateProductReportService(
-            AutoShopContext context,
-            RabbitMQService rabbitMQService,
-            IConfiguration configuration,
-            ILogger<GenerateProductReportService> logger)
+        public GenerateProductReportService(AutoShopContext context,RabbitMQService rabbitMQService,IConfiguration configuration,ILogger<GenerateProductReportService> logger)
         {
             _context = context;
             _rabbitMQService = rabbitMQService;
@@ -67,7 +64,7 @@ namespace eAutoShop.HelperApi.Services
 
             foreach (var product in products)
             {
-                var orderItems = product.OrderItems.AsEnumerable();
+                var orderItems = product.OrderItems.Where(x => x.Order.State == OrderStates.Completed).AsEnumerable();
 
                 if (request.StartDate != null)
                 {
@@ -119,6 +116,8 @@ namespace eAutoShop.HelperApi.Services
                 .ThenInclude(x => x.ProductCategory)
                 .Include(x => x.Order)
                 .AsQueryable();
+
+            query = query.Where(x => x.Order.State == OrderStates.Completed);
 
             if (request.StartDate != null)
             {
@@ -215,6 +214,8 @@ namespace eAutoShop.HelperApi.Services
                 .Include(x => x.Order)
                 .AsQueryable();
 
+            query = query.Where(x => x.Order.State == OrderStates.Completed);
+
             if (request.StartDate != null)
             {
                 query = query.Where(x =>
@@ -293,11 +294,7 @@ namespace eAutoShop.HelperApi.Services
             var endDate = request.EndDate?.Date
                 ?? DateTime.Now.Date;
 
-            var orders = await _context.Orders
-                .Where(x =>
-                    x.OrderDate.Date >= startDate &&
-                    x.OrderDate.Date <= endDate)
-                .ToListAsync();
+            var orders = await _context.Orders.Where(x =>x.State == OrderStates.Completed && x.OrderDate.Date >= startDate && x.OrderDate.Date <= endDate).ToListAsync();
 
             if (!orders.Any())
             {
@@ -343,6 +340,8 @@ namespace eAutoShop.HelperApi.Services
         public async Task GenerateTopCustomersReport(ReportRequest request)
         {
             var query = _context.Orders.AsQueryable();
+
+            query = query.Where(x => x.State == OrderStates.Completed);
 
             if (request.StartDate != null)
             {
