@@ -14,6 +14,7 @@ import 'package:eautoshop_desktop/providers/auth_provider.dart';
 import 'package:eautoshop_desktop/providers/product_category_provider.dart';
 import 'package:eautoshop_desktop/providers/product_provider.dart';
 import 'package:eautoshop_desktop/providers/report_provider.dart';
+import 'package:eautoshop_desktop/services/pdf_report_service.dart';
 import 'package:eautoshop_desktop/services/report_notification_service.dart';
 import 'package:eautoshop_desktop/utilities/custom_exception.dart';
 import 'package:file_selector/file_selector.dart';
@@ -102,6 +103,7 @@ class _ReportScreenState extends State<ReportScreen> {
 
   bool _isGenerating = false;
   bool _isDownloading = false;
+  bool _isPdfDownloading = false;
 
   String? _expectedNotificationType;
 
@@ -601,6 +603,168 @@ class _ReportScreenState extends State<ReportScreen> {
         });
       }
     }
+  }
+
+  Future<void> _downloadPdf() async {
+    if (!_hasData || _isPdfDownloading) {
+      return;
+    }
+
+    setState(() {
+      _isPdfDownloading = true;
+    });
+
+    try {
+      late final String fileName;
+      late final List<String> headers;
+      late final List<List<String>> rows;
+
+      switch (_selectedReport) {
+        case ReportType.products:
+          fileName = 'product_report.pdf';
+          headers = <String>[
+            'Proizvod',
+            'Kategorija',
+            'Cijena',
+            'Popust',
+            'Cijena s popustom',
+            'Prodano',
+            'Prihod',
+          ];
+          rows = _productReport
+              .map(
+                (item) => <String>[
+                  item.productName,
+                  item.category,
+                  '${_moneyFormat.format(item.price)} KM',
+                  '${(item.discount * 100).toStringAsFixed(0)}%',
+                  '${_moneyFormat.format(item.discountedPrice)} KM',
+                  item.totalSold.toString(),
+                  '${_moneyFormat.format(item.totalRevenue)} KM',
+                ],
+              )
+              .toList();
+          break;
+
+        case ReportType.topSellingProducts:
+          fileName = 'top_selling_products_report.pdf';
+          headers = <String>['Proizvod', 'Kategorija', 'Prodano', 'Prihod'];
+          rows = _topSellingProducts
+              .map(
+                (item) => <String>[
+                  item.productName,
+                  item.category,
+                  item.totalSold.toString(),
+                  '${_moneyFormat.format(item.totalRevenue)} KM',
+                ],
+              )
+              .toList();
+          break;
+
+        case ReportType.salesByCategory:
+          fileName = 'sales_by_category_report.pdf';
+          headers = <String>['Kategorija', 'Prodano', 'Prihod'];
+          rows = _salesByCategory
+              .map(
+                (item) => <String>[
+                  item.categoryName,
+                  item.totalSold.toString(),
+                  '${_moneyFormat.format(item.totalRevenue)} KM',
+                ],
+              )
+              .toList();
+          break;
+
+        case ReportType.monthlyRevenue:
+          fileName = 'monthly_revenue_report.pdf';
+          headers = <String>['Datum', 'Prihod'];
+          final sorted = <MonthlyRevenueItem>[..._monthlyRevenue]
+            ..sort((a, b) => a.date.compareTo(b.date));
+          rows = sorted
+              .map(
+                (item) => <String>[
+                  _dateFormat.format(item.date),
+                  '${_moneyFormat.format(item.revenue)} KM',
+                ],
+              )
+              .toList();
+          break;
+
+        case ReportType.topCustomers:
+          fileName = 'top_customers_report.pdf';
+          headers = <String>[
+            'Kupac',
+            'Korisničko ime',
+            'Broj narudžbi',
+            'Ukupno potrošeno',
+          ];
+          rows = _topCustomers
+              .map(
+                (item) => <String>[
+                  item.customerName,
+                  item.username,
+                  item.ordersCount.toString(),
+                  '${_moneyFormat.format(item.totalSpent)} KM',
+                ],
+              )
+              .toList();
+          break;
+      }
+
+      final saved = await PdfReportService.generateAndSave(
+        title: _selectedReport.label,
+        fileName: fileName,
+        headers: headers,
+        rows: rows,
+        startDate: _startDate,
+        endDate: _endDate,
+        filters: _pdfFilters,
+      );
+
+      if (!mounted || !saved) {
+        return;
+      }
+
+      _showMessage('PDF izvještaj je uspješno sačuvan.');
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+
+      _showMessage(_cleanError(error), isError: true);
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isPdfDownloading = false;
+        });
+      }
+    }
+  }
+
+  List<String> get _pdfFilters {
+    final filters = <String>[];
+
+    if (_selectedReport.supportsProductFilters) {
+      for (final category in _categories) {
+        if (category.id == _selectedCategoryId) {
+          filters.add('Kategorija: ${category.name}');
+          break;
+        }
+      }
+
+      for (final product in _products) {
+        if (product.id == _selectedProductId) {
+          filters.add('Proizvod: ${product.name}');
+          break;
+        }
+      }
+    }
+
+    if (filters.isEmpty) {
+      filters.add('Bez dodatnih filtera');
+    }
+
+    return filters;
   }
 
   void _clearCurrentReportData() {
@@ -1630,6 +1794,24 @@ class _ReportScreenState extends State<ReportScreen> {
                       )
                     : const Icon(Icons.download_outlined),
                 label: Text(_isDownloading ? 'Preuzimanje...' : 'Preuzmi CSV'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: _primaryBlue,
+                  side: const BorderSide(color: _primaryBlue),
+                ),
+              ),
+              const SizedBox(width: 10),
+              OutlinedButton.icon(
+                onPressed: _isPdfDownloading ? null : _downloadPdf,
+                icon: _isPdfDownloading
+                    ? const SizedBox(
+                        width: 17,
+                        height: 17,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.picture_as_pdf_outlined),
+                label: Text(
+                  _isPdfDownloading ? 'Preuzimanje...' : 'Preuzmi PDF',
+                ),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: _primaryBlue,
                   side: const BorderSide(color: _primaryBlue),

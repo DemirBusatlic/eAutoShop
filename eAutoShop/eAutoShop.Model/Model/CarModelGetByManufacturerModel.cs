@@ -8,7 +8,9 @@ namespace eAutoShop.Model.Model
 {
     public class CarModelGetByManufacturerModel
     {
-        public CarManufacturerModel Manufacturer { get; set; }
+        public CarManufacturerModel Manufacturer { get; set; } = null!;
+
         public List<CarModelModel> Models { get; set; }
+            = new List<CarModelModel>();
     }
 }

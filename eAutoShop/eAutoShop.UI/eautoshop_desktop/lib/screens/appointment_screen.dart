@@ -26,7 +26,6 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
 
   int _page = 1;
   String? _state;
-  bool? _hasOrder;
   double? _minAmount;
   double? _maxAmount;
   DateTime? _minReservationDate;
@@ -85,7 +84,6 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
         state: _state,
         minTotalAmount: _minAmount,
         maxTotalAmount: _maxAmount,
-        hasOrder: _hasOrder,
         minReservationDate: _minReservationDate,
         maxReservationDate: _maxReservationDate == null
             ? null
@@ -116,7 +114,6 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
       builder: (_) => _AppointmentFilterDialog(
         initial: _AppointmentFilters(
           state: _state,
-          hasOrder: _hasOrder,
           minAmount: _minAmount,
           maxAmount: _maxAmount,
           minReservationDate: _minReservationDate,
@@ -131,7 +128,6 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
 
     setState(() {
       _state = result.state;
-      _hasOrder = result.hasOrder;
       _minAmount = result.minAmount;
       _maxAmount = result.maxAmount;
       _minReservationDate = result.minReservationDate;
@@ -377,7 +373,6 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
 
   bool get _hasFilters =>
       _state != null ||
-      _hasOrder != null ||
       _minAmount != null ||
       _maxAmount != null ||
       _minReservationDate != null ||
@@ -1043,7 +1038,6 @@ class _AppointmentFilterDialogState extends State<_AppointmentFilterDialog> {
   late final TextEditingController _minController;
   late final TextEditingController _maxController;
   String? _state;
-  bool? _hasOrder;
   DateTime? _minDate;
   DateTime? _maxDate;
   String? _employeeUsername;
@@ -1052,7 +1046,6 @@ class _AppointmentFilterDialogState extends State<_AppointmentFilterDialog> {
   void initState() {
     super.initState();
     _state = widget.initial.state;
-    _hasOrder = widget.initial.hasOrder;
     _minDate = widget.initial.minReservationDate;
     _maxDate = widget.initial.maxReservationDate;
     _employeeUsername = widget.initial.employeeUsername;
@@ -1141,19 +1134,6 @@ class _AppointmentFilterDialogState extends State<_AppointmentFilterDialog> {
                   ),
                   const SizedBox(height: AppPadding.medium),
                 ],
-                DropdownButtonFormField<bool>(
-                  initialValue: _hasOrder,
-                  decoration: const InputDecoration(
-                    labelText: 'Povezana narudžba',
-                    border: OutlineInputBorder(),
-                  ),
-                  items: const [
-                    DropdownMenuItem(value: true, child: Text('Da')),
-                    DropdownMenuItem(value: false, child: Text('Ne')),
-                  ],
-                  onChanged: (value) => setState(() => _hasOrder = value),
-                ),
-                const SizedBox(height: AppPadding.medium),
                 Row(
                   children: [
                     Expanded(
@@ -1254,7 +1234,6 @@ class _AppointmentFilterDialogState extends State<_AppointmentFilterDialog> {
   void _clear() {
     setState(() {
       _state = null;
-      _hasOrder = null;
       _minDate = null;
       _maxDate = null;
       _employeeUsername = null;
@@ -1289,7 +1268,6 @@ class _AppointmentFilterDialogState extends State<_AppointmentFilterDialog> {
       context,
       _AppointmentFilters(
         state: _state,
-        hasOrder: _hasOrder,
         minAmount: min,
         maxAmount: max,
         minReservationDate: _minDate,
@@ -1535,7 +1513,6 @@ class _EmptyAppointments extends StatelessWidget {
 class _AppointmentFilters {
   const _AppointmentFilters({
     this.state,
-    this.hasOrder,
     this.minAmount,
     this.maxAmount,
     this.minReservationDate,
@@ -1544,7 +1521,6 @@ class _AppointmentFilters {
   });
 
   final String? state;
-  final bool? hasOrder;
   final double? minAmount;
   final double? maxAmount;
   final DateTime? minReservationDate;

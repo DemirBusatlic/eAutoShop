@@ -53,7 +53,6 @@ public partial class AutoShopContext : DbContext
         modelBuilder.Entity<Appointment>(entity =>
         {
             entity.Property(e => e.CancellationReason).HasMaxLength(500);
-            entity.Property(e => e.PaymentIntentId).HasMaxLength(100);
             entity.Property(e => e.RejectionReason).HasMaxLength(500);
             entity.Property(e => e.ReservationCreatedDate).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.State).HasMaxLength(50);
@@ -70,7 +69,6 @@ public partial class AutoShopContext : DbContext
 
             entity.HasOne(d => d.Employee).WithMany(p => p.AppointmentEmployees).HasForeignKey(d => d.EmployeeId);
 
-            entity.HasOne(d => d.Order).WithMany(p => p.Appointments).HasForeignKey(d => d.OrderId);
         });
 
         modelBuilder.Entity<AppointmentDetail>(entity =>

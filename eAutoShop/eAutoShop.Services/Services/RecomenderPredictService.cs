@@ -3,6 +3,7 @@ using eAutoShop.Model.Model;
 using eAutoShop.Services.Database;
 using eAutoShop.Services.Interfaces;
 using eAutoShop.Services.Utilities;
+using eAutoShop.Services.Helpers;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.ML;
@@ -28,31 +29,62 @@ namespace eAutoShop.Services.Services
 
         public async Task<PageResult<ProductModel>> RecommendProduct(int productId)
         {
+            var sourceProduct = await _context.Products
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x =>
+                    x.Id == productId &&
+                    x.State == ProductStates.Active);
+
+            if (sourceProduct == null)
+            {
+                throw new UserException(
+                    "Proizvod za koji se traže preporuke nije pronađen.");
+            }
+
             try
             {
-                DataViewSchema modelSchema;
+                var modelsPath = Path.Combine(
+                    AppDomain.CurrentDomain.BaseDirectory,
+                    "RecommenderModels");
 
-                string modelsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "RecommenderModels");
-                string productsModelPath = Path.Combine(modelsPath, "productsmodel.zip");
+                var productsModelPath = Path.Combine(
+                    modelsPath,
+                    "productsmodel.zip");
 
-                ITransformer model = mlContext.Model.Load(productsModelPath, out modelSchema);
+                var model = mlContext.Model.Load(
+                    productsModelPath,
+                    out DataViewSchema modelSchema);
 
-                var products = await _context.Products.Include(x => x.ProductCategory).Include(x => x.CarModels).Where(x => x.Id != productId && x.State == "active").ToListAsync();
+                var products = await _context.Products
+                    .AsNoTracking()
+                    .Include(x => x.ProductCategory)
+                    .Include(x => x.CarModels)
+                    .Where(x =>
+                        x.Id != productId &&
+                        x.State == ProductStates.Active)
+                    .ToListAsync();
 
-                var predictionResult = new List<Tuple<Product, float>>();
+                var predictionResult =
+                    new List<Tuple<Product, float>>();
 
                 var predictionEngine = mlContext.Model
-                    .CreatePredictionEngine<ProductEntry, CopurchasePrediction>(model);
+                    .CreatePredictionEngine<
+                        ProductEntry,
+                        CopurchasePrediction>(model);
 
                 foreach (var product in products)
                 {
-                    var prediction = predictionEngine.Predict(new ProductEntry
-                    {
-                        ProductId = (uint)productId,
-                        CoPurchaseProductId = (uint)product.Id
-                    });
+                    var prediction = predictionEngine.Predict(
+                        new ProductEntry
+                        {
+                            ProductId = (uint)productId,
+                            CoPurchaseProductId = (uint)product.Id
+                        });
 
-                    predictionResult.Add(new Tuple<Product, float>(product, prediction.Score));
+                    predictionResult.Add(
+                        new Tuple<Product, float>(
+                            product,
+                            prediction.Score));
                 }
 
                 var finalResults = predictionResult
@@ -61,15 +93,26 @@ namespace eAutoShop.Services.Services
                     .Take(3)
                     .ToList();
 
+                var mappedResults =
+                    _mapper.Map<List<ProductModel>>(finalResults);
+
+                foreach (var product in mappedResults)
+                {
+                    product.RecommendationReason =
+                        "Preporučeno na osnovu obrazaca zajedničke " +
+                        $"kupovine sa proizvodom „{sourceProduct.Name}“.";
+                }
+
                 return new PageResult<ProductModel>
                 {
-                    Result = _mapper.Map<List<ProductModel>>(finalResults),
-                    Count = finalResults.Count
+                    Result = mappedResults,
+                    Count = mappedResults.Count
                 };
             }
             catch
             {
-                throw new UserException("Sistem preporuke trenutno nije dostupan.");
+                throw new UserException(
+                    "Sistem preporuke trenutno nije dostupan.");
             }
         }
     }

@@ -30,7 +30,6 @@ namespace eAutoShop.Services.Services
                 .Include(x => x.Employee)
                 .Include(x => x.CarModel)
                 .ThenInclude(x => x.CarManufacturer)
-                .Include(x => x.Order)
                 .Include(x => x.StaffReview);
 
             return base.AddInclude(query, search);
@@ -62,12 +61,6 @@ namespace eAutoShop.Services.Services
             if (!string.IsNullOrWhiteSpace(search.Type))
                 query = query.Where(x => x.Type.Contains(search.Type));
 
-            if (search.HasOrder.HasValue)
-            {
-                query = search.HasOrder.Value
-                    ? query.Where(x => x.OrderId != null)
-                    : query.Where(x => x.OrderId == null);
-            }
 
             if (search.MinTotalAmount.HasValue)
                 query = query.Where(x => x.TotalAmount >= search.MinTotalAmount.Value);

@@ -26,34 +26,34 @@ namespace eAutoShop.Services.StateMachineService.AutoShopServiceStateMachine
             _serviceProvider = serviceProvider;
         }
 
-        public virtual async Task<AutoShopServiceModel> Insert(AutoShopServiceInsertRequest request)
+        public virtual  Task<AutoShopServiceModel> Insert(AutoShopServiceInsertRequest request)
         {
             throw new UserException("Action not allowed.");
         }
 
-        public virtual async Task<AutoShopServiceModel> Update(AutoShopService entity, AutoShopServiceUpdateRequest request)
+        public virtual  Task<AutoShopServiceModel> Update(AutoShopService entity, AutoShopServiceUpdateRequest request)
         {
             throw new UserException("Action not allowed.");
         }
 
-        public virtual async Task<AutoShopServiceModel> Activate(AutoShopService entity)
+        public virtual  Task<AutoShopServiceModel> Activate(AutoShopService entity)
         {
             throw new UserException("Action not allowed.");
         }
 
-        public virtual async Task<AutoShopServiceModel> Hide(AutoShopService entity)
+        public virtual  Task<AutoShopServiceModel> Hide(AutoShopService entity)
         {
             throw new UserException("Action not allowed.");
         }
 
-        public virtual async Task<bool> Delete(AutoShopService entity)
+        public virtual  Task<bool> Delete(AutoShopService entity)
         {
             throw new UserException("Action not allowed.");
         }
 
-        public virtual async Task<List<string>> AllowedActions()
+        public virtual  Task<List<string>> AllowedActions()
         {
-            return new List<string>();
+            return Task.FromResult(new List<string>());
         }
 
         public BaseAutoShopServiceState CreateState(string? state)

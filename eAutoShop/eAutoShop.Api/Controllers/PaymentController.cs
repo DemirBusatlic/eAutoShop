@@ -1,6 +1,7 @@
 ﻿using eAutoShop.Model.Exceptions;
 using eAutoShop.Model.Model;
 using eAutoShop.Model.Request;
+using eAutoShop.Services.Helpers;
 using eAutoShop.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -8,7 +9,7 @@ using System.Security.Claims;
 
 namespace eAutoShop.Api.Controllers
 {
-    [Authorize(Roles = "customer")]
+    [Authorize(Roles = UserRoles.Customer)]
     [ApiController]
     [Route("[controller]")]
     public class PaymentController : ControllerBase

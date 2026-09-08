@@ -10,19 +10,17 @@ using System.Security.Claims;
 
 namespace eAutoShop.Api.Controllers
 {
-    [AllowAnonymous]
+
     [ApiController]
     public class ProductController : BaseCRUDController<ProductModel, ProductSearchObject, ProductInsertRequest, ProductUpdateRequest>
     {
         private readonly NotificationService _notificationService;
 
-        public ProductController(IProductService service, ILogger<BaseCRUDController<ProductModel, ProductSearchObject, ProductInsertRequest, ProductUpdateRequest>> logger, NotificationService notificationService)
-            : base(logger, service)
+        public ProductController(IProductService service, ILogger<BaseCRUDController<ProductModel, ProductSearchObject, ProductInsertRequest, ProductUpdateRequest>> logger, NotificationService notificationService): base(logger, service)
         {
             _notificationService = notificationService;
         }
-
-        [Authorize(Roles = "manager,salesperson")]
+        [Authorize(Roles = UserRoles.Manager + "," + UserRoles.Salesperson)]
         [HttpPut("{id}/activate")]
         public async Task<ProductModel> Activate(int id)
         {
@@ -37,28 +35,27 @@ namespace eAutoShop.Api.Controllers
             return activatedProduct;
         }
 
-        [Authorize(Roles = "manager,salesperson")]
+        [Authorize(Roles = UserRoles.Manager + "," + UserRoles.Salesperson)]
         [HttpPut("{id}/hide")]
         public virtual async Task<ProductModel> Hide(int id)
         {
             return await (_service as IProductService)!.Hide(id);
         }
 
-        [Authorize(Roles = "manager,salesperson")]
+        [Authorize(Roles = UserRoles.Manager + "," + UserRoles.Salesperson)]
         [HttpGet("{id}/allowed-actions")]
         public virtual async Task<List<string>> AllowedActions(int id)
         {
             return await (_service as IProductService)!.AllowedActions(id);
         }
 
-        [Authorize(Roles = "manager,salesperson")]
+        [Authorize(Roles = UserRoles.Manager + "," + UserRoles.Salesperson)]
         [HttpPost]
         public override async Task<ProductModel> Insert(ProductInsertRequest request)
         {
             return await (_service as IProductService)!.Insert(request);
         }
-
-        [Authorize(Roles = "customer,manager,salesperson,technician")]
+        [Authorize(Roles = UserRoles.Manager + "," + UserRoles.Salesperson + "," + UserRoles.Technician + "," + UserRoles.Customer)]
         [HttpGet("active")]
         public async Task<PageResult<ProductModel>> GetActive([FromQuery] ProductSearchObject? search = null)
         {

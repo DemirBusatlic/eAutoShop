@@ -4,7 +4,7 @@ using eAutoShop.Model.Request;
 using eAutoShop.Model.Utilities;
 using eAutoShop.Services.Database;
 using eAutoShop.Services.Interfaces;
-using eAutoShop.Services.StateMachineService.OrderStateMachine;
+using eAutoShop.Services.Helpers;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -152,7 +152,7 @@ namespace eAutoShop.Services.Services
                     "You cannot verify another user's payment.");
             }
 
-            // Idempotentnost: ponovljeni poziv vraća isti rezultat.
+            
             if (order.State == OrderStates.OnHold ||
                 order.State == OrderStates.Accepted ||
                 order.State == OrderStates.Completed)

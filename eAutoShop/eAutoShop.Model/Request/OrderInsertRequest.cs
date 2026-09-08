@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Text;
 
 namespace eAutoShop.Model.Request
@@ -7,10 +8,17 @@ namespace eAutoShop.Model.Request
     public class OrderInsertRequest
     {
         public string? Username { get; set; }
+
         public bool UserAddress { get; set; }
+
         public int? CityId { get; set; }
+
         public string? ShippingAddress { get; set; }
+
         public string? ShippingPostalCode { get; set; }
-        public List<ProductOrderRequest> Product { get; set; }
+
+        [Required]
+        [MinLength(1,ErrorMessage = "Narudžba mora sadržavati najmanje jedan proizvod.")]
+        public List<ProductOrderRequest> Product { get; set; }= new List<ProductOrderRequest>();
     }
 }

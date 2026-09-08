@@ -11,8 +11,6 @@ public partial class Appointment
 
     public int CustomerId { get; set; }
 
-    public int? OrderId { get; set; }
-
     public DateTime ReservationCreatedDate { get; set; }
 
     public DateTime ReservationDate { get; set; }
@@ -31,8 +29,6 @@ public partial class Appointment
 
     public string Type { get; set; } = null!;
 
-    public string? PaymentIntentId { get; set; }
-
     public bool DeletedByShop { get; set; }
 
     public bool DeletedByCustomer { get; set; }
@@ -48,8 +44,6 @@ public partial class Appointment
     public virtual User Customer { get; set; } = null!;
 
     public virtual User? Employee { get; set; }
-
-    public virtual Order? Order { get; set; }
 
     public virtual StaffReview? StaffReview { get; set; }
 }

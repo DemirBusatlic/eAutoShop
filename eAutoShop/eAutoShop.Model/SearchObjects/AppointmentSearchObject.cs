@@ -18,8 +18,6 @@ namespace eAutoShop.Model.SearchObjects
 
         public double? MaxTotalAmount { get; set; }
 
-        public bool? HasOrder { get; set; }
-
         public DateTime? MinCreatedDate { get; set; }
 
         public DateTime? MaxCreatedDate { get; set; }

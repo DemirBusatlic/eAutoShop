@@ -8,6 +8,6 @@ namespace eAutoShop.Model.Request
 {
     public class CityInsertRequest
     {
-        public string Name { get; set; }
+        public string Name { get; set; } = null!;
     }
 }

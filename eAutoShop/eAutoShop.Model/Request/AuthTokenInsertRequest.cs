@@ -10,7 +10,7 @@ namespace eAutoShop.Model.Request
     public class AuthTokenInsertRequest
     {
         public int Id { get; set; }
-        public string Value { get; set; }
+        public string Value { get; set; } = null!;
         public int UserId { get; set; }
         public DateTime Created { get; set; }
     }

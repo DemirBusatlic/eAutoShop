@@ -17,8 +17,6 @@ namespace eAutoShop.Model.Model
 
         public bool HasStaffReview { get; set; }
 
-        public int? OrderId { get; set; }
-
         public string CarModel { get; set; } = null!;
         public string? RejectionReason { get; set; }
 

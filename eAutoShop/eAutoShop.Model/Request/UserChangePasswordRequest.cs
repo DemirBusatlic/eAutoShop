@@ -6,11 +6,16 @@ using System.Threading.Tasks;
 
 namespace eAutoShop.Model.Request
 {
-    public class UserChangePasswordRequest
-    {
-        public string Token { get; set; }
-        public string OldPassword { get; set; }
-        public string NewPassword { get; set; }
-        public string ConfirmNewPassword { get; set; }
-    }
+   
+        public class UserChangePasswordRequest
+        {
+            public string Token { get; set; } = null!;
+
+            public string OldPassword { get; set; } = null!;
+
+            public string NewPassword { get; set; } = null!;
+
+            public string ConfirmNewPassword { get; set; } = null!;
+        }
+    
 }

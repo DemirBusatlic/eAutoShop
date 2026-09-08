@@ -2,6 +2,7 @@
 using eAutoShop.Model.Request;
 using eAutoShop.Model.SearchObjects;
 using eAutoShop.Services.Interfaces;
+using eAutoShop.Services.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -15,7 +16,7 @@ namespace eAutoShop.Api.Controllers
         {
         }
 
-        [Authorize(Roles = "customer")]
+        [Authorize(Roles = UserRoles.Customer)]
         public override Task<ProductReviewModel> Insert([FromBody] ProductReviewInsertRequest insert)
         {
             var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -30,13 +31,13 @@ namespace eAutoShop.Api.Controllers
             return base.Insert(insert);
         }
 
-        [Authorize(Roles = "customer")]
+        [Authorize(Roles = UserRoles.Customer)]
         public override Task<ProductReviewModel> Update(int id, [FromBody] ProductReviewUpdateRequest update)
         {
             return base.Update(id, update);
         }
 
-        [Authorize(Roles = "customer,manager")]
+        [Authorize(Roles = UserRoles.Manager + "," + UserRoles.Customer)]
         public override Task<IActionResult> Delete(int id)
         {
             return base.Delete(id);

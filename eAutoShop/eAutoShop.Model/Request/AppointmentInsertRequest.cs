@@ -8,8 +8,6 @@ namespace eAutoShop.Model.Request
     {
         public int CarModelId { get; set; }
 
-        public int? OrderId { get; set; }
-
         public DateTime ReservationDate { get; set; }
 
         public List<int> Services { get; set; } = new List<int>();

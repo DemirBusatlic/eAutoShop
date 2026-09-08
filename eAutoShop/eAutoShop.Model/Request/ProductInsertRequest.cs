@@ -10,7 +10,7 @@ namespace eAutoShop.Model.Request
 {
     public class ProductInsertRequest
     {
-        public string Name { get; set; }
+        public string Name { get; set; } = null!;
         public double Price { get; set; }
         public double? Discount { get; set; }
         public string? ImageData { get; set; }

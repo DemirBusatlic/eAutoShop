@@ -16,6 +16,7 @@ class Product {
   List<CarModel>? carModels;
   int? productCategoryId;
   String? category;
+  String? recommendationReason;
 
   Product(
     this.id,
@@ -29,6 +30,7 @@ class Product {
     this.carModels,
     this.productCategoryId,
     this.category,
+    this.recommendationReason,
   );
 
   factory Product.fromJson(Map<String, dynamic> json) =>

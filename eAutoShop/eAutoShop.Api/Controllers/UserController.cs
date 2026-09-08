@@ -2,6 +2,7 @@
 using eAutoShop.Model.Model;
 using eAutoShop.Model.Request;
 using eAutoShop.Model.SearchObjects;
+using eAutoShop.Services.Helpers;
 using eAutoShop.Services.Interfaces;
 using eAutoShop.Services.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -11,10 +12,6 @@ using System.Security.Claims;
 
 namespace eAutoShop.Api.Controllers
 {
-
-    //[Authorize]
-
-
     [ApiController]
     public class UserController : BaseCRUDController<UserModel, UserSearchObject, UserInsertRequest, UserUpdateRequest>
     {
@@ -25,7 +22,7 @@ namespace eAutoShop.Api.Controllers
             _userService = service;
         }
 
-        [Authorize(Roles = "manager")]
+        [Authorize(Roles = UserRoles.Manager)]
         [HttpPost()]
         public async override Task<UserModel> Insert(UserInsertRequest request)
         {
@@ -33,14 +30,14 @@ namespace eAutoShop.Api.Controllers
             return await _userService.Insert(request);
         }
 
-        [Authorize(Roles = "manager")]
+        [Authorize(Roles = UserRoles.Manager)]
         [HttpPut("{id}")]
         public async override Task<UserModel> Update(int id, [FromBody] UserUpdateRequest request)
         {
             return await _userService.Update(id, request);
         }
 
-        [Authorize(Roles = "manager")]
+        [Authorize(Roles = UserRoles.Manager)]
         [HttpDelete("{id}")]
         public override Task<IActionResult> Delete(int id)
         {
@@ -70,6 +67,7 @@ namespace eAutoShop.Api.Controllers
 
             return await _service.GetById(userId);
         }
+
         [Authorize]
         [HttpPut("UpdateByToken")]
         public async Task<UserModel> UpdateByToken(UserUpdateRequest request)
@@ -90,7 +88,7 @@ namespace eAutoShop.Api.Controllers
             await ((IUserService)_service).ChangePassword(userId, request);
         }
 
-        [Authorize(Roles = "manager")]
+        [Authorize(Roles = UserRoles.Manager)]
         [HttpPut("ChangeActiveStatus/{id}")]
         public async Task ChangeActiveStatus(int id)
         {

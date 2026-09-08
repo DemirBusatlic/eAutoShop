@@ -3,6 +3,7 @@ using eAutoShop.Model.Model;
 using eAutoShop.Model.Request;
 using eAutoShop.Model.SearchObjects;
 using eAutoShop.Services.Interfaces;
+using eAutoShop.Services.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -16,8 +17,7 @@ namespace eAutoShop.Api.Controllers
         public OrderController(IOrderService service, ILogger<BaseCRUDController<OrderModel, OrderSearchObject, OrderInsertRequest, OrderUpdateRequest>> logger) : base(logger, service)
         {
         }
-
-        [Authorize(Roles = "customer")]
+        [Authorize(Roles = UserRoles.Customer)]
         [HttpPost]
         public override async Task<OrderModel> Insert(OrderInsertRequest request)
         {
@@ -27,43 +27,39 @@ namespace eAutoShop.Api.Controllers
 
             return await (_service as IOrderService)!.Insert(request);
         }
-
-        [Authorize(Roles = "manager,salesperson")]
+        [Authorize(Roles = UserRoles.Manager + "," + UserRoles.Salesperson)]
         [HttpPut("Accept/{id}")]
         public virtual async Task<OrderModel> Accept(int id, OrderAcceptRequest orderAccept)
         {
             return await (_service as IOrderService)!.Accept(id, orderAccept);
         }
 
-        [Authorize(Roles = "manager,salesperson")]
+        [Authorize(Roles = UserRoles.Manager + "," + UserRoles.Salesperson)]
         [HttpPut("Reject/{id}")]
         public virtual async Task<OrderModel> Reject(int id)
         {
             return await (_service as IOrderService)!.Reject(id);
         }
 
-        [Authorize(Roles = "manager,salesperson")]
+        [Authorize(Roles = UserRoles.Manager + "," + UserRoles.Salesperson)]
         [HttpPut("Complete/{id}")]
         public virtual async Task<OrderModel> Complete(int id)
         {
             return await (_service as IOrderService)!.Complete(id);
         }
-
-        [Authorize(Roles = "customer,manager,salesperson")]
+        [Authorize(Roles = UserRoles.Manager + "," + UserRoles.Salesperson + "," + UserRoles.Customer)]
         [HttpPut("Cancel/{id}")]
         public virtual async Task<OrderModel> Cancel(int id)
         {
             return await (_service as IOrderService)!.Cancel(id);
         }
-
-        [Authorize(Roles = "customer")]
+        [Authorize(Roles = UserRoles.Customer)]
         [HttpPut("Resend/{id}")]
         public virtual async Task<OrderModel> Resend(int id)
         {
             return await (_service as IOrderService)!.Resend(id);
         }
-
-        [Authorize(Roles = "customer,manager,salesperson,technician")]
+        [Authorize(Roles = UserRoles.Manager + "," + UserRoles.Salesperson + "," + UserRoles.Customer + "," + UserRoles.Technician)]
         [HttpPut("SoftDelete/{id}")]
         public virtual async Task<OrderModel> SoftDelete(int id)
         {
@@ -84,15 +80,13 @@ namespace eAutoShop.Api.Controllers
         {
             return await (_service as IOrderService)!.GetBasicOrderInfo(id);
         }
-
-        [Authorize(Roles = "technician,salesperson,manager")]
+        [Authorize(Roles = UserRoles.Manager + "," + UserRoles.Salesperson + "," + UserRoles.Technician)]
         [HttpGet("shop")]
         public async Task<PageResult<OrderModel>> GetForShop([FromQuery] OrderSearchObject? search = null)
         {
             return await (_service as IOrderService)!.Get(search);
         }
-
-        [Authorize(Roles = "customer")]
+        [Authorize(Roles = UserRoles.Customer)]
         [HttpGet("GetByClient")]
         public async Task<PageResult<OrderModel>> GetByClient([FromQuery] OrderSearchObject? search = null)
         {

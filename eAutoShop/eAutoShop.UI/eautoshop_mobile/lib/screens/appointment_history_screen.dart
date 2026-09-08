@@ -31,7 +31,6 @@ class _ReservationHistoryScreenState extends State<AppointmentHistoryScreen> {
   int _totalPages = 1;
 
   String? _selectedState;
-  bool? _hasOrder;
   DateTime? _minReservationDate;
   DateTime? _maxReservationDate;
 
@@ -69,7 +68,6 @@ class _ReservationHistoryScreenState extends State<AppointmentHistoryScreen> {
       state: _selectedState,
       minTotalAmount: minAmount,
       maxTotalAmount: maxAmount,
-      hasOrder: _hasOrder,
       minReservationDate: _minReservationDate,
       maxReservationDate: maxReservationDate,
     );
@@ -171,12 +169,6 @@ class _ReservationHistoryScreenState extends State<AppointmentHistoryScreen> {
 
   void _showFilterDialog() {
     String? draftState = _selectedState;
-    String draftOrderFilter = _hasOrder == null
-        ? 'all'
-        : _hasOrder!
-        ? 'withOrder'
-        : 'withoutOrder';
-
     DateTime? draftMinDate = _minReservationDate;
     DateTime? draftMaxDate = _maxReservationDate;
 
@@ -231,33 +223,6 @@ class _ReservationHistoryScreenState extends State<AppointmentHistoryScreen> {
                         onChanged: (value) {
                           setModalState(() {
                             draftState = value;
-                          });
-                        },
-                      ),
-                      const SizedBox(height: 12),
-                      DropdownButtonFormField<String>(
-                        initialValue: draftOrderFilter,
-                        decoration: const InputDecoration(
-                          labelText: 'Povezana narudžba',
-                          border: OutlineInputBorder(),
-                        ),
-                        items: const [
-                          DropdownMenuItem(
-                            value: 'all',
-                            child: Text('Sve rezervacije'),
-                          ),
-                          DropdownMenuItem(
-                            value: 'withOrder',
-                            child: Text('S narudžbom'),
-                          ),
-                          DropdownMenuItem(
-                            value: 'withoutOrder',
-                            child: Text('Bez narudžbe'),
-                          ),
-                        ],
-                        onChanged: (value) {
-                          setModalState(() {
-                            draftOrderFilter = value ?? 'all';
                           });
                         },
                       ),
@@ -377,7 +342,6 @@ class _ReservationHistoryScreenState extends State<AppointmentHistoryScreen> {
 
                     setModalState(() {
                       draftState = null;
-                      draftOrderFilter = 'all';
                       draftMinDate = null;
                       draftMaxDate = null;
                     });
@@ -433,17 +397,12 @@ class _ReservationHistoryScreenState extends State<AppointmentHistoryScreen> {
 
                     setState(() {
                       _selectedState = draftState;
-                      _hasOrder = draftOrderFilter == 'all'
-                          ? null
-                          : draftOrderFilter == 'withOrder';
-
                       _minReservationDate = draftMinDate;
                       _maxReservationDate = draftMaxDate;
                       _pageNumber = 1;
 
                       _filtersApplied =
                           _selectedState != null ||
-                          _hasOrder != null ||
                           _minAmountController.text.trim().isNotEmpty ||
                           _maxAmountController.text.trim().isNotEmpty ||
                           _minReservationDate != null ||
@@ -921,8 +880,6 @@ class _ReservationHistoryScreenState extends State<AppointmentHistoryScreen> {
                       'Zaposlenik',
                       appointment.employeeUsername ?? 'Još nije dodijeljen',
                     ),
-                    if (appointment.orderId != null)
-                      _detailRow('Narudžba', '#${appointment.orderId}'),
                     if (appointment.estimatedCompletionDate != null)
                       _detailRow(
                         'Procijenjeni završetak',

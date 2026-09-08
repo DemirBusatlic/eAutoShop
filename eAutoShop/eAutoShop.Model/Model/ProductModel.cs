@@ -13,7 +13,7 @@ namespace eAutoShop.Model.Model
 
         public double Price { get; set; }
 
-        public string State { get; set; }
+        public string State { get; set; } = null!;
 
         public double Discount { get; set; }
         public double DiscountedPrice { get; set; }
@@ -25,5 +25,6 @@ namespace eAutoShop.Model.Model
 
         public int? ProductCategoryId { get; set; }
         public string? Category { get; set; }
+        public string? RecommendationReason { get; set; }
     }
 }

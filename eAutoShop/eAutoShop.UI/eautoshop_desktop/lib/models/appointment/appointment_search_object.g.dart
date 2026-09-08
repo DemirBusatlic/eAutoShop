@@ -15,7 +15,6 @@ AppointmentSearchObject _$AppointmentSearchObjectFromJson(
   type: json['type'] as String?,
   minTotalAmount: (json['minTotalAmount'] as num?)?.toDouble(),
   maxTotalAmount: (json['maxTotalAmount'] as num?)?.toDouble(),
-  hasOrder: json['hasOrder'] as bool?,
   minCreatedDate: json['minCreatedDate'] == null
       ? null
       : DateTime.parse(json['minCreatedDate'] as String),
@@ -45,7 +44,6 @@ Map<String, dynamic> _$AppointmentSearchObjectToJson(
   'type': ?instance.type,
   'minTotalAmount': ?instance.minTotalAmount,
   'maxTotalAmount': ?instance.maxTotalAmount,
-  'hasOrder': ?instance.hasOrder,
   'minCreatedDate': ?instance.minCreatedDate?.toIso8601String(),
   'maxCreatedDate': ?instance.maxCreatedDate?.toIso8601String(),
   'minReservationDate': ?instance.minReservationDate?.toIso8601String(),

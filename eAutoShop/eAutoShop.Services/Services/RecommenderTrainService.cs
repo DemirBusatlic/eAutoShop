@@ -1,102 +1,145 @@
 ﻿using eAutoShop.Model.Exceptions;
 using eAutoShop.Services.Database;
+using eAutoShop.Services.Helpers;
 using eAutoShop.Services.Interfaces;
+using eAutoShop.Services.StateMachineService.OrderStateMachine;
 using eAutoShop.Services.Utilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.ML;
 using Microsoft.ML.Trainers;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace eAutoShop.Services.Services
 {
     public class RecommenderTrainService : IRecommenderTrainService
     {
         protected readonly AutoShopContext _context;
+
         private static readonly MLContext mlContext = new MLContext();
-        private static readonly object isLocked = new object();
+
+        private static readonly SemaphoreSlim trainingLock =
+            new SemaphoreSlim(1, 1);
 
         public RecommenderTrainService(AutoShopContext context)
         {
             _context = context;
         }
 
-        public void TrainProductsModel()
+        public async Task TrainProductsModel()
         {
-            lock (isLocked)
-            {
-                var orders = _context.Orders.Include(x => x.OrderItems).ToList();
+            await trainingLock.WaitAsync();
 
-                if (orders == null || !orders.Any())
+            try
+            {
+                var orders = await _context.Orders
+                    .AsNoTracking()
+                    .Include(x => x.OrderItems)
+                    .Where(x => x.State == OrderStates.Completed)
+                    .ToListAsync();
+
+                if (!orders.Any())
                 {
-                    throw new UserException("Nema dovoljno podataka za treniranje sistema preporuke.");
+                    throw new UserException(
+                        "Nema dovoljno završenih narudžbi za " +
+                        "treniranje sistema preporuke.");
                 }
 
                 var data = new List<ProductEntry>();
 
                 foreach (var order in orders)
                 {
-                    if (order.OrderItems.Count > 1)
+                    var productIds = order.OrderItems
+                        .Select(x => x.ProductId)
+                        .Distinct()
+                        .ToList();
+
+                    if (productIds.Count < 2)
                     {
-                        var productIds = order.OrderItems.Select(x => x.ProductId).ToList();
+                        continue;
+                    }
 
-                        productIds.ForEach(productId =>
+                    foreach (var productId in productIds)
+                    {
+                        var relatedProductIds = productIds
+                            .Where(id => id != productId);
+
+                        foreach (var relatedProductId in relatedProductIds)
                         {
-                            var relatedProducts = order.OrderItems
-                                .Where(x => x.ProductId != productId);
-
-                            foreach (var relatedProduct in relatedProducts)
-                            {
-                                data.Add(new ProductEntry
+                            data.Add(
+                                new ProductEntry
                                 {
                                     ProductId = (uint)productId,
-                                    CoPurchaseProductId = (uint)relatedProduct.ProductId,
+                                    CoPurchaseProductId =
+                                        (uint)relatedProductId,
                                     Label = 1
                                 });
-                            }
-                        });
+                        }
                     }
                 }
 
                 if (!data.Any())
                 {
-                    throw new UserException("Nema dovoljno povezanih proizvoda za treniranje sistema preporuke.");
+                    throw new UserException(
+                        "Nema dovoljno povezanih proizvoda za " +
+                        "treniranje sistema preporuke.");
                 }
 
-                var trainData = mlContext.Data.LoadFromEnumerable(data);
+                var trainData =
+                    mlContext.Data.LoadFromEnumerable(data);
 
-                var options = new MatrixFactorizationTrainer.Options
-                {
-                    MatrixColumnIndexColumnName = nameof(ProductEntry.ProductId),
-                    MatrixRowIndexColumnName = nameof(ProductEntry.CoPurchaseProductId),
-                    LabelColumnName = nameof(ProductEntry.Label),
-                    LossFunction = MatrixFactorizationTrainer.LossFunctionType.SquareLossOneClass,
-                    Alpha = 0.01,
-                    Lambda = 0.025,
-                    NumberOfIterations = 100,
-                    C = 0.00001
-                };
+                var options =
+                    new MatrixFactorizationTrainer.Options
+                    {
+                        MatrixColumnIndexColumnName =
+                            nameof(ProductEntry.ProductId),
 
-                var trainer = mlContext.Recommendation().Trainers.MatrixFactorization(options);
+                        MatrixRowIndexColumnName =
+                            nameof(ProductEntry.CoPurchaseProductId),
+                        LabelColumnName =
+                            nameof(ProductEntry.Label),
+                        LossFunction =
+                            MatrixFactorizationTrainer
+                                .LossFunctionType
+                                .SquareLossOneClass,
+                        Alpha = 0.01,
+                        Lambda = 0.025,
+                        NumberOfIterations = 100,
+                        C = 0.00001
+                    };
+
+                var trainer = mlContext
+                    .Recommendation()
+                    .Trainers
+                    .MatrixFactorization(options);
 
                 var model = trainer.Fit(trainData);
 
                 try
                 {
-                    string modelsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "RecommenderModels");
+                    var modelsPath = Path.Combine(
+                        AppDomain.CurrentDomain.BaseDirectory,
+                        "RecommenderModels");
+
                     Directory.CreateDirectory(modelsPath);
 
-                    string productsModelPath = Path.Combine(modelsPath, "productsmodel.zip");
+                    var productsModelPath = Path.Combine(
+                        modelsPath,
+                        "productsmodel.zip");
 
-                    mlContext.Model.Save(model, trainData.Schema, productsModelPath);
+                    mlContext.Model.Save(
+                        model,
+                        trainData.Schema,
+                        productsModelPath);
                 }
                 catch
                 {
-                    throw new UserException("Server je zauzet. Pokušajte ponovo kasnije.");
+                    throw new UserException(
+                        "Model preporuka nije moguće sačuvati. " +
+                        "Pokušajte ponovo kasnije.");
                 }
+            }
+            finally
+            {
+                trainingLock.Release();
             }
         }
     }

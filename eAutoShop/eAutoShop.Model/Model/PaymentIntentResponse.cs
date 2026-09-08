@@ -8,7 +8,7 @@ namespace eAutoShop.Model.Model
 {
     public class PaymentIntentResponse
     {
-        public string PaymentIntentId { get; set; }
-        public string ClientSecret { get; set; }
+        public string PaymentIntentId { get; set; } = null!;
+        public string ClientSecret { get; set; } = null!;
     }
 }

@@ -50,21 +50,6 @@ namespace eAutoShop.Services.StateMachineService.AppointmentStateMachine
             if (request.Services == null || !request.Services.Any())
                 throw new UserException("Please select at least one service.");
 
-            if (request.OrderId != null)
-            {
-                var order = await _context.Orders.FirstOrDefaultAsync(x => x.Id == request.OrderId);
-
-                if (order == null)
-                    throw new UserException($"Order #{request.OrderId} does not exist.");
-
-                if (order.CustomerId != customer.Id)
-                    throw new UserException($"Order #{request.OrderId} is not made by you.");
-
-                var alreadyUsed = await _context.Appointments.AnyAsync(x => x.OrderId == order.Id && x.State != AppointmentStates.Rejected && x.State != AppointmentStates.Cancelled);
-
-                if (alreadyUsed)
-                    throw new UserException($"This order is already used for another appointment.");
-            }
 
             double totalAmount = 0;
             TimeSpan totalDuration = TimeSpan.Zero;
@@ -95,7 +80,6 @@ namespace eAutoShop.Services.StateMachineService.AppointmentStateMachine
             {
                 CustomerId = customer.Id,
                 EmployeeId = null,
-                OrderId = request.OrderId,
                 CarModelId = request.CarModelId,
                 ReservationCreatedDate = DateTime.UtcNow,
                 ReservationDate = request.ReservationDate,

@@ -13,7 +13,6 @@ class Appointment {
   @JsonKey(defaultValue: false)
   final bool hasStaffReview;
 
-  final int? orderId;
   final String carModel;
   final String? rejectionReason;
   final String? cancellationReason;
@@ -33,7 +32,6 @@ class Appointment {
     this.employeeId,
     this.employeeUsername,
     this.hasStaffReview = false,
-    this.orderId,
     required this.carModel,
     this.rejectionReason,
     this.cancellationReason,

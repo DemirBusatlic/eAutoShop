@@ -19,9 +19,7 @@ namespace eAutoShop.Services.StateMachineService.AppointmentStateMachine
         {
         }
 
-        public override async Task<AppointmentModel> Update(
-    Appointment entity,
-    AppointmentUpdateRequest request)
+        public override async Task<AppointmentModel> Update(Appointment entity,AppointmentUpdateRequest request)
         {
             if (request.ReservationDate.HasValue)
             {

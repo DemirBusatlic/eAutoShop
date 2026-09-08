@@ -31,8 +31,6 @@ public partial class Order
 
     public bool DeletedByCustomer { get; set; }
 
-    public virtual ICollection<Appointment> Appointments { get; set; } = new List<Appointment>();
-
     public virtual City City { get; set; } = null!;
 
     public virtual User? Customer { get; set; }

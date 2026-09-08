@@ -83,7 +83,7 @@ namespace eAutoShop.Services.StateMachineService.AppointmentStateMachine
                 x.Role.Name == UserRoles.Technician
             );
 
-            // Ako nema aktivnih tehničara, nema ni slobodnog termina.
+            
             if (technicianCount == 0)
             {
                 return true;
@@ -91,7 +91,7 @@ namespace eAutoShop.Services.StateMachineService.AppointmentStateMachine
 
             var reservationEnd = reservationStart.Add(duration);
 
-            // TotalDuration je TimeOnly i ne može predstavljati 24h ili više.
+           
             var earliestPossibleStart = reservationStart.AddDays(-1);
 
             var appointments = await _context.Appointments

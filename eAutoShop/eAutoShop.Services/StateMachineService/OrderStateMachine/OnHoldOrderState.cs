@@ -42,27 +42,14 @@ namespace eAutoShop.Services.StateMachineService.OrderStateMachine
 
         public override async Task<OrderModel> Accept(Order entity, OrderAcceptRequest orderAccept)
         {
-            if (orderAccept.shippingDate <= DateTime.UtcNow)
+            if (orderAccept.ShippingDate <= DateTime.UtcNow)
             {
                 throw new UserException("Shipping date must be in the future.");
             }
 
             entity.State = OrderStates.Accepted;
-            entity.ShippingDate = orderAccept.shippingDate;
+            entity.ShippingDate = orderAccept.ShippingDate;
 
-            var appointment = await _context.Appointments.FirstOrDefaultAsync(x => x.OrderId == entity.Id);
-
-            if (appointment != null)
-            {
-                if (entity.ShippingDate > appointment.ReservationDate)
-                {
-                    appointment.State = AppointmentStates.Cancelled;
-                }
-                else
-                {
-                    appointment.State = AppointmentStates.Pending;
-                }
-            }
 
             await _context.SaveChangesAsync();
 
@@ -73,25 +60,13 @@ namespace eAutoShop.Services.StateMachineService.OrderStateMachine
         {
             if (string.IsNullOrWhiteSpace(entity.PaymentIntentId))
             {
-                throw new UserException(
-                    "Payment intent does not exist.");
+                throw new UserException("Payment intent does not exist.");
             }
 
-            await _serviceProvider
-                .GetRequiredService<IStripeService>()
-                .CreateRefundAsync(
-                    entity.PaymentIntentId,
-                    $"order-refund-{entity.Id}");
+            await _serviceProvider.GetRequiredService<IStripeService>().CreateRefundAsync(entity.PaymentIntentId,$"order-refund-{entity.Id}");
 
             entity.State = OrderStates.Rejected;
 
-            var appointment = await _context.Appointments
-                .FirstOrDefaultAsync(x => x.OrderId == entity.Id);
-
-            if (appointment != null)
-            {
-                appointment.OrderId = null;
-            }
 
             await _context.SaveChangesAsync();
 
@@ -102,25 +77,13 @@ namespace eAutoShop.Services.StateMachineService.OrderStateMachine
         {
             if (string.IsNullOrWhiteSpace(entity.PaymentIntentId))
             {
-                throw new UserException(
-                    "Payment intent does not exist.");
+                throw new UserException("Payment intent does not exist.");
             }
 
-            await _serviceProvider
-                .GetRequiredService<IStripeService>()
-                .CreateRefundAsync(
-                    entity.PaymentIntentId,
-                    $"order-refund-{entity.Id}");
+            await _serviceProvider.GetRequiredService<IStripeService>().CreateRefundAsync(entity.PaymentIntentId,$"order-refund-{entity.Id}");
 
             entity.State = OrderStates.Cancelled;
 
-            var appointment = await _context.Appointments
-                .FirstOrDefaultAsync(x => x.OrderId == entity.Id);
-
-            if (appointment != null)
-            {
-                appointment.OrderId = null;
-            }
 
             await _context.SaveChangesAsync();
 

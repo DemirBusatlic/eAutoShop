@@ -601,9 +601,26 @@ class _ProductsScreenState extends State<ProductsScreen> {
                                   child: _productImage(recommendedProduct),
                                 ),
                                 title: Text(recommendedProduct.name),
-                                subtitle: Text(
-                                  '${(recommendedProduct.discount > 0 ? recommendedProduct.discountedPrice : recommendedProduct.price).toStringAsFixed(2)} €',
+                                subtitle: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      '${(recommendedProduct.discount > 0 ? recommendedProduct.discountedPrice : recommendedProduct.price).toStringAsFixed(2)} €',
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      recommendedProduct.recommendationReason ??
+                                          'Preporučeno na osnovu zajedničkih kupovina.',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.copyWith(
+                                            color: Colors.grey.shade600,
+                                          ),
+                                    ),
+                                  ],
                                 ),
+                                isThreeLine: true,
                                 onTap: () {
                                   Navigator.pop(dialogContext);
                                   _showProductDetails(recommendedProduct);

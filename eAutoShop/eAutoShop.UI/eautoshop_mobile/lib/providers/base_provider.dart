@@ -1,10 +1,11 @@
 import 'dart:convert';
-import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:http/http.dart' as http;
+
 import 'package:eautoshop_mobile/constants.dart';
 import 'package:eautoshop_mobile/models/search_result.dart';
 import 'package:eautoshop_mobile/utilities/custom_exception.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:http/http.dart' as http;
 
 abstract class BaseProvider<T, TInsertUpdate> with ChangeNotifier {
   static const String baseUrl = 'http://${ApiHost.address}:${ApiHost.port}';
@@ -49,9 +50,10 @@ abstract class BaseProvider<T, TInsertUpdate> with ChangeNotifier {
       handleHttpError(response);
     } on CustomException {
       rethrow;
-    } catch (e) {
+    } catch (_) {
       throw CustomException(
-        "Can't reach the server. Please check whether the API is running.",
+        'Nije moguće pristupiti serveru. '
+        'Provjerite da li je API pokrenut.',
       );
     }
   }
@@ -74,9 +76,10 @@ abstract class BaseProvider<T, TInsertUpdate> with ChangeNotifier {
       handleHttpError(response);
     } on CustomException {
       rethrow;
-    } catch (e) {
+    } catch (_) {
       throw CustomException(
-        "Can't reach the server. Please check whether the API is running.",
+        'Nije moguće pristupiti serveru. '
+        'Provjerite da li je API pokrenut.',
       );
     }
   }
@@ -101,9 +104,10 @@ abstract class BaseProvider<T, TInsertUpdate> with ChangeNotifier {
       handleHttpError(response);
     } on CustomException {
       rethrow;
-    } catch (e) {
+    } catch (_) {
       throw CustomException(
-        "Can't reach the server. Please check whether the API is running.",
+        'Nije moguće pristupiti serveru. '
+        'Provjerite da li je API pokrenut.',
       );
     }
   }
@@ -129,9 +133,10 @@ abstract class BaseProvider<T, TInsertUpdate> with ChangeNotifier {
       handleHttpError(response);
     } on CustomException {
       rethrow;
-    } catch (e) {
+    } catch (_) {
       throw CustomException(
-        "Can't reach the server. Please check whether the API is running.",
+        'Nije moguće pristupiti serveru. '
+        'Provjerite da li je API pokrenut.',
       );
     }
   }
@@ -151,9 +156,10 @@ abstract class BaseProvider<T, TInsertUpdate> with ChangeNotifier {
       handleHttpError(response);
     } on CustomException {
       rethrow;
-    } catch (e) {
+    } catch (_) {
       throw CustomException(
-        "Can't reach the server. Please check whether the API is running.",
+        'Nije moguće pristupiti serveru. '
+        'Provjerite da li je API pokrenut.',
       );
     }
   }
@@ -179,33 +185,69 @@ abstract class BaseProvider<T, TInsertUpdate> with ChangeNotifier {
   }
 
   Never handleHttpError(http.Response response) {
-    String message = 'Server error (${response.statusCode}).';
+    String message = 'Greška servera (${response.statusCode}).';
 
-    if (response.body.isNotEmpty) {
+    if (response.body.trim().isNotEmpty) {
       try {
         final body = jsonDecode(response.body);
 
         if (body is Map<String, dynamic>) {
-          final errors = body['errors'];
+          final extractedError = _extractErrorMessage(body['errors']);
 
-          if (errors is Map<String, dynamic>) {
-            final userErrors = errors['UserError'];
-
-            if (userErrors is List && userErrors.isNotEmpty) {
-              message = userErrors.first.toString();
-            }
+          if (extractedError != null) {
+            message = extractedError;
+          } else if (body['message']?.toString().trim().isNotEmpty == true) {
+            message = body['message'].toString();
+          } else if (body['title']?.toString().trim().isNotEmpty == true) {
+            message = body['title'].toString();
           }
-
-          message =
-              body['message']?.toString() ??
-              body['title']?.toString() ??
-              message;
+        } else if (body is String && body.trim().isNotEmpty) {
+          message = body;
         }
       } catch (_) {
-        message = response.body;
+        message = response.body.trim();
       }
     }
 
     throw CustomException(message);
+  }
+
+  String? _extractErrorMessage(dynamic errors) {
+    if (errors is! Map<String, dynamic> || errors.isEmpty) {
+      return null;
+    }
+
+    const preferredKeys = ['UserError', 'error'];
+
+    for (final key in preferredKeys) {
+      final message = _readErrorValue(errors[key]);
+
+      if (message != null) {
+        return message;
+      }
+    }
+
+    for (final value in errors.values) {
+      final message = _readErrorValue(value);
+
+      if (message != null) {
+        return message;
+      }
+    }
+
+    return null;
+  }
+
+  String? _readErrorValue(dynamic value) {
+    if (value is List && value.isNotEmpty) {
+      final message = value.first.toString().trim();
+      return message.isEmpty ? null : message;
+    }
+
+    if (value is String && value.trim().isNotEmpty) {
+      return value.trim();
+    }
+
+    return null;
   }
 }

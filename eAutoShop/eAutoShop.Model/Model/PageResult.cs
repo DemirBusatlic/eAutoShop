@@ -8,7 +8,7 @@ namespace eAutoShop.Model.Model
 {
     public class PageResult<T>
     {
-        public List<T> Result { get; set; }
+        public List<T> Result { get; set; } = new List<T>();
         public int? Count { get; set; }
     }
 }

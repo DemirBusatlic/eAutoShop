@@ -17,8 +17,7 @@ namespace eAutoShop.Api.Controllers
         }
 
         [Authorize(Roles = UserRoles.Customer)]
-        public override Task<StaffReviewModel> Insert(
-            [FromBody] StaffReviewInsertRequest insert)
+        public override Task<StaffReviewModel> Insert([FromBody] StaffReviewInsertRequest insert)
         {
             var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
 

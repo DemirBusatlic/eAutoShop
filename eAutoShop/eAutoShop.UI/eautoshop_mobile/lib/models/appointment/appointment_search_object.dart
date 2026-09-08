@@ -8,7 +8,6 @@ class AppointmentSearchObject {
   String? type;
   double? minTotalAmount;
   double? maxTotalAmount;
-  bool? hasOrder;
   DateTime? minCreatedDate;
   DateTime? maxCreatedDate;
   DateTime? minReservationDate;
@@ -21,7 +20,6 @@ class AppointmentSearchObject {
     this.type,
     this.minTotalAmount,
     this.maxTotalAmount,
-    this.hasOrder,
     this.minCreatedDate,
     this.maxCreatedDate,
     this.minReservationDate,

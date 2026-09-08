@@ -33,8 +33,6 @@ class _ServicesScreenState extends State<ServicesScreen> {
 
   final TextEditingController _nameFilterController = TextEditingController();
 
-  final TextEditingController _orderIdController = TextEditingController();
-
   final Map<int, AutoShopService> _selectedServices = {};
 
   List<CarModelsByManufacturer> _carModelsByManufacturer = [];
@@ -634,25 +632,6 @@ class _ServicesScreenState extends State<ServicesScreen> {
                         ),
                       ],
                       const SizedBox(height: 12),
-                      TextFormField(
-                        controller: _orderIdController,
-                        enabled: !submitting,
-                        keyboardType: TextInputType.number,
-                        decoration: const InputDecoration(
-                          labelText: 'Broj narudžbe (opcionalno)',
-                          border: OutlineInputBorder(),
-                        ),
-                        validator: (value) {
-                          final text = value?.trim() ?? '';
-
-                          if (text.isNotEmpty && int.tryParse(text) == null) {
-                            return 'Unesite ispravan broj narudžbe.';
-                          }
-
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 12),
                       Row(
                         children: [
                           Expanded(
@@ -740,14 +719,8 @@ class _ServicesScreenState extends State<ServicesScreen> {
                                   submitting = true;
                                 });
 
-                                final orderIdText = _orderIdController.text
-                                    .trim();
-
                                 final appointment = AppointmentInsert(
                                   carModelId: _selectedCarModel!.id,
-                                  orderId: orderIdText.isEmpty
-                                      ? null
-                                      : int.parse(orderIdText),
                                   reservationDate: localDateTime.toUtc(),
                                   services: _selectedServices.keys.toList(),
                                 );
@@ -765,7 +738,6 @@ class _ServicesScreenState extends State<ServicesScreen> {
 
                                   setState(() {
                                     _selectedServices.clear();
-                                    _orderIdController.clear();
                                     _selectedManufacturerId = null;
                                     _selectedCarModel = null;
                                     _selectedDate = null;
@@ -1040,7 +1012,6 @@ class _ServicesScreenState extends State<ServicesScreen> {
   @override
   void dispose() {
     _nameFilterController.dispose();
-    _orderIdController.dispose();
     super.dispose();
   }
 }

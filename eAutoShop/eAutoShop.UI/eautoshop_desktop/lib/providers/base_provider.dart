@@ -54,8 +54,10 @@ abstract class BaseProvider<T, TInsertUpdate> with ChangeNotifier {
       rethrow;
     } catch (error) {
       debugPrint('GET $endpoint failed: $error');
+
       throw const CustomException(
-        'Nije moguće pristupiti serveru. Provjerite da li je API pokrenut.',
+        'Nije moguće pristupiti serveru. '
+        'Provjerite da li je API pokrenut.',
       );
     }
   }
@@ -80,8 +82,10 @@ abstract class BaseProvider<T, TInsertUpdate> with ChangeNotifier {
       rethrow;
     } catch (error) {
       debugPrint('GET $endpoint/$id failed: $error');
+
       throw const CustomException(
-        'Nije moguće pristupiti serveru. Provjerite da li je API pokrenut.',
+        'Nije moguće pristupiti serveru. '
+        'Provjerite da li je API pokrenut.',
       );
     }
   }
@@ -108,8 +112,10 @@ abstract class BaseProvider<T, TInsertUpdate> with ChangeNotifier {
       rethrow;
     } catch (error) {
       debugPrint('POST $endpoint failed: $error');
+
       throw const CustomException(
-        'Nije moguće pristupiti serveru. Provjerite da li je API pokrenut.',
+        'Nije moguće pristupiti serveru. '
+        'Provjerite da li je API pokrenut.',
       );
     }
   }
@@ -137,8 +143,10 @@ abstract class BaseProvider<T, TInsertUpdate> with ChangeNotifier {
       rethrow;
     } catch (error) {
       debugPrint('PUT $endpoint/$id failed: $error');
+
       throw const CustomException(
-        'Nije moguće pristupiti serveru. Provjerite da li je API pokrenut.',
+        'Nije moguće pristupiti serveru. '
+        'Provjerite da li je API pokrenut.',
       );
     }
   }
@@ -160,8 +168,10 @@ abstract class BaseProvider<T, TInsertUpdate> with ChangeNotifier {
       rethrow;
     } catch (error) {
       debugPrint('DELETE $endpoint/$id failed: $error');
+
       throw const CustomException(
-        'Nije moguće pristupiti serveru. Provjerite da li je API pokrenut.',
+        'Nije moguće pristupiti serveru. '
+        'Provjerite da li je API pokrenut.',
       );
     }
   }
@@ -174,27 +184,63 @@ abstract class BaseProvider<T, TInsertUpdate> with ChangeNotifier {
         final body = jsonDecode(response.body);
 
         if (body is Map<String, dynamic>) {
-          final errors = body['errors'];
+          final extractedError = _extractErrorMessage(body['errors']);
 
-          if (errors is Map<String, dynamic>) {
-            final userErrors = errors['UserError'];
-
-            if (userErrors is List && userErrors.isNotEmpty) {
-              message = userErrors.first.toString();
-            }
+          if (extractedError != null) {
+            message = extractedError;
+          } else if (body['message']?.toString().trim().isNotEmpty == true) {
+            message = body['message'].toString();
+          } else if (body['title']?.toString().trim().isNotEmpty == true) {
+            message = body['title'].toString();
           }
-
-          message =
-              body['message']?.toString() ??
-              body['title']?.toString() ??
-              message;
+        } else if (body is String && body.trim().isNotEmpty) {
+          message = body.trim();
         }
       } catch (_) {
-        message = response.body;
+        message = response.body.trim();
       }
     }
 
     throw CustomException(message);
+  }
+
+  String? _extractErrorMessage(dynamic errors) {
+    if (errors is! Map<String, dynamic> || errors.isEmpty) {
+      return null;
+    }
+
+    const preferredKeys = ['UserError', 'error'];
+
+    for (final key in preferredKeys) {
+      final message = _readErrorValue(errors[key]);
+
+      if (message != null) {
+        return message;
+      }
+    }
+
+    for (final value in errors.values) {
+      final message = _readErrorValue(value);
+
+      if (message != null) {
+        return message;
+      }
+    }
+
+    return null;
+  }
+
+  String? _readErrorValue(dynamic value) {
+    if (value is List && value.isNotEmpty) {
+      final message = value.first.toString().trim();
+      return message.isEmpty ? null : message;
+    }
+
+    if (value is String && value.trim().isNotEmpty) {
+      return value.trim();
+    }
+
+    return null;
   }
 
   Uri _createUri({String customEndpoint = '', Map<String, dynamic>? filter}) {
@@ -244,5 +290,7 @@ abstract class BaseProvider<T, TInsertUpdate> with ChangeNotifier {
     return '$baseUrl/$path';
   }
 
-  bool _isSuccessful(int statusCode) => statusCode >= 200 && statusCode < 300;
+  bool _isSuccessful(int statusCode) {
+    return statusCode >= 200 && statusCode < 300;
+  }
 }

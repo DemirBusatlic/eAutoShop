@@ -1,4 +1,5 @@
 ﻿using eAutoShop.Model.Request;
+using eAutoShop.Services.Helpers;
 using eAutoShop.Services.Interfaces;
 using eAutoShop.Services.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -8,7 +9,7 @@ using System.Security.Claims;
 
 namespace eAutoShop.Api.Controllers
 {
-    [Authorize(Roles = "manager,salesperson, technician")]
+    [Authorize(Roles = UserRoles.Manager + "," + UserRoles.Salesperson + "," + UserRoles.Technician)]
     [ApiController]
     [Route("[controller]")]
     public class ReportController : ControllerBase

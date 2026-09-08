@@ -6,6 +6,6 @@ namespace eAutoShop.Model.Request
 {
     public class OrderAcceptRequest
     {
-        public DateTime shippingDate { get; set; }
+        public DateTime ShippingDate { get; set; }
     }
 }
