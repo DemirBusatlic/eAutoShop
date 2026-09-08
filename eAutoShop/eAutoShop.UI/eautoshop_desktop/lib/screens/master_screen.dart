@@ -4,6 +4,7 @@ import 'package:eautoshop_desktop/screens/home_screen.dart';
 import 'package:eautoshop_desktop/screens/appointment_screen.dart';
 import 'package:eautoshop_desktop/screens/user_screen.dart';
 import 'package:eautoshop_desktop/screens/customer_screen.dart';
+import 'package:eautoshop_desktop/screens/catalog_screen.dart';
 import 'package:eautoshop_desktop/screens/product_screen.dart';
 import 'package:eautoshop_desktop/screens/order_screen.dart';
 import 'package:eautoshop_desktop/screens/service_screen.dart';
@@ -237,6 +238,12 @@ class _MasterScreenState extends State<MasterScreen> {
           label: 'Zaposlenici',
           icon: Icons.badge_outlined,
           screen: UserScreen(),
+        ),
+        const _DesktopDestination(
+          key: 'catalogs',
+          label: 'Katalozi',
+          icon: Icons.category_outlined,
+          screen: CatalogScreen(),
         ),
       ],
       if (!authProvider.isTechnician)

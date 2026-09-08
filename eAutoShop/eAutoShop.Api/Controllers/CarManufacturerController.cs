@@ -9,26 +9,26 @@ using Microsoft.AspNetCore.Mvc;
 namespace eAutoShop.Api.Controllers
 {
     [ApiController]
-    public class ProductCategoryController: BaseCRUDController<ProductCategoryModel,ProductCategorySearchObject,ProductCategoryInsertRequest,ProductCategoryUpdateRequest>
+    public class CarManufacturerController: BaseCRUDController<CarManufacturerModel,CarManufacturerSearchObject,CarManufacturerInsertRequest,CarManufacturerUpdateRequest>
     {
-        public ProductCategoryController(ILogger<BaseCRUDController<ProductCategoryModel,ProductCategorySearchObject,ProductCategoryInsertRequest,ProductCategoryUpdateRequest>> logger,IProductCategoryService service): base(logger, service)
+        public CarManufacturerController(ILogger<BaseCRUDController<CarManufacturerModel,CarManufacturerSearchObject,CarManufacturerInsertRequest,CarManufacturerUpdateRequest>> logger,ICarManufacturerService service): base(logger, service)
         {
         }
 
         [Authorize]
-        public override Task<PageResult<ProductCategoryModel>> Get([FromQuery] ProductCategorySearchObject? search = null)
+        public override Task<PageResult<CarManufacturerModel>> Get([FromQuery] CarManufacturerSearchObject? search = null)
         {
             return base.Get(search);
         }
 
         [Authorize(Roles = UserRoles.Manager)]
-        public override Task<ProductCategoryModel> Insert([FromBody] ProductCategoryInsertRequest insert)
+        public override Task<CarManufacturerModel> Insert([FromBody] CarManufacturerInsertRequest insert)
         {
             return base.Insert(insert);
         }
 
         [Authorize(Roles = UserRoles.Manager)]
-        public override Task<ProductCategoryModel> Update(int id,[FromBody] ProductCategoryUpdateRequest update)
+        public override Task<CarManufacturerModel> Update(int id,[FromBody] CarManufacturerUpdateRequest update)
         {
             return base.Update(id, update);
         }

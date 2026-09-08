@@ -1,4 +1,5 @@
 ﻿using eAutoShop.Model.Model;
+using eAutoShop.Model.Request;
 using eAutoShop.Model.SearchObjects;
 using eAutoShop.Services.Database;
 using System;
@@ -9,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace eAutoShop.Services.Interfaces
 {
-    public interface IServiceTypeService : IService<ServiceTypeModel, ServiceTypeSearchObject>
+    public interface IServiceTypeService: IBaseCRUDService<ServiceTypeModel,ServiceTypeSearchObject,ServiceTypeInsertRequest,ServiceTypeUpdateRequest>
     {
     }
 }

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace eAutoShop.Model.SearchObjects
 {
-    public class ServiceTypeSearchObject : BaseSearchObject
+    public class CarManufacturerSearchObject : BaseSearchObject
     {
         public string? Name { get; set; }
     }

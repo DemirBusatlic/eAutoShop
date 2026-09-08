@@ -4,14 +4,12 @@ using eAutoShop.Model.SearchObjects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Dynamic.Core;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace eAutoShop.Services.Interfaces
 {
-    public interface ICarModelService: IBaseCRUDService<CarModelModel,CarModelSearchObject,CarModelInsertRequest,CarModelUpdateRequest>
+    public interface ICarManufacturerService: IBaseCRUDService<CarManufacturerModel,CarManufacturerSearchObject,CarManufacturerInsertRequest,CarManufacturerUpdateRequest>
     {
-        Task<PageResult<CarModelGetByManufacturerModel>>GetByManufacturerAll();
     }
 }

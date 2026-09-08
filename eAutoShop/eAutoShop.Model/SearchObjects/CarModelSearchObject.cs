@@ -8,5 +8,8 @@ namespace eAutoShop.Model.SearchObjects
 {
     public class CarModelSearchObject : BaseSearchObject
     {
+        public string? Name { get; set; }
+
+        public int? CarManufacturerId { get; set; }
     }
 }

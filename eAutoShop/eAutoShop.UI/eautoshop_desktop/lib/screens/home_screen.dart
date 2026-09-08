@@ -109,6 +109,12 @@ class HomeScreen extends StatelessWidget {
           description: 'Upravljanje nalozima zaposlenika.',
           icon: Icons.badge_outlined,
         ),
+        const _HomeModule(
+          key: 'catalogs',
+          title: 'Katalozi',
+          description: 'Upravljanje gradovima, kategorijama i vozilima.',
+          icon: Icons.category_outlined,
+        ),
       ],
       if (!auth.isTechnician)
         const _HomeModule(

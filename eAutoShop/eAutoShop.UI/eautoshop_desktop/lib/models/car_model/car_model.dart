@@ -7,11 +7,15 @@ class CarModel {
   final int id;
   final String name;
   final String modelYear;
+  final int carManufacturerId;
+  final String carManufacturerName;
 
   const CarModel({
     required this.id,
     required this.name,
     required this.modelYear,
+    required this.carManufacturerId,
+    required this.carManufacturerName,
   });
 
   factory CarModel.fromJson(Map<String, dynamic> json) =>

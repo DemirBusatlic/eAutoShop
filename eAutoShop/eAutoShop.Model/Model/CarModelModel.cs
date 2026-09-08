@@ -14,5 +14,9 @@ namespace eAutoShop.Model.Model
         public string Name { get; set; } = null!;
 
         public string ModelYear { get; set; } = null!;
+
+        public int CarManufacturerId { get; set; }
+
+        public string CarManufacturerName { get; set; } = null!;
     }
 }

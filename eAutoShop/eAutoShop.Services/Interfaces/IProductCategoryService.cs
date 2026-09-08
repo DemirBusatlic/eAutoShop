@@ -1,4 +1,5 @@
 ﻿using eAutoShop.Model.Model;
+using eAutoShop.Model.Request;
 using eAutoShop.Model.SearchObjects;
 using System;
 using System.Collections.Generic;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace eAutoShop.Services.Interfaces
 {
-    public interface IProductCategoryService : IService<ProductCategoryModel, ProductCategorySearchObject>
+    public interface IProductCategoryService: IBaseCRUDService<ProductCategoryModel,ProductCategorySearchObject,ProductCategoryInsertRequest,ProductCategoryUpdateRequest>
     {
     }
 }

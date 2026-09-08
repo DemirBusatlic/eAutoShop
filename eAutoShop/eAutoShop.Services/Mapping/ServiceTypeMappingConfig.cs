@@ -1,7 +1,8 @@
-﻿using System;
-using eAutoShop.Model.Model;
+﻿using eAutoShop.Model.Model;
+using eAutoShop.Model.Request;
 using eAutoShop.Services.Database;
 using Mapster;
+using System;
 
 namespace eAutoShop.Services.Mapping
 {
@@ -15,8 +16,13 @@ namespace eAutoShop.Services.Mapping
                     source => source.Image != null &&
                               source.Image.Length > 0
                         ? Convert.ToBase64String(source.Image)
-                        : string.Empty
-                );
+                        : string.Empty);
+
+            config.NewConfig<ServiceTypeInsertRequest, ServiceType>()
+                .Ignore(destination => destination.Image);
+
+            config.NewConfig<ServiceTypeUpdateRequest, ServiceType>()
+                .Ignore(destination => destination.Image);
         }
     }
 }

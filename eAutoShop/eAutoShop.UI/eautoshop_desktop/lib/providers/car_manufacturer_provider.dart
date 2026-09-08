@@ -1,17 +1,17 @@
+import 'package:eautoshop_desktop/models/car_manufacturer/car_manufacturer.dart';
 import 'package:eautoshop_desktop/models/catalog/catalog_name_request.dart';
-import 'package:eautoshop_desktop/models/product_category/product_category.dart';
 import 'package:eautoshop_desktop/models/search_result.dart';
 import 'package:eautoshop_desktop/providers/base_provider.dart';
 
-class ProductCategoryProvider
-    extends BaseProvider<ProductCategory, CatalogNameRequest> {
-  ProductCategoryProvider() : super('ProductCategory');
+class CarManufacturerProvider
+    extends BaseProvider<CarManufacturer, CatalogNameRequest> {
+  CarManufacturerProvider() : super('CarManufacturer');
 
-  List<ProductCategory> categories = [];
+  List<CarManufacturer> manufacturers = [];
   int countOfItems = 0;
   bool isLoading = false;
 
-  Future<void> getCategories({
+  Future<void> getManufacturers({
     String? name,
     int page = 1,
     int pageSize = 100,
@@ -20,15 +20,15 @@ class ProductCategoryProvider
     notifyListeners();
 
     try {
-      final SearchResult<ProductCategory> searchResult = await get(
+      final SearchResult<CarManufacturer> searchResult = await get(
         filter: {'name': name, 'page': page, 'pageSize': pageSize},
-        fromJson: ProductCategory.fromJson,
+        fromJson: CarManufacturer.fromJson,
       );
 
-      categories = searchResult.result;
+      manufacturers = searchResult.result;
       countOfItems = searchResult.count;
     } catch (_) {
-      categories = [];
+      manufacturers = [];
       countOfItems = 0;
       rethrow;
     } finally {
@@ -37,19 +37,19 @@ class ProductCategoryProvider
     }
   }
 
-  Future<void> insertCategory(CatalogNameRequest request) async {
+  Future<void> insertManufacturer(CatalogNameRequest request) async {
     await insert(request, toJson: (item) => item.toJson());
-    await getCategories();
+    await getManufacturers();
   }
 
-  Future<void> updateCategory(int id, CatalogNameRequest request) async {
+  Future<void> updateManufacturer(int id, CatalogNameRequest request) async {
     await update(id: id, item: request, toJson: (item) => item.toJson());
 
-    await getCategories();
+    await getManufacturers();
   }
 
-  Future<void> deleteCategory(int id) async {
+  Future<void> deleteManufacturer(int id) async {
     await delete(id);
-    await getCategories();
+    await getManufacturers();
   }
 }

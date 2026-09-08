@@ -46,20 +46,15 @@ builder.Services.AddScoped<IProductCategoryService, ProductCategoryService>();
 builder.Services.AddScoped<IProductService, ProductsService>();
 builder.Services.AddScoped<IOrderItemService, OrderItemService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
-builder.Services.AddScoped<
-    IAutoShopServiceService,
-    AutoShopServiceService
->();
+builder.Services.AddScoped<IAutoShopServiceService,AutoShopServiceService>();
 builder.Services.AddScoped<IServiceTypeService, ServiceTypeService>();
-builder.Services.AddScoped<
-    IAppointmentDetailService,
-    AppointmentDetailService
->();
+builder.Services.AddScoped<IAppointmentDetailService,AppointmentDetailService>();
 builder.Services.AddScoped<IAppointmentService, AppointmentService>();
 builder.Services.AddScoped<IStaffReviewService, StaffReviewService>();
 builder.Services.AddScoped<IProductReviewService, ProductReviewService>();
 builder.Services.AddScoped<IStripeService, StripeService>();
 builder.Services.AddScoped<IReportService, ReportService>();
+builder.Services.AddScoped<ICarManufacturerService,CarManufacturerService>();
 
 builder.Services.AddScoped<
     IRecommenderTrainService,
