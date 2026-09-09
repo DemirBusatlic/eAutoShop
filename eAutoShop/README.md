@@ -276,8 +276,13 @@ korisnik
 |---|---|---|---|
 | Desktop | Menadžer | `manager.admin` | `korisnik` |
 | Desktop | Prodavač | `sales.amir` | `korisnik` |
+| Desktop | Prodavač | `sales.adnan` | `korisnik` |
 | Desktop | Tehničar | `tech.jasna` | `korisnik` |
+| Desktop | Tehničar | `tech.lejla` | `korisnik` |
+| Desktop | Tehničar | `tech.armin` | `korisnik` |
 | Mobilna | Kupac | `customer.selma` | `korisnik` |
+| Mobilna | Kupac | `customer.emina` | `korisnik` |
+| Mobilna | Kupac | `customer.tarik` | `korisnik` |
 
 Desktop aplikacija prihvata račune zaposlenika, dok je mobilna aplikacija namijenjena korisnicima s ulogom kupca.
 
@@ -288,8 +293,8 @@ Za testiranje plaćanja koristi se Stripe sandbox okruženje.
 | Polje | Vrijednost |
 |---|---|
 | Broj kartice | `4242 4242 4242 4242` |
-| Datum isteka | bilo koji budući datum |
-| CVC | bilo koje tri cifre |
+| Datum isteka | 12/34 |
+| CVC | 123 |
 | Poštanski broj | bilo koja validna vrijednost |
 
 Ne koristiti stvarne podatke platne kartice.
