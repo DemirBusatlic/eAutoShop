@@ -31,9 +31,7 @@ namespace eAutoShop.Services.Services
 
             if (search?.CarManufacturerId != null)
             {
-                query = query.Where(
-                    x => x.CarManufacturerId ==
-                         search.CarManufacturerId);
+                query = query.Where(x => x.CarManufacturerId == search.CarManufacturerId);
             }
 
             return query
@@ -57,8 +55,7 @@ namespace eAutoShop.Services.Services
 
             if (exists)
             {
-                throw new UserException(
-                    "Ovaj model vozila već postoji.");
+                throw new UserException("Ovaj model vozila već postoji.");
             }
 
             db.Name = name;
@@ -83,8 +80,7 @@ namespace eAutoShop.Services.Services
 
             if (exists)
             {
-                throw new UserException(
-                    "Ovaj model vozila već postoji.");
+                throw new UserException("Ovaj model vozila već postoji.");
             }
 
             db.Name = name;
@@ -95,16 +91,13 @@ namespace eAutoShop.Services.Services
 
         public override async Task BeforeRemove(CarModel db)
         {
-            var hasAppointments = await _context.Appointments.AnyAsync(
-                x => x.CarModelId == db.Id);
+            var hasAppointments = await _context.Appointments.AnyAsync(x => x.CarModelId == db.Id);
 
-            var hasProducts = await _context.Products.AnyAsync(
-                x => x.CarModels.Any(model => model.Id == db.Id));
+            var hasProducts = await _context.Products.AnyAsync(x => x.CarModels.Any(model => model.Id == db.Id));
 
             if (hasAppointments || hasProducts)
             {
-                throw new UserException(
-                    "Model nije moguće obrisati jer se koristi u sistemu.");
+                throw new UserException("Model nije moguće obrisati jer se koristi u sistemu.");
             }
 
             await base.BeforeRemove(db);
@@ -112,18 +105,15 @@ namespace eAutoShop.Services.Services
 
         private async Task ValidateManufacturer(int manufacturerId)
         {
-            var exists = await _context.CarManufacturers.AnyAsync(
-                x => x.Id == manufacturerId);
+            var exists = await _context.CarManufacturers.AnyAsync( x => x.Id == manufacturerId);
 
             if (!exists)
             {
-                throw new UserException(
-                    "Odabrani proizvođač ne postoji.");
+                throw new UserException("Odabrani proizvođač ne postoji.");
             }
         }
 
-        public async Task<PageResult<CarModelGetByManufacturerModel>> GetByManufacturerAll(
-            BaseSearchObject? search = null)
+        public async Task<PageResult<CarModelGetByManufacturerModel>> GetByManufacturerAll(BaseSearchObject? search = null)
         {
             search ??= new BaseSearchObject();
             var page = search.Page.GetValueOrDefault(1);
@@ -143,14 +133,11 @@ namespace eAutoShop.Services.Services
                 .Include(x => x.CarModels)
                 .ToListAsync();
 
-            var result = manufacturers.Select(manufacturer =>
-                new CarModelGetByManufacturerModel
+            var result = manufacturers.Select(manufacturer => new CarModelGetByManufacturerModel
                 {
-                    Manufacturer =
-                        _mapper.Map<CarManufacturerModel>(manufacturer),
+                    Manufacturer =_mapper.Map<CarManufacturerModel>(manufacturer),
 
-                    Models = _mapper.Map<List<CarModelModel>>(
-                        manufacturer.CarModels
+                    Models = _mapper.Map<List<CarModelModel>>(manufacturer.CarModels
                             .OrderBy(x => x.Name)
                             .ThenBy(x => x.ModelYear)
                             .ToList())

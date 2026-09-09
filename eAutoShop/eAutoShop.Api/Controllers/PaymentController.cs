@@ -22,14 +22,11 @@ namespace eAutoShop.Api.Controllers
         }
 
         [HttpPost("CreatePaymentIntent")]
-        public async Task<PaymentIntentResponse> CreatePaymentIntent(
-            PaymentCreateRequest request)
+        public async Task<PaymentIntentResponse> CreatePaymentIntent(PaymentCreateRequest request)
         {
             var customerId = GetCustomerId();
 
-            return await _stripeService.CreatePaymentIntent(
-                request.OrderId,
-                customerId);
+            return await _stripeService.CreatePaymentIntent(request.OrderId,customerId);
         }
 
         [HttpPost("VerifyPayment/{orderId:int}")]
@@ -37,15 +34,12 @@ namespace eAutoShop.Api.Controllers
         {
             var customerId = GetCustomerId();
 
-            return await _stripeService.VerifyPayment(
-                orderId,
-                customerId);
+            return await _stripeService.VerifyPayment(orderId, customerId);
         }
 
         private int GetCustomerId()
         {
-            var value = User.FindFirst(
-                ClaimTypes.NameIdentifier)?.Value;
+            var value = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             if (!int.TryParse(value, out var customerId))
             {

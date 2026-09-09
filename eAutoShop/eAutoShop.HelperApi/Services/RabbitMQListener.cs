@@ -83,46 +83,32 @@ namespace eAutoShop.HelperApi.Services
 
                     if (ea.RoutingKey == "generate_product_report")
                     {
-                        var request =
-                            JsonSerializer.Deserialize<ProductReportRequest>(message)
-                            ?? throw new JsonException("Neispravan zahtjev za izvještaj.");
+                        var request =JsonSerializer.Deserialize<ProductReportRequest>(message) ?? throw new JsonException("Neispravan zahtjev za izvještaj.");
 
                         await generateReportService.GenerateReport(request);
                     }
-                    else if (ea.RoutingKey ==
-                             "generate_top_selling_products_report")
+                    else if (ea.RoutingKey =="generate_top_selling_products_report")
                     {
-                        var request =
-                            JsonSerializer.Deserialize<ProductReportRequest>(message)
-                            ?? throw new JsonException("Neispravan zahtjev za izvještaj.");
+                        var request =JsonSerializer.Deserialize<ProductReportRequest>(message) ?? throw new JsonException("Neispravan zahtjev za izvještaj.");
 
-                        await generateReportService
-                            .GenerateTopSellingProductsReport(request);
+                        await generateReportService.GenerateTopSellingProductsReport(request);
                     }
                     else if (ea.RoutingKey ==
                              "generate_monthly_revenue_report")
                     {
-                        var request =
-                            JsonSerializer.Deserialize<ReportRequest>(message)
-                            ?? throw new JsonException("Neispravan zahtjev za izvještaj.");
+                        var request =JsonSerializer.Deserialize<ReportRequest>(message)?? throw new JsonException("Neispravan zahtjev za izvještaj.");
 
-                        await generateReportService
-                            .GenerateMonthlyRevenueReport(request);
+                        await generateReportService.GenerateMonthlyRevenueReport(request);
                     }
-                    else if (ea.RoutingKey ==
-                             "generate_sales_by_category_report")
+                    else if (ea.RoutingKey =="generate_sales_by_category_report")
                     {
-                        var request =
-                            JsonSerializer.Deserialize<ReportRequest>(message)
-                            ?? throw new JsonException("Neispravan zahtjev za izvještaj.");
+                        var request =JsonSerializer.Deserialize<ReportRequest>(message) ?? throw new JsonException("Neispravan zahtjev za izvještaj.");
 
-                        await generateReportService
-                            .GenerateSalesByCategoryReport(request);
+                        await generateReportService.GenerateSalesByCategoryReport(request);
                     }
                     else if (ea.RoutingKey =="generate_top_customers_report")
                     {
-                        var request =JsonSerializer.Deserialize<ReportRequest>(message)
-                            ?? throw new JsonException("Neispravan zahtjev za izvještaj.");
+                        var request =JsonSerializer.Deserialize<ReportRequest>(message) ?? throw new JsonException("Neispravan zahtjev za izvještaj.");
 
                         await generateReportService.GenerateTopCustomersReport(request);
                     }
@@ -131,9 +117,7 @@ namespace eAutoShop.HelperApi.Services
                         throw new InvalidOperationException($"Nepoznat RabbitMQ routing key: {ea.RoutingKey}");
                     }
 
-                    await _channel.BasicAckAsync(
-                        deliveryTag: ea.DeliveryTag,
-                        multiple: false);
+                    await _channel.BasicAckAsync(deliveryTag: ea.DeliveryTag,multiple: false);
                 }
                 catch (Exception exception)
                 {

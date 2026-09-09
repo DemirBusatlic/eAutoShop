@@ -9,42 +9,26 @@ using Microsoft.AspNetCore.Mvc;
 namespace eAutoShop.Api.Controllers
 {
     [ApiController]
-    public class ServiceTypeController
-        : BaseCRUDController<
-            ServiceTypeModel,
-            ServiceTypeSearchObject,
-            ServiceTypeInsertRequest,
-            ServiceTypeUpdateRequest>
+    public class ServiceTypeController: BaseCRUDController<ServiceTypeModel,ServiceTypeSearchObject,ServiceTypeInsertRequest,ServiceTypeUpdateRequest>
     {
-        public ServiceTypeController(
-            IServiceTypeService service,
-            ILogger<BaseCRUDController<
-                ServiceTypeModel,
-                ServiceTypeSearchObject,
-                ServiceTypeInsertRequest,
-                ServiceTypeUpdateRequest>> logger)
-            : base(logger, service)
+        public ServiceTypeController(IServiceTypeService service,ILogger<BaseCRUDController<ServiceTypeModel,ServiceTypeSearchObject,ServiceTypeInsertRequest,ServiceTypeUpdateRequest>> logger): base(logger, service)
         {
         }
 
         [Authorize]
-        public override Task<PageResult<ServiceTypeModel>> Get(
-            [FromQuery] ServiceTypeSearchObject? search = null)
+        public override Task<PageResult<ServiceTypeModel>> Get([FromQuery] ServiceTypeSearchObject? search = null)
         {
             return base.Get(search);
         }
 
         [Authorize(Roles = UserRoles.Manager)]
-        public override Task<ServiceTypeModel> Insert(
-            [FromBody] ServiceTypeInsertRequest insert)
+        public override Task<ServiceTypeModel> Insert([FromBody] ServiceTypeInsertRequest insert)
         {
             return base.Insert(insert);
         }
 
         [Authorize(Roles = UserRoles.Manager)]
-        public override Task<ServiceTypeModel> Update(
-            int id,
-            [FromBody] ServiceTypeUpdateRequest update)
+        public override Task<ServiceTypeModel> Update(int id,[FromBody] ServiceTypeUpdateRequest update)
         {
             return base.Update(id, update);
         }

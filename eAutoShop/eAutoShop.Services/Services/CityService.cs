@@ -36,13 +36,11 @@ namespace eAutoShop.Services.Services
                 throw new UserException("Naziv grada je obavezan.");
             }
 
-            var exists = await _context.Cities.AnyAsync(
-                x => x.Name == name);
+            var exists = await _context.Cities.AnyAsync(x => x.Name == name);
 
             if (exists)
             {
-                throw new UserException(
-                    "Grad sa ovim nazivom već postoji.");
+                throw new UserException( "Grad sa ovim nazivom već postoji.");
             }
 
             db.Name = name;

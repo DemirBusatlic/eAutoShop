@@ -11,42 +11,26 @@ namespace eAutoShop.HelperApi.Filters
     {
         public override void OnException(ExceptionContext context)
         {
-            var logger = context.HttpContext.RequestServices
-                .GetRequiredService<ILogger<ErrorFilter>>();
+            var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<ErrorFilter>>();
 
             if (context.Exception is UserException)
             {
-                logger.LogWarning(
-                    context.Exception,
-                    "Neispravan zahtjev prema Helper API servisu."
-                );
+                logger.LogWarning(context.Exception,"Neispravan zahtjev prema Helper API servisu.");
 
-                context.ModelState.AddModelError(
-                    "error",
-                    context.Exception.Message
-                );
+                context.ModelState.AddModelError("error",context.Exception.Message);
 
-                context.HttpContext.Response.StatusCode =
-                    (int)HttpStatusCode.BadRequest;
+                context.HttpContext.Response.StatusCode =(int)HttpStatusCode.BadRequest;
             }
             else
             {
-                logger.LogError(
-                    context.Exception,
-                    "Neočekivana greška u Helper API servisu."
-                );
+                logger.LogError(context.Exception,"Neočekivana greška u Helper API servisu.");
 
-                context.ModelState.AddModelError(
-                    "error",
-                    "Došlo je do greške na serveru."
-                );
+                context.ModelState.AddModelError("error","Došlo je do greške na serveru.");
 
-                context.HttpContext.Response.StatusCode =
-                    (int)HttpStatusCode.InternalServerError;
+                context.HttpContext.Response.StatusCode =(int)HttpStatusCode.InternalServerError;
             }
 
-            var errors = context.ModelState
-                .Where(x => x.Value is { Errors.Count: > 0 })
+            var errors = context.ModelState.Where(x => x.Value is { Errors.Count: > 0 })
                 .ToDictionary(
                     x => x.Key,
                     x => x.Value!.Errors.Select(e => e.ErrorMessage)

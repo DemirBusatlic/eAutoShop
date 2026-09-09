@@ -62,8 +62,7 @@ namespace eAutoShop.Services.Services
 
             if (search.HasDiscount.HasValue)
             {
-                query = search.HasDiscount.Value ? query.Where(o => o.OrderItems.Any(oi => oi.Discount > 0))
-                    : query.Where(o => !o.OrderItems.Any(oi => oi.Discount > 0));
+                query = search.HasDiscount.Value ? query.Where(o => o.OrderItems.Any(oi => oi.Discount > 0)) : query.Where(o => !o.OrderItems.Any(oi => oi.Discount > 0));
             }
 
             if (!string.IsNullOrWhiteSpace(search.State))
@@ -93,8 +92,7 @@ namespace eAutoShop.Services.Services
 
         private IQueryable<Order> ApplyScope(IQueryable<Order> query)
         {
-            var user = _httpContextAccessor.HttpContext?.User
-                ?? throw new UserException("Unauthorized.");
+            var user = _httpContextAccessor.HttpContext?.User?? throw new UserException("Unauthorized.");
 
             var role = GetCurrentUserRole(user);
             var username = GetCurrentUsername(user);
@@ -217,8 +215,7 @@ namespace eAutoShop.Services.Services
             if (entity == null)
                 throw new UserException("Order not found.");
 
-            var role = GetCurrentUserRole(
-                _httpContextAccessor.HttpContext!.User);
+            var role = GetCurrentUserRole(_httpContextAccessor.HttpContext!.User);
 
             var state = _baseOrderState.CreateState(entity.State);
 

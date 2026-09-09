@@ -15,9 +15,7 @@ namespace eAutoShop.Services.Services
 
             public RabbitMQService(IConnectionFactory connectionFactory)
             {
-                _connectionTask = new Lazy<Task<IConnection>>(
-                    () => connectionFactory.CreateConnectionAsync()
-                );
+                _connectionTask = new Lazy<Task<IConnection>>(() => connectionFactory.CreateConnectionAsync());
             }
 
             public Task SendReportGenerationRequest(
@@ -60,14 +58,11 @@ namespace eAutoShop.Services.Services
                     request: reportRequest);
             }
 
-            private async Task SendMessage<TRequest>(
-                string queue,
-                TRequest request)
+            private async Task SendMessage<TRequest>(string queue,TRequest request)
             {
                 var connection = await _connectionTask.Value;
 
-                await using var channel =
-                    await connection.CreateChannelAsync();
+                await using var channel =await connection.CreateChannelAsync();
 
                 await channel.QueueDeclareAsync(
                     queue: queue,

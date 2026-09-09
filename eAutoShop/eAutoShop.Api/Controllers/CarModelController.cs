@@ -44,8 +44,7 @@ namespace eAutoShop.Api.Controllers
 
         [Authorize]
         [HttpGet("/GetByManufacturerAll")]
-        public async Task<PageResult<CarModelGetByManufacturerModel>> GetByManufacturerAll(
-            [FromQuery] BaseSearchObject? search = null)
+        public async Task<PageResult<CarModelGetByManufacturerModel>> GetByManufacturerAll([FromQuery] BaseSearchObject? search = null)
         {
             return await _carModelService.GetByManufacturerAll(search);
         }

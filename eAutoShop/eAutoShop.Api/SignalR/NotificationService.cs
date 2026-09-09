@@ -9,20 +9,15 @@ namespace eAutoShop.Api.SignalR
         private readonly IHubContext<NotificationHub> _hubContext;
         private readonly AutoShopContext _context;
 
-        public NotificationService(
-            IHubContext<NotificationHub> hubContext,
-            AutoShopContext context)
+        public NotificationService(IHubContext<NotificationHub> hubContext, AutoShopContext context)
         {
             _hubContext = hubContext;
             _context = context;
         }
 
-        public async Task SendServiceNotification(
-            string message,
-            string type)
+        public async Task SendServiceNotification(string message, string type)
         {
-            await _hubContext.Clients.All.SendAsync(
-                "newNotification",
+            await _hubContext.Clients.All.SendAsync("newNotification",
                 new
                 {
                     Message = message,
@@ -30,10 +25,7 @@ namespace eAutoShop.Api.SignalR
                 });
         }
 
-        public async Task SendUserNotification(
-            int userId,
-            string message,
-            string type)
+        public async Task SendUserNotification(int userId, string message, string type)
         {
             var username = await _context.Users
                 .Where(x => x.Id == userId)
@@ -42,14 +34,10 @@ namespace eAutoShop.Api.SignalR
 
             if (string.IsNullOrWhiteSpace(username))
             {
-                throw new InvalidOperationException(
-                    $"Korisnik sa ID-em {userId} nije pronađen.");
+                throw new InvalidOperationException($"Korisnik sa ID-em {userId} nije pronađen.");
             }
 
-            await _hubContext.Clients
-                .User(username)
-                .SendAsync(
-                    "newNotification",
+            await _hubContext.Clients.User(username).SendAsync("newNotification",
                     new
                     {
                         Message = message,

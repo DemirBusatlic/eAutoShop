@@ -31,8 +31,7 @@ namespace eAutoShop.Services.StateMachineService.AppointmentStateMachine
                 throw new UserException("User not found.");
             }
 
-            var customer = await _context.Users
-                .FirstOrDefaultAsync(x => x.Id == userId);
+            var customer = await _context.Users.FirstOrDefaultAsync(x => x.Id == userId);
 
             if (customer == null)
             {
@@ -52,9 +51,7 @@ namespace eAutoShop.Services.StateMachineService.AppointmentStateMachine
 
 
             var serviceIds = request.Services.Distinct().ToList();
-            var services = await _context.AutoShopServices
-                .Where(x => serviceIds.Contains(x.Id))
-                .ToListAsync();
+            var services = await _context.AutoShopServices.Where(x => serviceIds.Contains(x.Id)).ToListAsync();
 
             if (services.Count != serviceIds.Count)
                 throw new UserException("One or more selected services do not exist.");
@@ -63,9 +60,7 @@ namespace eAutoShop.Services.StateMachineService.AppointmentStateMachine
                 throw new UserException("One or more selected services are not active.");
 
             var totalAmount = services.Sum(x => x.DiscountedPrice);
-            var totalDuration = services.Aggregate(
-                TimeSpan.Zero,
-                (total, service) => total + service.Duration.ToTimeSpan());
+            var totalDuration = services.Aggregate(TimeSpan.Zero,(total, service) => total + service.Duration.ToTimeSpan());
 
 
             var shopIsAtCapacity = await IsShopAtCapacity(request.ReservationDate, totalDuration);

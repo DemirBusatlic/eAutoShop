@@ -21,8 +21,7 @@ namespace eAutoShop.Services.Services
     {
         private readonly BaseProductState _baseProductState;
 
-        public ProductsService(AutoShopContext context, IMapper mapper, BaseProductState baseProductState)
-            : base(context, mapper)
+        public ProductsService(AutoShopContext context, IMapper mapper, BaseProductState baseProductState): base(context, mapper)
         {
             _baseProductState = baseProductState;
         }
@@ -55,9 +54,7 @@ namespace eAutoShop.Services.Services
 
             if (!string.IsNullOrWhiteSpace(search?.State))
             {
-                var state = search.State
-                    .Trim()
-                    .ToLowerInvariant();
+                var state = search.State.Trim().ToLowerInvariant();
 
                 query = query.Where(x => x.State == state);
             }
@@ -69,11 +66,9 @@ namespace eAutoShop.Services.Services
                     : query.Where(x => x.Discount == 0);
             }
 
-            if (search?.ProductCategoryId.HasValue == true &&
-                search.ProductCategoryId.Value > 0)
+            if (search?.ProductCategoryId.HasValue == true && search.ProductCategoryId.Value > 0)
             {
-                query = query.Where(x =>
-                    x.ProductCategoryId == search.ProductCategoryId.Value);
+                query = query.Where(x =>x.ProductCategoryId == search.ProductCategoryId.Value);
             }
 
             if (search?.CarModelIds != null &&
@@ -83,11 +78,9 @@ namespace eAutoShop.Services.Services
                     .Distinct()
                     .ToList();
 
-                query = query.Where(x =>
-                    x.CarModels.Any(cm => ids.Contains(cm.Id)));
+                query = query.Where(x =>x.CarModels.Any(cm => ids.Contains(cm.Id)));
             }
-            else if (search?.CarManufacturerId.HasValue == true &&
-                     search.CarManufacturerId.Value > 0)
+            else if (search?.CarManufacturerId.HasValue == true &&search.CarManufacturerId.Value > 0)
             {
                 query = query.Where(x =>
                     x.CarModels.Any(cm =>
@@ -170,8 +163,7 @@ namespace eAutoShop.Services.Services
 
         public async Task<List<string>> AllowedActions(int id)
         {
-            var entity = await _context.Products
-                .FirstOrDefaultAsync(x => x.Id == id);
+            var entity = await _context.Products.FirstOrDefaultAsync(x => x.Id == id);
 
             var state = _baseProductState.CreateState(entity?.State ?? ProductStates.Initial);
 

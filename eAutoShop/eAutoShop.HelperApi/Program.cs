@@ -36,8 +36,7 @@ builder.Services.AddHostedService<RabbitMqListener>();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-builder.Services.AddDbContext<AutoShopContext>(options =>
-    options.UseSqlServer(connectionString));
+builder.Services.AddDbContext<AutoShopContext>(options =>options.UseSqlServer(connectionString));
 
 var app = builder.Build();
 

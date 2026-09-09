@@ -29,14 +29,11 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddHttpContextAccessor();
 
-var stripeSecretKey =
-    Environment.GetEnvironmentVariable("STRIPE_SECRET_KEY");
+var stripeSecretKey = Environment.GetEnvironmentVariable("STRIPE_SECRET_KEY");
 
-var stripePublishableKey =
-    Environment.GetEnvironmentVariable("STRIPE_PUBLISHABLE_KEY");
+var stripePublishableKey = Environment.GetEnvironmentVariable("STRIPE_PUBLISHABLE_KEY");
 
-var jwtSecretFromEnv =
-    Environment.GetEnvironmentVariable("JWT_SECRET_KEY");
+var jwtSecretFromEnv = Environment.GetEnvironmentVariable("JWT_SECRET_KEY");
 
 builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<ICityService, CityService>();
@@ -56,23 +53,17 @@ builder.Services.AddScoped<IStripeService, StripeService>();
 builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddScoped<ICarManufacturerService,CarManufacturerService>();
 
-builder.Services.AddScoped<
-    IRecommenderTrainService,
-    RecommenderTrainService
->();
+builder.Services.AddScoped<IRecommenderTrainService,RecommenderTrainService>();
 
-builder.Services.AddScoped<
-    IRecommenderPredictService,
-    RecommenderPredictService
->();
+builder.Services.AddScoped<IRecommenderPredictService,RecommenderPredictService>();
 
-// Product state machine
+
 builder.Services.AddScoped<BaseProductState>();
 builder.Services.AddScoped<InitialProductState>();
 builder.Services.AddScoped<DraftProductState>();
 builder.Services.AddScoped<ActiveProductState>();
 
-// Order state machine
+
 builder.Services.AddScoped<BaseOrderState>();
 builder.Services.AddScoped<InitialOrderState>();
 builder.Services.AddScoped<CancelledOrderState>();
@@ -83,14 +74,14 @@ builder.Services.AddScoped<OnHoldOrderState>();
 builder.Services.AddScoped<PaymentFailedOrderState>();
 builder.Services.AddScoped<RejectedOrderState>();
 
-// Auto shop service state machine
+
 builder.Services.AddScoped<BaseAutoShopServiceState>();
 builder.Services.AddScoped<InitialAutoShopServiceState>();
 builder.Services.AddScoped<DraftAutoShopServiceState>();
 builder.Services.AddScoped<ActiveAutoShopServiceState>();
 builder.Services.AddScoped<HiddenAutoShopServiceState>();
 
-// Appointment state machine
+
 builder.Services.AddScoped<BaseAppointmentState>();
 builder.Services.AddScoped<InitialAppointmentState>();
 builder.Services.AddScoped<PendingAppointmentState>();
@@ -102,38 +93,23 @@ builder.Services.AddScoped<CompletedAppointmentState>();
 
 builder.Services.AddSignalR();
 
-builder.Services.AddSingleton<
-    IUserIdProvider,
-    UsernameUserIdProvider
->();
+builder.Services.AddSingleton<IUserIdProvider,UsernameUserIdProvider>();
 
 builder.Services.AddScoped<NotificationService>();
 builder.Services.AddScoped<ReportNotificationService>();
 
-// RabbitMQ configuration
+
 builder.Services.AddSingleton<IConnectionFactory>(_ =>
 {
-    var hostName =
-        Environment.GetEnvironmentVariable("RABBITMQ_HOST")
-        ?? builder.Configuration["RabbitMQ:HostName"];
+    var hostName =Environment.GetEnvironmentVariable("RABBITMQ_HOST")?? builder.Configuration["RabbitMQ:HostName"];
 
-    var userName =
-        Environment.GetEnvironmentVariable("RABBITMQ_USERNAME")
-        ?? builder.Configuration["RabbitMQ:UserName"];
+    var userName =Environment.GetEnvironmentVariable("RABBITMQ_USERNAME")?? builder.Configuration["RabbitMQ:UserName"];
 
-    var password =
-        Environment.GetEnvironmentVariable("RABBITMQ_PASSWORD")
-        ?? builder.Configuration["RabbitMQ:Password"];
+    var password =Environment.GetEnvironmentVariable("RABBITMQ_PASSWORD") ?? builder.Configuration["RabbitMQ:Password"];
 
-    if (string.IsNullOrWhiteSpace(hostName) ||
-        string.IsNullOrWhiteSpace(userName) ||
-        string.IsNullOrWhiteSpace(password))
+    if (string.IsNullOrWhiteSpace(hostName) ||string.IsNullOrWhiteSpace(userName) || string.IsNullOrWhiteSpace(password))
     {
-        throw new InvalidOperationException(
-            "RabbitMQ konfiguracija nije potpuna. " +
-            "Provjerite RABBITMQ_HOST, RABBITMQ_USERNAME " +
-            "i RABBITMQ_PASSWORD."
-        );
+        throw new InvalidOperationException("RabbitMQ konfiguracija nije potpuna. " +"Provjerite RABBITMQ_HOST, RABBITMQ_USERNAME " +"i RABBITMQ_PASSWORD.");
     }
 
     return new ConnectionFactory
@@ -149,16 +125,12 @@ builder.Services.AddSingleton<IConnectionFactory>(_ =>
 builder.Services.AddHostedService<RabbitMqListener>();
 builder.Services.AddSingleton<RabbitMQService>();
 
-// JWT configuration
-var jwtKey = !string.IsNullOrWhiteSpace(jwtSecretFromEnv)
-    ? jwtSecretFromEnv
-    : builder.Configuration["JwtSettings:Secret"];
+
+var jwtKey = !string.IsNullOrWhiteSpace(jwtSecretFromEnv)? jwtSecretFromEnv : builder.Configuration["JwtSettings:Secret"];
 
 if (string.IsNullOrWhiteSpace(jwtKey))
 {
-    throw new InvalidOperationException(
-        "JWT secret nije definisan. Provjerite JWT_SECRET_KEY."
-    );
+    throw new InvalidOperationException("JWT secret nije definisan. Provjerite JWT_SECRET_KEY.");
 }
 
 var jwtKeyBytes = Encoding.ASCII.GetBytes(jwtKey);
@@ -166,28 +138,19 @@ var jwtKeyBytes = Encoding.ASCII.GetBytes(jwtKey);
 builder.Services.AddScoped<IAuthTokenService, AuthTokenService>(
     provider =>
     {
-        var context =
-            provider.GetRequiredService<AutoShopContext>();
+        var context =provider.GetRequiredService<AutoShopContext>();
 
-        var mapper =
-            provider.GetRequiredService<IMapper>();
+        var mapper =provider.GetRequiredService<IMapper>();
 
-        return new AuthTokenService(
-            jwtKey,
-            context,
-            mapper
-        );
+        return new AuthTokenService(jwtKey,context,mapper);
     }
 );
 
-builder.Services
-    .AddAuthentication(options =>
+builder.Services.AddAuthentication(options =>
     {
-        options.DefaultAuthenticateScheme =
-            JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultAuthenticateScheme =JwtBearerDefaults.AuthenticationScheme;
 
-        options.DefaultChallengeScheme =
-            JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme =JwtBearerDefaults.AuthenticationScheme;
     })
     .AddJwtBearer(options =>
     {
@@ -198,8 +161,7 @@ builder.Services
             new TokenValidationParameters
             {
                 ValidateIssuerSigningKey = true,
-                IssuerSigningKey =
-                    new SymmetricSecurityKey(jwtKeyBytes),
+                IssuerSigningKey =new SymmetricSecurityKey(jwtKeyBytes),
                 ValidateIssuer = false,
                 ValidateAudience = false,
                 ValidateLifetime = true,
@@ -210,9 +172,7 @@ builder.Services
         {
             OnTokenValidated = async context =>
             {
-                var authService = context.HttpContext
-                    .RequestServices
-                    .GetRequiredService<IAuthTokenService>();
+                var authService = context.HttpContext.RequestServices.GetRequiredService<IAuthTokenService>();
 
                 var authHeader = context.HttpContext
                     .Request
@@ -221,17 +181,12 @@ builder.Services
 
                 if (string.IsNullOrWhiteSpace(authHeader))
                 {
-                    context.Fail(
-                        "Nedostaje Authorization zaglavlje."
-                    );
+                    context.Fail("Nedostaje Authorization zaglavlje.");
 
                     return;
                 }
 
-                var token = authHeader.StartsWith(
-                    "Bearer ",
-                    StringComparison.OrdinalIgnoreCase
-                )
+                var token = authHeader.StartsWith("Bearer ",StringComparison.OrdinalIgnoreCase)
                     ? authHeader["Bearer ".Length..].Trim()
                     : authHeader.Trim();
 
@@ -249,19 +204,14 @@ builder.Services
 
             OnMessageReceived = context =>
             {
-                var accessToken =
-                    context.Request.Query["access_token"];
+                var accessToken =context.Request.Query["access_token"];
 
                 var path = context.HttpContext.Request.Path;
 
                 var isSignalRPath =
                     path.StartsWithSegments("/chathub") ||
-                    path.StartsWithSegments(
-                        "/reportNotificationHub"
-                    ) ||
-                    path.StartsWithSegments(
-                        "/notificationHub"
-                    );
+                    path.StartsWithSegments("/reportNotificationHub") ||
+                    path.StartsWithSegments("/notificationHub");
 
                 if (!string.IsNullOrWhiteSpace(accessToken) &&
                     isSignalRPath)
@@ -274,15 +224,14 @@ builder.Services
         };
     });
 
-// Global error filter
+
 builder.Services.AddControllers(options =>
 {
     options.Filters.Add<ErrorFilter>();
 });
 
 
-if (string.IsNullOrWhiteSpace(stripeSecretKey) ||
-    string.IsNullOrWhiteSpace(stripePublishableKey))
+if (string.IsNullOrWhiteSpace(stripeSecretKey) ||string.IsNullOrWhiteSpace(stripePublishableKey))
 {
     throw new InvalidOperationException(
         "Stripe konfiguracija nije potpuna. " +
@@ -332,16 +281,11 @@ builder.Services.AddSwaggerGen(options =>
     );
 });
 
-var connectionString =
-    builder.Configuration.GetConnectionString(
-        "DefaultConnection"
-    );
+var connectionString =builder.Configuration.GetConnectionString("DefaultConnection");
 
 if (string.IsNullOrWhiteSpace(connectionString))
 {
-    throw new InvalidOperationException(
-        "Connection string 'DefaultConnection' nije definisan."
-    );
+    throw new InvalidOperationException("Connection string 'DefaultConnection' nije definisan.");
 }
 
 builder.Services.AddDbContext<AutoShopContext>(options =>
@@ -350,9 +294,7 @@ builder.Services.AddDbContext<AutoShopContext>(options =>
 });
 
 
-TypeAdapterConfig.GlobalSettings.Scan(
-    typeof(OrderMappingConfig).Assembly
-);
+TypeAdapterConfig.GlobalSettings.Scan(typeof(OrderMappingConfig).Assembly);
 
 TypeAdapterConfig.GlobalSettings
     .ForType<Appointment, AppointmentModel>()
@@ -361,9 +303,7 @@ TypeAdapterConfig.GlobalSettings
         source => source.StaffReview != null
     );
 
-builder.Services.AddSingleton(
-    TypeAdapterConfig.GlobalSettings
-);
+builder.Services.AddSingleton(TypeAdapterConfig.GlobalSettings);
 
 builder.Services.AddScoped<IMapper, ServiceMapper>();
 
@@ -382,42 +322,29 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.MapHub<NotificationHub>(
-    "/notificationHub"
-);
+app.MapHub<NotificationHub>("/notificationHub");
 
-app.MapHub<ReportNotificationHub>(
-    "/reportNotificationHub"
-);
+app.MapHub<ReportNotificationHub>("/reportNotificationHub");
 
 
-var stripeSettings = app.Services
-    .GetRequiredService<IOptions<StripeSettings>>()
-    .Value;
+var stripeSettings = app.Services.GetRequiredService<IOptions<StripeSettings>>().Value;
 
-StripeConfiguration.ApiKey =
-    stripeSettings.SecretKey;
+StripeConfiguration.ApiKey =stripeSettings.SecretKey;
 
 
 using (var scope = app.Services.CreateScope())
 {
     try
     {
-        var recommenderTrainService =
-            scope.ServiceProvider
-                .GetRequiredService<IRecommenderTrainService>();
+        var recommenderTrainService =scope.ServiceProvider.GetRequiredService<IRecommenderTrainService>();
 
         await recommenderTrainService.TrainProductsModel();
 
-        app.Logger.LogInformation(
-            "Model preporuka je uspješno treniran.");
+        app.Logger.LogInformation("Model preporuka je uspješno treniran.");
     }
     catch (Exception ex)
     {
-        app.Logger.LogWarning(
-            ex,
-            "Model preporuka nije treniran. " +
-            "API će nastaviti s radom.");
+        app.Logger.LogWarning(ex,"Model preporuka nije treniran. " +"API će nastaviti s radom.");
     }
 }
 

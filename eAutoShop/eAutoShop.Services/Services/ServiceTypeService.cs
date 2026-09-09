@@ -10,25 +10,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace eAutoShop.Services.Services
 {
-    public class ServiceTypeService
-        : BaseCRUDService<
-            ServiceTypeModel,
-            ServiceType,
-            ServiceTypeSearchObject,
-            ServiceTypeInsertRequest,
-            ServiceTypeUpdateRequest>,
-          IServiceTypeService
+    public class ServiceTypeService: BaseCRUDService<ServiceTypeModel,ServiceType,ServiceTypeSearchObject,ServiceTypeInsertRequest,ServiceTypeUpdateRequest>,IServiceTypeService
     {
-        public ServiceTypeService(
-            AutoShopContext context,
-            IMapper mapper)
-            : base(context, mapper)
+        public ServiceTypeService(AutoShopContext context,IMapper mapper): base(context, mapper)
         {
         }
 
-        public override IQueryable<ServiceType> AddFilter(
-            IQueryable<ServiceType> query,
-            ServiceTypeSearchObject? search = null)
+        public override IQueryable<ServiceType> AddFilter(IQueryable<ServiceType> query,ServiceTypeSearchObject? search = null)
         {
             if (!string.IsNullOrWhiteSpace(search?.Name))
             {
@@ -40,19 +28,15 @@ namespace eAutoShop.Services.Services
             return query.OrderBy(x => x.Name);
         }
 
-        public override async Task BeforeInsert(
-            ServiceType db,
-            ServiceTypeInsertRequest insert)
+        public override async Task BeforeInsert(ServiceType db,ServiceTypeInsertRequest insert)
         {
             var name = insert.Name.Trim();
 
-            var exists = await _context.ServiceTypes.AnyAsync(
-                x => x.Name == name);
+            var exists = await _context.ServiceTypes.AnyAsync(x => x.Name == name);
 
             if (exists)
             {
-                throw new UserException(
-                    "Tip usluge sa ovim nazivom već postoji.");
+                throw new UserException("Tip usluge sa ovim nazivom već postoji.");
             }
 
             db.Name = name;
@@ -61,19 +45,15 @@ namespace eAutoShop.Services.Services
             await base.BeforeInsert(db, insert);
         }
 
-        public override async Task BeforeUpdate(
-            ServiceType db,
-            ServiceTypeUpdateRequest update)
+        public override async Task BeforeUpdate(ServiceType db,ServiceTypeUpdateRequest update)
         {
             var name = update.Name.Trim();
 
-            var exists = await _context.ServiceTypes.AnyAsync(
-                x => x.Id != db.Id && x.Name == name);
+            var exists = await _context.ServiceTypes.AnyAsync(x => x.Id != db.Id && x.Name == name);
 
             if (exists)
             {
-                throw new UserException(
-                    "Tip usluge sa ovim nazivom već postoji.");
+                throw new UserException("Tip usluge sa ovim nazivom već postoji.");
             }
 
             db.Name = name;
@@ -88,13 +68,11 @@ namespace eAutoShop.Services.Services
 
         public override async Task BeforeRemove(ServiceType db)
         {
-            var isUsed = await _context.AutoShopServices.AnyAsync(
-                x => x.ServiceTypeId == db.Id);
+            var isUsed = await _context.AutoShopServices.AnyAsync(x => x.ServiceTypeId == db.Id);
 
             if (isUsed)
             {
-                throw new UserException(
-                    "Tip usluge nije moguće obrisati jer se koristi u uslugama.");
+                throw new UserException("Tip usluge nije moguće obrisati jer se koristi u uslugama.");
             }
 
             await base.BeforeRemove(db);

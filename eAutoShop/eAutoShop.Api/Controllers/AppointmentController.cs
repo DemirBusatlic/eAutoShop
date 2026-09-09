@@ -19,11 +19,7 @@ namespace eAutoShop.Api.Controllers
         private readonly NotificationService _notificationService;
         private readonly ILogger<AppointmentController> _appointmentLogger;
 
-        public AppointmentController(IAppointmentService service,NotificationService notificationService,ILogger<AppointmentController> appointmentLogger,ILogger<BaseCRUDController<AppointmentModel,
-        AppointmentSearchObject,
-        AppointmentInsertRequest,
-        AppointmentUpdateRequest>> logger)
-    : base(logger, service)
+        public AppointmentController(IAppointmentService service,NotificationService notificationService,ILogger<AppointmentController> appointmentLogger,ILogger<BaseCRUDController<AppointmentModel,AppointmentSearchObject,AppointmentInsertRequest,AppointmentUpdateRequest>> logger): base(logger, service)
         {
             _notificationService = notificationService;
             _appointmentLogger = appointmentLogger;
@@ -67,23 +63,15 @@ namespace eAutoShop.Api.Controllers
         [HttpPut("Confirm/{id}")]
         public async Task<AppointmentModel> Confirm(int id,[FromBody] AppointmentConfirmRequest request)
         {
-            var appointment =
-                await AppointmentService.Confirm(id, request);
+            var appointment = await AppointmentService.Confirm(id, request);
 
             try
             {
-                await _notificationService.SendUserNotification(
-                appointment.CustomerId,
-                "Vaša rezervacija je prihvaćena.",
-                "reservationstatuschanged");
+                await _notificationService.SendUserNotification(appointment.CustomerId,"Vaša rezervacija je prihvaćena.","reservationstatuschanged");
             }
             catch (Exception exception)
             {
-                _appointmentLogger.LogError(
-                    exception,
-                    "Slanje notifikacije o prihvatanju rezervacije {AppointmentId} korisniku {CustomerId} nije uspjelo.",
-                    appointment.Id,
-                    appointment.CustomerId);
+                _appointmentLogger.LogError(exception,"Slanje notifikacije o prihvatanju rezervacije {AppointmentId} korisniku {CustomerId} nije uspjelo.",appointment.Id,appointment.CustomerId);
             }
 
             return appointment;
@@ -93,23 +81,15 @@ namespace eAutoShop.Api.Controllers
         [HttpPut("Reject/{id}/{reason}")]
         public async Task<AppointmentModel> Reject(int id,string reason)
         {
-            var appointment =
-                await AppointmentService.Reject(id, reason);
+            var appointment =await AppointmentService.Reject(id, reason);
 
             try
             {
-                await _notificationService.SendUserNotification(
-                appointment.CustomerId,
-                $"Vaša rezervacija je odbijena. Razlog: {reason}",
-                "reservationstatuschanged");
+                await _notificationService.SendUserNotification(appointment.CustomerId,$"Vaša rezervacija je odbijena. Razlog: {reason}","reservationstatuschanged");
             }
             catch (Exception exception)
             {
-                _appointmentLogger.LogError(
-                    exception,
-                    "Slanje notifikacije o odbijanju rezervacije {AppointmentId} korisniku {CustomerId} nije uspjelo.",
-                    appointment.Id,
-                    appointment.CustomerId);
+                _appointmentLogger.LogError(exception,"Slanje notifikacije o odbijanju rezervacije {AppointmentId} korisniku {CustomerId} nije uspjelo.",appointment.Id,appointment.CustomerId);
             }
 
             return appointment;
@@ -183,6 +163,7 @@ namespace eAutoShop.Api.Controllers
             string? username = User.FindFirst(ClaimTypes.Name)?.Value;
 
             if (string.IsNullOrWhiteSpace(username))
+
                 throw new UserException("Signed-in user was not found.");
 
             return username;

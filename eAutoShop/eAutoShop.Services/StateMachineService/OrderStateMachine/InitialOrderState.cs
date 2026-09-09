@@ -21,8 +21,7 @@ namespace eAutoShop.Services.StateMachineService.OrderStateMachine
 
         public override async Task<OrderModel> Insert(OrderInsertRequest request)
         {
-            using var transaction =
-                await _context.Database.BeginTransactionAsync();
+            using var transaction =await _context.Database.BeginTransactionAsync();
 
             var user = await _context.Users
                 .Include(x => x.Role)
@@ -37,43 +36,28 @@ namespace eAutoShop.Services.StateMachineService.OrderStateMachine
 
             var employee = await _context.Users
                 .Include(x => x.Role)
-                .Where(x =>
-                    x.Active &&
-                    x.Role.Name == UserRoles.Salesperson)
-                .OrderBy(x => x.Id)
-                .FirstOrDefaultAsync()
-                ?? throw new UserException(
-                    "No active salesperson is available for this order."
-                );
+                .Where(x =>x.Active &&x.Role.Name == UserRoles.Salesperson)
+                .OrderBy(x => x.Id).FirstOrDefaultAsync()
+                ?? throw new UserException("No active salesperson is available for this order.");
 
             if (request.Product == null || request.Product.Count == 0)
             {
-                throw new UserException(
-                    "The order must contain at least one product."
-                );
+                throw new UserException("The order must contain at least one product.");
             }
 
-            var productIds = request.Product
-                .Select(x => x.ProductId)
-                .Distinct()
-                .ToList();
+            var productIds = request.Product.Select(x => x.ProductId).Distinct().ToList();
 
-            var products = await _context.Products
-                .Where(x => productIds.Contains(x.Id))
-                .ToListAsync();
+            var products = await _context.Products.Where(x => productIds.Contains(x.Id)).ToListAsync();
 
             if (products.Count != productIds.Count)
             {
-                throw new UserException(
-                    "One or more products do not exist."
-                );
+                throw new UserException("One or more products do not exist.");
             }
 
             var entity = new Order
             {
                 CustomerId = user.Id,
 
-                // Ovo je nedostajalo i uzrokovalo FK grešku.
                 EmployeeId = employee.Id,
 
                 State = OrderStates.MissingPayment,
@@ -87,16 +71,12 @@ namespace eAutoShop.Services.StateMachineService.OrderStateMachine
             {
                 if (string.IsNullOrWhiteSpace(user.Address))
                 {
-                    throw new UserException(
-                        "The user does not have a saved address."
-                    );
+                    throw new UserException("The user does not have a saved address.");
                 }
 
                 if (string.IsNullOrWhiteSpace(user.PostalCode))
                 {
-                    throw new UserException(
-                        "The user does not have a saved postal code."
-                    );
+                    throw new UserException("The user does not have a saved postal code.");
                 }
 
                 entity.CityId = user.CityId;
@@ -112,16 +92,12 @@ namespace eAutoShop.Services.StateMachineService.OrderStateMachine
 
                 if (string.IsNullOrWhiteSpace(request.ShippingAddress))
                 {
-                    throw new UserException(
-                        "Shipping address is required."
-                    );
+                    throw new UserException("Shipping address is required.");
                 }
 
                 if (string.IsNullOrWhiteSpace(request.ShippingPostalCode))
                 {
-                    throw new UserException(
-                        "Postal code is required."
-                    );
+                    throw new UserException("Postal code is required.");
                 }
 
                 entity.CityId = request.CityId.Value;
@@ -135,28 +111,21 @@ namespace eAutoShop.Services.StateMachineService.OrderStateMachine
             {
                 if (item.Quantity <= 0)
                 {
-                    throw new UserException(
-                        "Quantity must be greater than 0."
-                    );
+                    throw new UserException("Quantity must be greater than 0.");
                 }
 
-                var product = products.First(
-                    x => x.Id == item.ProductId
-                );
+                var product = products.First(x => x.Id == item.ProductId);
 
-                // Kod tebe se popust čuva kao vrijednost od 0 do 1.
+                
                 if (product.Discount < 0 || product.Discount > 1)
                 {
-                    throw new UserException(
-                        "Invalid discount on product."
-                    );
+                    throw new UserException("Invalid discount on product.");
                 }
 
                 var totalPrice = product.Price * item.Quantity;
                 var discountMultiplier = product.Discount;
 
-                var discountedPrice =
-                    totalPrice - (totalPrice * discountMultiplier);
+                var discountedPrice =totalPrice - (totalPrice * discountMultiplier);
 
                 entity.TotalAmount += discountedPrice;
 
@@ -178,9 +147,7 @@ namespace eAutoShop.Services.StateMachineService.OrderStateMachine
             await _context.SaveChangesAsync();
 
 
-            await _context.Entry(entity)
-                .Reference(x => x.City)
-                .LoadAsync();
+            await _context.Entry(entity).Reference(x => x.City).LoadAsync();
 
             await transaction.CommitAsync();
 

@@ -35,8 +35,7 @@ namespace eAutoShop.HelperApi.Services
 
             if (request.ProductCategoryId != null)
             {
-                query = query.Where(x =>
-                    x.ProductCategoryId == request.ProductCategoryId);
+                query = query.Where(x =>x.ProductCategoryId == request.ProductCategoryId);
             }
 
             if (request.ProductId != null)
@@ -58,9 +57,7 @@ namespace eAutoShop.HelperApi.Services
 
             var csvReport = new StringBuilder();
 
-            csvReport.AppendLine(
-                "ProductId,ProductName,Category,Price,Discount," +
-                "DiscountedPrice,TotalSold,TotalRevenue");
+            csvReport.AppendLine("ProductId,ProductName,Category,Price,Discount," +"DiscountedPrice,TotalSold,TotalRevenue");
 
             foreach (var product in products)
             {
@@ -68,19 +65,16 @@ namespace eAutoShop.HelperApi.Services
 
                 if (request.StartDate != null)
                 {
-                    orderItems = orderItems.Where(x =>
-                        x.Order.OrderDate.Date >= request.StartDate.Value.Date);
+                    orderItems = orderItems.Where(x =>x.Order.OrderDate.Date >= request.StartDate.Value.Date);
                 }
 
                 if (request.EndDate != null)
                 {
-                    orderItems = orderItems.Where(x =>
-                        x.Order.OrderDate.Date <= request.EndDate.Value.Date);
+                    orderItems = orderItems.Where(x =>x.Order.OrderDate.Date <= request.EndDate.Value.Date);
                 }
 
                 var totalSold = orderItems.Sum(x => x.Quantity);
-                var totalRevenue = orderItems.Sum(x =>
-                    x.TotalItemPriceDiscounted);
+                var totalRevenue = orderItems.Sum(x =>x.TotalItemPriceDiscounted);
 
                 csvReport.AppendLine(
                     $"{product.Id}," +
@@ -96,9 +90,7 @@ namespace eAutoShop.HelperApi.Services
             const string fileName = "product_report.csv";
             var filePath = Path.Combine(_reportsPath, fileName);
 
-            _logger.LogInformation(
-                "Generisanje izvještaja na putanji {FilePath}.",
-                filePath);
+            _logger.LogInformation("Generisanje izvještaja na putanji {FilePath}.",filePath);
 
             await File.WriteAllTextAsync(filePath, csvReport.ToString());
 
@@ -121,31 +113,25 @@ namespace eAutoShop.HelperApi.Services
 
             if (request.StartDate != null)
             {
-                query = query.Where(x =>
-                    x.Order.OrderDate.Date >= request.StartDate.Value.Date);
+                query = query.Where(x =>x.Order.OrderDate.Date >= request.StartDate.Value.Date);
             }
 
             if (request.EndDate != null)
             {
-                query = query.Where(x =>
-                    x.Order.OrderDate.Date <= request.EndDate.Value.Date);
+                query = query.Where(x =>x.Order.OrderDate.Date <= request.EndDate.Value.Date);
             }
 
             if (request.ProductCategoryId != null)
             {
-                query = query.Where(x =>
-                    x.Product.ProductCategoryId ==
-                    request.ProductCategoryId);
+                query = query.Where(x =>x.Product.ProductCategoryId ==request.ProductCategoryId);
             }
 
             if (request.ProductId != null)
             {
-                query = query.Where(x =>
-                    x.ProductId == request.ProductId);
+                query = query.Where(x =>x.ProductId == request.ProductId);
             }
 
-            var data = await query
-                .GroupBy(x => new
+            var data = await query.GroupBy(x => new
                 {
                     x.ProductId,
                     ProductName = x.Product.Name,
@@ -159,8 +145,7 @@ namespace eAutoShop.HelperApi.Services
                     group.Key.ProductName,
                     group.Key.CategoryName,
                     TotalSold = group.Sum(x => x.Quantity),
-                    TotalRevenue = group.Sum(x =>
-                        x.TotalItemPriceDiscounted)
+                    TotalRevenue = group.Sum(x =>x.TotalItemPriceDiscounted)
                 })
                 .OrderByDescending(x => x.TotalSold)
                 .Take(10)
@@ -178,8 +163,7 @@ namespace eAutoShop.HelperApi.Services
 
             var csvReport = new StringBuilder();
 
-            csvReport.AppendLine(
-                "ProductId,ProductName,Category,TotalSold,TotalRevenue");
+            csvReport.AppendLine("ProductId,ProductName,Category,TotalSold,TotalRevenue");
 
             foreach (var item in data)
             {
@@ -194,9 +178,7 @@ namespace eAutoShop.HelperApi.Services
             const string fileName = "top_selling_products_report.csv";
             var filePath = Path.Combine(_reportsPath, fileName);
 
-            _logger.LogInformation(
-                "Generisanje izvještaja na putanji {FilePath}.",
-                filePath);
+            _logger.LogInformation("Generisanje izvještaja na putanji {FilePath}.",filePath);
 
             await File.WriteAllTextAsync(filePath, csvReport.ToString());
 
@@ -218,14 +200,12 @@ namespace eAutoShop.HelperApi.Services
 
             if (request.StartDate != null)
             {
-                query = query.Where(x =>
-                    x.Order.OrderDate.Date >= request.StartDate.Value.Date);
+                query = query.Where(x =>x.Order.OrderDate.Date >= request.StartDate.Value.Date);
             }
 
             if (request.EndDate != null)
             {
-                query = query.Where(x =>
-                    x.Order.OrderDate.Date <= request.EndDate.Value.Date);
+                query = query.Where(x =>x.Order.OrderDate.Date <= request.EndDate.Value.Date);
             }
 
             var data = await query
@@ -241,8 +221,7 @@ namespace eAutoShop.HelperApi.Services
                     group.Key.CategoryId,
                     group.Key.CategoryName,
                     TotalSold = group.Sum(x => x.Quantity),
-                    TotalRevenue = group.Sum(x =>
-                        x.TotalItemPriceDiscounted)
+                    TotalRevenue = group.Sum(x =>x.TotalItemPriceDiscounted)
                 })
                 .OrderByDescending(x => x.TotalRevenue)
                 .ToListAsync();
@@ -259,8 +238,7 @@ namespace eAutoShop.HelperApi.Services
 
             var csvReport = new StringBuilder();
 
-            csvReport.AppendLine(
-                "CategoryId,CategoryName,TotalSold,TotalRevenue");
+            csvReport.AppendLine("CategoryId,CategoryName,TotalSold,TotalRevenue");
 
             foreach (var item in data)
             {
@@ -274,9 +252,7 @@ namespace eAutoShop.HelperApi.Services
             const string fileName = "sales_by_category_report.csv";
             var filePath = Path.Combine(_reportsPath, fileName);
 
-            _logger.LogInformation(
-                "Generisanje izvještaja na putanji {FilePath}.",
-                filePath);
+            _logger.LogInformation("Generisanje izvještaja na putanji {FilePath}.",filePath);
 
             await File.WriteAllTextAsync(filePath, csvReport.ToString());
 
@@ -288,20 +264,15 @@ namespace eAutoShop.HelperApi.Services
 
         public async Task GenerateMonthlyRevenueReport(ReportRequest request)
         {
-            var startDate = request.StartDate?.Date
-                ?? DateTime.Now.AddMonths(-1).Date;
+            var startDate = request.StartDate?.Date?? DateTime.Now.AddMonths(-1).Date;
 
-            var endDate = request.EndDate?.Date
-                ?? DateTime.Now.Date;
+            var endDate = request.EndDate?.Date?? DateTime.Now.Date;
 
             var orders = await _context.Orders.Where(x =>x.State == OrderStates.Completed && x.OrderDate.Date >= startDate && x.OrderDate.Date <= endDate).ToListAsync();
 
             if (!orders.Any())
             {
-                await SendNotification(
-                    request.Username,
-                    "monthlyrevenuereport",
-                    "Nema narudžbi za generisanje mjesečnog izvještaja.");
+                await SendNotification(request.Username,"monthlyrevenuereport","Nema narudžbi za generisanje mjesečnog izvještaja.");
 
                 return;
             }
@@ -318,16 +289,13 @@ namespace eAutoShop.HelperApi.Services
                     .Where(x => x.OrderDate.Date == date.Date)
                     .Sum(x => x.TotalAmount);
 
-                csvReport.AppendLine(
-                    $"{date:yyyy-MM-dd},{dailyRevenue:F2}");
+                csvReport.AppendLine($"{date:yyyy-MM-dd},{dailyRevenue:F2}");
             }
 
             const string fileName = "monthly_revenue_report.csv";
             var filePath = Path.Combine(_reportsPath, fileName);
 
-            _logger.LogInformation(
-                "Generisanje izvještaja na putanji {FilePath}.",
-                filePath);
+            _logger.LogInformation("Generisanje izvještaja na putanji {FilePath}.",filePath);
 
             await File.WriteAllTextAsync(filePath, csvReport.ToString());
 
@@ -345,24 +313,20 @@ namespace eAutoShop.HelperApi.Services
 
             if (request.StartDate != null)
             {
-                query = query.Where(x =>
-                    x.OrderDate.Date >= request.StartDate.Value.Date);
+                query = query.Where(x =>x.OrderDate.Date >= request.StartDate.Value.Date);
             }
 
             if (request.EndDate != null)
             {
-                query = query.Where(x =>
-                    x.OrderDate.Date <= request.EndDate.Value.Date);
+                query = query.Where(x =>x.OrderDate.Date <= request.EndDate.Value.Date);
             }
 
-            var data = await query
-                .Where(x => x.CustomerId != null && x.Customer != null)
+            var data = await query.Where(x => x.CustomerId != null && x.Customer != null)
                 .GroupBy(x => new
                 {
                     x.CustomerId,
                     Username = x.Customer!.Username,
-                    CustomerName =
-                        x.Customer!.Name + " " + x.Customer!.Surname
+                    CustomerName = x.Customer!.Name + " " + x.Customer!.Surname
                 })
                 .Select(group => new
                 {
@@ -388,8 +352,7 @@ namespace eAutoShop.HelperApi.Services
 
             var csvReport = new StringBuilder();
 
-            csvReport.AppendLine(
-                "CustomerId,Username,CustomerName,OrdersCount,TotalSpent");
+            csvReport.AppendLine("CustomerId,Username,CustomerName,OrdersCount,TotalSpent");
 
             foreach (var item in data)
             {
@@ -404,9 +367,7 @@ namespace eAutoShop.HelperApi.Services
             const string fileName = "top_customers_report.csv";
             var filePath = Path.Combine(_reportsPath, fileName);
 
-            _logger.LogInformation(
-                "Generisanje izvještaja na putanji {FilePath}.",
-                filePath);
+            _logger.LogInformation("Generisanje izvještaja na putanji {FilePath}.",filePath);
 
             await File.WriteAllTextAsync(filePath, csvReport.ToString());
 
@@ -416,19 +377,14 @@ namespace eAutoShop.HelperApi.Services
                 "Izvještaj top kupaca je uspješno generisan.");
         }
 
-        private async Task SendNotification(
-            string? username,
-            string notificationType,
-            string message)
+        private async Task SendNotification(string? username,string notificationType,string message)
         {
             if (string.IsNullOrWhiteSpace(username))
             {
-                throw new InvalidOperationException(
-                    "Korisničko ime za slanje obavijesti nije definisano.");
+                throw new InvalidOperationException("Korisničko ime za slanje obavijesti nije definisano.");
             }
 
-            await _rabbitMQService.SendReportNotification(
-                new ReportNotificationModel
+            await _rabbitMQService.SendReportNotification(new ReportNotificationModel
                 {
                     Username = username,
                     NotificationType = notificationType,

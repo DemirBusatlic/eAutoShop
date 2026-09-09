@@ -36,8 +36,7 @@ namespace eAutoShop.Services.Services
         {
             if (string.IsNullOrWhiteSpace(paymentIntentId))
             {
-                throw new UserException(
-                    "Payment intent does not exist.");
+                throw new UserException("Payment intent does not exist.");
             }
 
             var refundService = new RefundService();
@@ -52,25 +51,20 @@ namespace eAutoShop.Services.Services
                     IdempotencyKey = idempotencyKey
                 });
 
-            if (refund.Status != "succeeded" &&
-                refund.Status != "pending")
+            if (refund.Status != "succeeded" &&refund.Status != "pending")
             {
-                throw new UserException(
-                    "Refund was not successful.");
+                throw new UserException("Refund was not successful.");
             }
         }
 
 
         public async Task<PaymentIntentResponse> CreatePaymentIntent(int orderId, int customerId)
         {
-            var order = await _context.Orders
-                .FirstOrDefaultAsync(x => x.Id == orderId)
-                ?? throw new UserException("Order not found.");
+            var order = await _context.Orders.FirstOrDefaultAsync(x => x.Id == orderId)?? throw new UserException("Order not found.");
 
             if (order.CustomerId != customerId)
             {
-                throw new UserException(
-                    "You cannot pay for another user's order.");
+                throw new UserException("You cannot pay for another user's order.");
             }
 
             if (order.State == OrderStates.OnHold ||
@@ -82,17 +76,15 @@ namespace eAutoShop.Services.Services
 
             if (order.State != OrderStates.MissingPayment)
             {
-                throw new UserException(
-                    "Payment is not allowed for this order.");
+                throw new UserException("Payment is not allowed for this order.");
             }
 
             var paymentIntentService = new PaymentIntentService();
 
-            // Ako već postoji, ne kreiramo drugi.
+           
             if (!string.IsNullOrWhiteSpace(order.PaymentIntentId))
             {
-                var existingIntent = await paymentIntentService.GetAsync(
-                    order.PaymentIntentId);
+                var existingIntent = await paymentIntentService.GetAsync(order.PaymentIntentId);
 
                 return new PaymentIntentResponse
                 {
@@ -101,9 +93,7 @@ namespace eAutoShop.Services.Services
                 };
             }
 
-            var amountInCents = (long)Math.Round(
-                order.TotalAmount * 100,
-                MidpointRounding.AwayFromZero);
+            var amountInCents = (long)Math.Round(order.TotalAmount * 100,MidpointRounding.AwayFromZero);
 
             if (amountInCents <= 0)
             {
@@ -128,9 +118,7 @@ namespace eAutoShop.Services.Services
                 IdempotencyKey = $"order-payment-{order.Id}"
             };
 
-            var paymentIntent = await paymentIntentService.CreateAsync(
-                options,
-                requestOptions);
+            var paymentIntent = await paymentIntentService.CreateAsync(options,requestOptions);
 
             order.PaymentIntentId = paymentIntent.Id;
             await _context.SaveChangesAsync();
@@ -148,8 +136,7 @@ namespace eAutoShop.Services.Services
 
             if (order.CustomerId != customerId)
             {
-                throw new UserException(
-                    "You cannot verify another user's payment.");
+                throw new UserException("You cannot verify another user's payment.");
             }
 
             
@@ -162,53 +149,37 @@ namespace eAutoShop.Services.Services
 
             if (string.IsNullOrWhiteSpace(order.PaymentIntentId))
             {
-                throw new UserException(
-                    "Payment intent does not exist.");
+                throw new UserException("Payment intent does not exist.");
             }
 
             var service = new PaymentIntentService();
             var intent = await service.GetAsync(order.PaymentIntentId);
 
-            var expectedAmount = (long)Math.Round(
-                order.TotalAmount * 100,
-                MidpointRounding.AwayFromZero);
+            var expectedAmount = (long)Math.Round(order.TotalAmount * 100,MidpointRounding.AwayFromZero);
 
             if (intent.Status != "succeeded")
             {
-                throw new UserException(
-                    "Payment has not been completed.");
+                throw new UserException("Payment has not been completed.");
             }
 
             if (intent.Amount != expectedAmount)
             {
-                throw new UserException(
-                    "Paid amount does not match the order amount.");
+                throw new UserException("Paid amount does not match the order amount.");
             }
 
-            if (!string.Equals(
-                    intent.Currency,
-                    "eur",
-                    StringComparison.OrdinalIgnoreCase))
+            if (!string.Equals(intent.Currency,"eur",StringComparison.OrdinalIgnoreCase))
             {
                 throw new UserException("Invalid payment currency.");
             }
 
-            if (!intent.Metadata.TryGetValue(
-                    "order_id",
-                    out var metadataOrderId) ||
-                metadataOrderId != order.Id.ToString())
+            if (!intent.Metadata.TryGetValue("order_id",out var metadataOrderId) ||metadataOrderId != order.Id.ToString())
             {
-                throw new UserException(
-                    "Payment does not belong to this order.");
+                throw new UserException("Payment does not belong to this order.");
             }
 
-            if (!intent.Metadata.TryGetValue(
-                    "customer_id",
-                    out var metadataCustomerId) ||
-                metadataCustomerId != customerId.ToString())
+            if (!intent.Metadata.TryGetValue("customer_id",out var metadataCustomerId) ||metadataCustomerId != customerId.ToString())
             {
-                throw new UserException(
-                    "Payment does not belong to this customer.");
+                throw new UserException("Payment does not belong to this customer.");
             }
 
             order.State = OrderStates.OnHold;

@@ -43,8 +43,7 @@ namespace eAutoShop.Services.StateMachineService.ProductStateMachine
 
             if (request.ProductCategoryId.HasValue)
             {
-                var categoryExists = await _context.ProductCategories.AnyAsync(
-                    x => x.Id == request.ProductCategoryId.Value);
+                var categoryExists = await _context.ProductCategories.AnyAsync(x => x.Id == request.ProductCategoryId.Value);
                 if (!categoryExists)
                     throw new UserException("Selected product category doesn't exist.");
                 entity.ProductCategoryId = request.ProductCategoryId.Value;
@@ -52,9 +51,7 @@ namespace eAutoShop.Services.StateMachineService.ProductStateMachine
 
             if (request.Description != null)
             {
-                entity.Description = string.IsNullOrWhiteSpace(request.Description)
-                    ? null
-                    : request.Description.Trim();
+                entity.Description = string.IsNullOrWhiteSpace(request.Description)? null: request.Description.Trim();
             }
 
             if (!string.IsNullOrWhiteSpace(request.ImageData))
@@ -64,17 +61,11 @@ namespace eAutoShop.Services.StateMachineService.ProductStateMachine
 
             if (request.CarModelIds != null)
             {
-                await _context.Entry(entity)
-                    .Collection(p => p.CarModels)
-                    .LoadAsync();
+                await _context.Entry(entity).Collection(p => p.CarModels).LoadAsync();
 
-                var ids = request.CarModelIds
-                    .Distinct()
-                    .ToList();
+                var ids = request.CarModelIds.Distinct().ToList();
 
-                var models = await _context.CarModels
-                    .Where(x => ids.Contains(x.Id))
-                    .ToListAsync();
+                var models = await _context.CarModels.Where(x => ids.Contains(x.Id)).ToListAsync();
 
                 if (models.Count != ids.Count)
                 {
@@ -127,21 +118,16 @@ namespace eAutoShop.Services.StateMachineService.ProductStateMachine
 
         public override async Task<bool> Delete(Product entity)
         {
-            var isUsedInOrders = await _context.OrderItems
-                .AnyAsync(x => x.ProductId == entity.Id);
+            var isUsedInOrders = await _context.OrderItems.AnyAsync(x => x.ProductId == entity.Id);
 
-            var hasReviews = await _context.ProductReviews
-                .AnyAsync(x => x.ProductId == entity.Id);
+            var hasReviews = await _context.ProductReviews.AnyAsync(x => x.ProductId == entity.Id);
 
             if (isUsedInOrders || hasReviews)
             {
-                throw new UserException(
-                    "Proizvod se ne može obrisati jer je korišten u narudžbama ili recenzijama. Možete ga ostaviti skrivenim.");
+                throw new UserException("Proizvod se ne može obrisati jer je korišten u narudžbama ili recenzijama. Možete ga ostaviti skrivenim.");
             }
 
-            await _context.Entry(entity)
-                .Collection(x => x.CarModels)
-                .LoadAsync();
+            await _context.Entry(entity).Collection(x => x.CarModels).LoadAsync();
 
             entity.CarModels.Clear();
 

@@ -37,8 +37,7 @@ namespace eAutoShop.Services.Services
 
             if (sourceProduct == null)
             {
-                throw new UserException(
-                    "Proizvod za koji se traže preporuke nije pronađen.");
+                throw new UserException("Proizvod za koji se traže preporuke nije pronađen.");
             }
 
             try
@@ -64,13 +63,9 @@ namespace eAutoShop.Services.Services
                         x.State == ProductStates.Active)
                     .ToListAsync();
 
-                var predictionResult =
-                    new List<Tuple<Product, float>>();
+                var predictionResult =new List<Tuple<Product, float>>();
 
-                var predictionEngine = mlContext.Model
-                    .CreatePredictionEngine<
-                        ProductEntry,
-                        CopurchasePrediction>(model);
+                var predictionEngine = mlContext.Model.CreatePredictionEngine<ProductEntry,CopurchasePrediction>(model);
 
                 foreach (var product in products)
                 {
@@ -81,10 +76,7 @@ namespace eAutoShop.Services.Services
                             CoPurchaseProductId = (uint)product.Id
                         });
 
-                    predictionResult.Add(
-                        new Tuple<Product, float>(
-                            product,
-                            prediction.Score));
+                    predictionResult.Add(new Tuple<Product, float>(product,prediction.Score));
                 }
 
                 var finalResults = predictionResult

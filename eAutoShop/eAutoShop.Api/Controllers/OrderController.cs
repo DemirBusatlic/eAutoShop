@@ -32,33 +32,21 @@ namespace eAutoShop.Api.Controllers
 
             return await (_service as IOrderService)!.Insert(request);
         }
-        [Authorize(
-      Roles = UserRoles.Manager + "," +
-              UserRoles.Salesperson)]
+        [Authorize(Roles = UserRoles.Manager + "," + UserRoles.Salesperson)]
         [HttpPut("Accept/{id}")]
-        public virtual async Task<OrderModel> Accept(
-      int id,
-      OrderAcceptRequest orderAccept)
+        public virtual async Task<OrderModel> Accept(int id, OrderAcceptRequest orderAccept)
         {
-            var order = await (_service as IOrderService)!
-                .Accept(id, orderAccept);
+            var order = await (_service as IOrderService)!.Accept(id, orderAccept);
 
             if (order.CustomerId.HasValue)
             {
                 try
                 {
-                    await _notificationService.SendUserNotification(
-                        order.CustomerId.Value,
-                        "Vaša narudžba je prihvaćena.",
-                        "orderstatuschanged");
+                    await _notificationService.SendUserNotification(order.CustomerId.Value,"Vaša narudžba je prihvaćena.","orderstatuschanged");
                 }
                 catch (Exception exception)
                 {
-                    _orderLogger.LogError(
-                        exception,
-                        "Slanje notifikacije o prihvatanju narudžbe {OrderId} korisniku {CustomerId} nije uspjelo.",
-                        order.Id,
-                        order.CustomerId.Value);
+                    _orderLogger.LogError(exception,"Slanje notifikacije o prihvatanju narudžbe {OrderId} korisniku {CustomerId} nije uspjelo.",order.Id,order.CustomerId.Value);
                 }
             }
 
@@ -75,18 +63,11 @@ namespace eAutoShop.Api.Controllers
             {
                 try
                 {
-                    await _notificationService.SendUserNotification(
-                        order.CustomerId.Value,
-                        "Vaša narudžba je odbijena.",
-                        "orderstatuschanged");
+                    await _notificationService.SendUserNotification(order.CustomerId.Value,"Vaša narudžba je odbijena.","orderstatuschanged");
                 }
                 catch (Exception exception)
                 {
-                    _orderLogger.LogError(
-                        exception,
-                        "Slanje notifikacije o odbijanju narudžbe {OrderId} korisniku {CustomerId} nije uspjelo.",
-                        order.Id,
-                        order.CustomerId.Value);
+                    _orderLogger.LogError(exception, "Slanje notifikacije o odbijanju narudžbe {OrderId} korisniku {CustomerId} nije uspjelo.",order.Id, order.CustomerId.Value);
                 }
             }
 
@@ -103,18 +84,11 @@ namespace eAutoShop.Api.Controllers
             {
                 try
                 {
-                    await _notificationService.SendUserNotification(
-                        order.CustomerId.Value,
-                        "Vaša narudžba je završena.",
-                        "orderstatuschanged");
+                    await _notificationService.SendUserNotification(order.CustomerId.Value, "Vaša narudžba je završena.","orderstatuschanged");
                 }
                 catch (Exception exception)
                 {
-                    _orderLogger.LogError(
-                        exception,
-                        "Slanje notifikacije o završetku narudžbe {OrderId} korisniku {CustomerId} nije uspjelo.",
-                        order.Id,
-                        order.CustomerId.Value);
+                    _orderLogger.LogError(exception, "Slanje notifikacije o završetku narudžbe {OrderId} korisniku {CustomerId} nije uspjelo.", order.Id,order.CustomerId.Value);
                 }
             }
 

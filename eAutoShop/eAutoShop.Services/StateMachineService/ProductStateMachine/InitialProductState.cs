@@ -27,27 +27,21 @@ namespace eAutoShop.Services.StateMachineService.ProductStateMachine
             if (request.Price <= 0)
                 throw new UserException("Product price must be greater than zero.");
 
-            if (request.ProductCategoryId.HasValue &&
-                !await _context.ProductCategories.AnyAsync(x => x.Id == request.ProductCategoryId.Value))
+            if (request.ProductCategoryId.HasValue &&!await _context.ProductCategories.AnyAsync(x => x.Id == request.ProductCategoryId.Value))
                 throw new UserException("Selected product category doesn't exist.");
 
             var entity = _mapper.Map<Product>(request);
 
             entity.Name = request.Name.Trim();
-            entity.Description = string.IsNullOrWhiteSpace(request.Description)
-                ? null
-                : request.Description.Trim();
-            entity.Image = string.IsNullOrWhiteSpace(request.ImageData)
-                ? null
-                : ImageValidator.Parse(request.ImageData);
+            entity.Description = string.IsNullOrWhiteSpace(request.Description)? null: request.Description.Trim();
+            entity.Image = string.IsNullOrWhiteSpace(request.ImageData)? null: ImageValidator.Parse(request.ImageData);
 
             entity.State = ProductStates.Draft;
             var discount = request.Discount ?? 0;
 
             if (discount < 0 || discount > 1)
             {
-                throw new UserException("Discount must be between 0 and 1."
-                );
+                throw new UserException("Discount must be between 0 and 1.");
             }
 
             entity.Discount = discount;

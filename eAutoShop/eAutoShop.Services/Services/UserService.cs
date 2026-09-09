@@ -319,9 +319,7 @@ namespace eAutoShop.Services.Services
                     throw new UserException("Email is required.");
                 }
 
-                var emailTaken = await _context.Users.AnyAsync(
-                    x => x.Id != entity.Id && x.Email == email
-                );
+                var emailTaken = await _context.Users.AnyAsync(x => x.Id != entity.Id && x.Email == email);
 
                 if (emailTaken)
                 {
@@ -346,23 +344,17 @@ namespace eAutoShop.Services.Services
 
             if (request.Address != null)
             {
-                entity.Address = string.IsNullOrWhiteSpace(request.Address)
-                    ? null
-                    : request.Address.Trim();
+                entity.Address = string.IsNullOrWhiteSpace(request.Address)? null : request.Address.Trim();
             }
 
             if (request.PostalCode != null)
             {
-                entity.PostalCode = string.IsNullOrWhiteSpace(request.PostalCode)
-                    ? null
-                    : request.PostalCode.Trim();
+                entity.PostalCode = string.IsNullOrWhiteSpace(request.PostalCode)? null : request.PostalCode.Trim();
             }
 
             if (request.CityId.HasValue)
             {
-                var cityExists = await _context.Cities.AnyAsync(
-                    x => x.Id == request.CityId.Value
-                );
+                var cityExists = await _context.Cities.AnyAsync(x => x.Id == request.CityId.Value);
 
                 if (!cityExists)
                 {
@@ -389,9 +381,7 @@ namespace eAutoShop.Services.Services
             return await GetById(entity.Id);
         }
 
-        public override async Task BeforeInsert(
-    User entity,
-    UserInsertRequest request)
+        public override async Task BeforeInsert(User entity,UserInsertRequest request)
         {
             var username = request.Username?.Trim();
             var email = request.Email?.Trim().ToLowerInvariant();
@@ -430,39 +420,30 @@ namespace eAutoShop.Services.Services
                 throw new UserException("Gender is required.");
             }
 
-            var cityExists = await _context.Cities
-                .AnyAsync(x => x.Id == request.CityId);
+            var cityExists = await _context.Cities.AnyAsync(x => x.Id == request.CityId);
 
             if (!cityExists)
             {
-                throw new UserException(
-                    "Selected city doesn't exist.");
+                throw new UserException("Selected city doesn't exist.");
             }
 
-            if (!request.RoleId.HasValue ||
-                !await _context.Roles.AnyAsync(
-                    x => x.Id == request.RoleId.Value))
+            if (!request.RoleId.HasValue ||!await _context.Roles.AnyAsync(x => x.Id == request.RoleId.Value))
             {
-                throw new UserException(
-                    "Selected role doesn't exist.");
+                throw new UserException("Selected role doesn't exist.");
             }
 
-            var usernameTaken = await _context.Users
-                .AnyAsync(x => x.Username == username);
+            var usernameTaken = await _context.Users.AnyAsync(x => x.Username == username);
 
             if (usernameTaken)
             {
-                throw new UserException(
-                    "This username is already in use.");
+                throw new UserException("This username is already in use.");
             }
 
-            var emailTaken = await _context.Users
-                .AnyAsync(x => x.Email == email);
+            var emailTaken = await _context.Users.AnyAsync(x => x.Email == email);
 
             if (emailTaken)
             {
-                throw new UserException(
-                    "This email is already in use.");
+                throw new UserException("This email is already in use.");
             }
 
             if (request.Password != request.PasswordConfirm)
@@ -477,26 +458,16 @@ namespace eAutoShop.Services.Services
             entity.Phone = phone;
             entity.Gender = gender;
 
-            entity.Address =
-                string.IsNullOrWhiteSpace(request.Address)
-                    ? null
-                    : request.Address.Trim();
+            entity.Address =string.IsNullOrWhiteSpace(request.Address)? null: request.Address.Trim();
 
-            entity.PostalCode =
-                string.IsNullOrWhiteSpace(request.PostalCode)
-                    ? null
-                    : request.PostalCode.Trim();
+            entity.PostalCode =string.IsNullOrWhiteSpace(request.PostalCode)? null: request.PostalCode.Trim();
 
-            entity.PasswordHash =
-                BCrypt.Net.BCrypt.HashPassword(request.Password);
+            entity.PasswordHash =BCrypt.Net.BCrypt.HashPassword(request.Password);
 
             entity.CreatedAt = DateTime.UtcNow;
             entity.Active = true;
 
-            entity.Image =
-                string.IsNullOrWhiteSpace(request.Image)
-                    ? null
-                    : ImageValidator.Parse(request.Image);
+            entity.Image =string.IsNullOrWhiteSpace(request.Image)? null: ImageValidator.Parse(request.Image);
 
             await base.BeforeInsert(entity, request);
         }

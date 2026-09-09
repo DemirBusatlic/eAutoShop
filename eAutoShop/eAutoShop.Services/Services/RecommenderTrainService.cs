@@ -16,8 +16,7 @@ namespace eAutoShop.Services.Services
 
         private static readonly MLContext mlContext = new MLContext();
 
-        private static readonly SemaphoreSlim trainingLock =
-            new SemaphoreSlim(1, 1);
+        private static readonly SemaphoreSlim trainingLock =new SemaphoreSlim(1, 1);
 
         public RecommenderTrainService(AutoShopContext context)
         {
@@ -59,8 +58,7 @@ namespace eAutoShop.Services.Services
 
                     foreach (var productId in productIds)
                     {
-                        var relatedProductIds = productIds
-                            .Where(id => id != productId);
+                        var relatedProductIds = productIds.Where(id => id != productId);
 
                         foreach (var relatedProductId in relatedProductIds)
                         {
@@ -68,8 +66,7 @@ namespace eAutoShop.Services.Services
                                 new ProductEntry
                                 {
                                     ProductId = (uint)productId,
-                                    CoPurchaseProductId =
-                                        (uint)relatedProductId,
+                                    CoPurchaseProductId =(uint)relatedProductId,
                                     Label = 1
                                 });
                         }
@@ -83,21 +80,15 @@ namespace eAutoShop.Services.Services
                         "treniranje sistema preporuke.");
                 }
 
-                var trainData =
-                    mlContext.Data.LoadFromEnumerable(data);
+                var trainData =mlContext.Data.LoadFromEnumerable(data);
 
-                var options =
-                    new MatrixFactorizationTrainer.Options
+                var options =new MatrixFactorizationTrainer.Options
                     {
-                        MatrixColumnIndexColumnName =
-                            nameof(ProductEntry.ProductId),
+                        MatrixColumnIndexColumnName =nameof(ProductEntry.ProductId),
 
-                        MatrixRowIndexColumnName =
-                            nameof(ProductEntry.CoPurchaseProductId),
-                        LabelColumnName =
-                            nameof(ProductEntry.Label),
-                        LossFunction =
-                            MatrixFactorizationTrainer
+                        MatrixRowIndexColumnName =nameof(ProductEntry.CoPurchaseProductId),
+                        LabelColumnName =nameof(ProductEntry.Label),
+                        LossFunction =MatrixFactorizationTrainer
                                 .LossFunctionType
                                 .SquareLossOneClass,
                         Alpha = 0.01,
@@ -115,15 +106,11 @@ namespace eAutoShop.Services.Services
 
                 try
                 {
-                    var modelsPath = Path.Combine(
-                        AppDomain.CurrentDomain.BaseDirectory,
-                        "RecommenderModels");
+                    var modelsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"RecommenderModels");
 
                     Directory.CreateDirectory(modelsPath);
 
-                    var productsModelPath = Path.Combine(
-                        modelsPath,
-                        "productsmodel.zip");
+                    var productsModelPath = Path.Combine(modelsPath,"productsmodel.zip");
 
                     mlContext.Model.Save(
                         model,

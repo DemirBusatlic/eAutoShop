@@ -22,9 +22,7 @@ namespace eAutoShop.Services.StateMachineService.OrderStateMachine
             role = role?.Trim().ToLowerInvariant()
              ?? throw new UserException("Invalid role.");
 
-            if (role == UserRoles.Salesperson ||
-                role == UserRoles.Technician ||
-                role == UserRoles.Manager)
+            if (role == UserRoles.Salesperson ||role == UserRoles.Technician ||role == UserRoles.Manager)
             {
                 entity.DeletedByShop = true;
             }

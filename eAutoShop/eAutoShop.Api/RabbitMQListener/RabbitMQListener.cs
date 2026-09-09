@@ -15,9 +15,7 @@ namespace eAutoShop.Api.RabbitMQListener
         private IConnection? _connection;
         private IChannel? _channel;
 
-        public RabbitMqListener(
-            IConnectionFactory connectionFactory,
-            IServiceProvider serviceProvider)
+        public RabbitMqListener(IConnectionFactory connectionFactory,IServiceProvider serviceProvider)
         {
             _connectionFactory = connectionFactory;
             _serviceProvider = serviceProvider;
@@ -50,8 +48,7 @@ namespace eAutoShop.Api.RabbitMQListener
 
                 using var scope = _serviceProvider.CreateScope();
 
-                var reportNotificationService =
-                    scope.ServiceProvider.GetRequiredService<ReportNotificationService>();
+                var reportNotificationService = scope.ServiceProvider.GetRequiredService<ReportNotificationService>();
 
                 await reportNotificationService.SendServiceNotification(
                     notification.Username,

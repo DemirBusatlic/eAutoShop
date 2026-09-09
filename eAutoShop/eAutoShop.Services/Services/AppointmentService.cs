@@ -232,9 +232,7 @@ namespace eAutoShop.Services.Services
             var state = _baseAppointmentState.CreateState(entity.State);
             var stateActions = await state.AllowedActions();
 
-            return stateActions
-                .Where(actionsAllowedForRole.Contains)
-                .ToList();
+            return stateActions.Where(actionsAllowedForRole.Contains).ToList();
         }
 
         private async Task<PageResult<AppointmentModel>> GetForUser(AppointmentSearchObject? search, string username, bool isEmployee)
@@ -299,8 +297,7 @@ namespace eAutoShop.Services.Services
         {
             ValidateUsername(employeeUsername);
 
-            if (appointment.Employee == null ||
-                !string.Equals(appointment.Employee.Username, employeeUsername, StringComparison.OrdinalIgnoreCase))
+            if (appointment.Employee == null ||!string.Equals(appointment.Employee.Username, employeeUsername, StringComparison.OrdinalIgnoreCase))
             {
                 throw new UserException("Appointment is not assigned to the signed-in employee.");
             }

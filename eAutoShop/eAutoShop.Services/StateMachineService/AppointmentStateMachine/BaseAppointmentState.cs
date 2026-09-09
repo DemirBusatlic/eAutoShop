@@ -78,10 +78,7 @@ namespace eAutoShop.Services.StateMachineService.AppointmentStateMachine
         }
         protected async Task<bool> IsShopAtCapacity(DateTime reservationStart, TimeSpan duration, int? excludedAppointmentId = null)
         {
-            var technicianCount = await _context.Users.CountAsync(x =>
-                x.Active &&
-                x.Role.Name == UserRoles.Technician
-            );
+            var technicianCount = await _context.Users.CountAsync(x =>x.Active &&x.Role.Name == UserRoles.Technician);
 
             
             if (technicianCount == 0)
@@ -102,17 +99,13 @@ namespace eAutoShop.Services.StateMachineService.AppointmentStateMachine
                      x.State == AppointmentStates.Confirmed ||
                      x.State == AppointmentStates.Ongoing) &&
                     x.ReservationDate >= earliestPossibleStart &&
-                    x.ReservationDate < reservationEnd)
-                .ToListAsync();
+                    x.ReservationDate < reservationEnd).ToListAsync();
 
             var numberOfOverlappingAppointments = appointments.Count(x =>
             {
-                var existingAppointmentEnd = x.ReservationDate.Add(
-                    x.TotalDuration.ToTimeSpan()
-                );
+                var existingAppointmentEnd = x.ReservationDate.Add(x.TotalDuration.ToTimeSpan());
 
-                return reservationStart < existingAppointmentEnd &&
-                       reservationEnd > x.ReservationDate;
+                return reservationStart < existingAppointmentEnd &&reservationEnd > x.ReservationDate;
             });
 
             return numberOfOverlappingAppointments >= technicianCount;

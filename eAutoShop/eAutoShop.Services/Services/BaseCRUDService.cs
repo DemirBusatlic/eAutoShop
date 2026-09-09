@@ -20,8 +20,7 @@ namespace eAutoShop.Services.Services
 {
     public class BaseCRUDService<T, TDb, TSearch, TInsert, TUpdate> : BaseService<T, TDb, TSearch>, IBaseCRUDService<T, TSearch, TInsert, TUpdate> where TDb : class where T : class where TSearch : BaseSearchObject, new() where TInsert : class where TUpdate : class
     {
-        public BaseCRUDService(AutoShopContext context, IMapper mapper)
-            : base(context, mapper)
+        public BaseCRUDService(AutoShopContext context, IMapper mapper): base(context, mapper)
         {
         }
 
@@ -130,9 +129,7 @@ namespace eAutoShop.Services.Services
 
                 Expires = DateTime.UtcNow.AddDays(7),
 
-                SigningCredentials = new SigningCredentials(
-                    new SymmetricSecurityKey(key),
-                    SecurityAlgorithms.HmacSha256Signature)
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key),SecurityAlgorithms.HmacSha256Signature)
             };
 
             var token = tokenHandler.CreateToken(tokenDescriptor);
