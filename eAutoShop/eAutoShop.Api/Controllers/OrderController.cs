@@ -7,6 +7,7 @@ using eAutoShop.Services.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using eAutoShop.Api.SignalR;
 
 namespace eAutoShop.Api.Controllers
 {
@@ -14,8 +15,12 @@ namespace eAutoShop.Api.Controllers
     [ApiController]
     public class OrderController : BaseCRUDController<OrderModel, OrderSearchObject, OrderInsertRequest, OrderUpdateRequest>
     {
-        public OrderController(IOrderService service, ILogger<BaseCRUDController<OrderModel, OrderSearchObject, OrderInsertRequest, OrderUpdateRequest>> logger) : base(logger, service)
+        private readonly NotificationService _notificationService;
+        private readonly ILogger<OrderController> _orderLogger;
+        public OrderController(IOrderService service,NotificationService notificationService,ILogger<OrderController> orderLogger,ILogger<BaseCRUDController<OrderModel,OrderSearchObject,OrderInsertRequest,OrderUpdateRequest>> logger): base(logger, service)
         {
+            _notificationService = notificationService;
+            _orderLogger = orderLogger;
         }
         [Authorize(Roles = UserRoles.Customer)]
         [HttpPost]
@@ -27,25 +32,93 @@ namespace eAutoShop.Api.Controllers
 
             return await (_service as IOrderService)!.Insert(request);
         }
-        [Authorize(Roles = UserRoles.Manager + "," + UserRoles.Salesperson)]
+        [Authorize(
+      Roles = UserRoles.Manager + "," +
+              UserRoles.Salesperson)]
         [HttpPut("Accept/{id}")]
-        public virtual async Task<OrderModel> Accept(int id, OrderAcceptRequest orderAccept)
+        public virtual async Task<OrderModel> Accept(
+      int id,
+      OrderAcceptRequest orderAccept)
         {
-            return await (_service as IOrderService)!.Accept(id, orderAccept);
+            var order = await (_service as IOrderService)!
+                .Accept(id, orderAccept);
+
+            if (order.CustomerId.HasValue)
+            {
+                try
+                {
+                    await _notificationService.SendUserNotification(
+                        order.CustomerId.Value,
+                        "Vaša narudžba je prihvaćena.",
+                        "orderstatuschanged");
+                }
+                catch (Exception exception)
+                {
+                    _orderLogger.LogError(
+                        exception,
+                        "Slanje notifikacije o prihvatanju narudžbe {OrderId} korisniku {CustomerId} nije uspjelo.",
+                        order.Id,
+                        order.CustomerId.Value);
+                }
+            }
+
+            return order;
         }
 
         [Authorize(Roles = UserRoles.Manager + "," + UserRoles.Salesperson)]
         [HttpPut("Reject/{id}")]
         public virtual async Task<OrderModel> Reject(int id)
         {
-            return await (_service as IOrderService)!.Reject(id);
+            var order = await (_service as IOrderService)!.Reject(id);
+
+            if (order.CustomerId.HasValue)
+            {
+                try
+                {
+                    await _notificationService.SendUserNotification(
+                        order.CustomerId.Value,
+                        "Vaša narudžba je odbijena.",
+                        "orderstatuschanged");
+                }
+                catch (Exception exception)
+                {
+                    _orderLogger.LogError(
+                        exception,
+                        "Slanje notifikacije o odbijanju narudžbe {OrderId} korisniku {CustomerId} nije uspjelo.",
+                        order.Id,
+                        order.CustomerId.Value);
+                }
+            }
+
+            return order;
         }
 
-        [Authorize(Roles = UserRoles.Manager + "," + UserRoles.Salesperson)]
+        [Authorize(Roles = UserRoles.Manager + "," +UserRoles.Salesperson)]
         [HttpPut("Complete/{id}")]
         public virtual async Task<OrderModel> Complete(int id)
         {
-            return await (_service as IOrderService)!.Complete(id);
+            var order = await (_service as IOrderService)!.Complete(id);
+
+            if (order.CustomerId.HasValue)
+            {
+                try
+                {
+                    await _notificationService.SendUserNotification(
+                        order.CustomerId.Value,
+                        "Vaša narudžba je završena.",
+                        "orderstatuschanged");
+                }
+                catch (Exception exception)
+                {
+                    _orderLogger.LogError(
+                        exception,
+                        "Slanje notifikacije o završetku narudžbe {OrderId} korisniku {CustomerId} nije uspjelo.",
+                        order.Id,
+                        order.CustomerId.Value);
+                }
+            }
+
+            return order;
         }
         [Authorize(Roles = UserRoles.Manager + "," + UserRoles.Salesperson + "," + UserRoles.Customer)]
         [HttpPut("Cancel/{id}")]
@@ -92,5 +165,7 @@ namespace eAutoShop.Api.Controllers
         {
             return await (_service as IOrderService)!.Get(search);
         }
+
+        
     }
 }

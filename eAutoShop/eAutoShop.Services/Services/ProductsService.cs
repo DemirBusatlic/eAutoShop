@@ -31,7 +31,8 @@ namespace eAutoShop.Services.Services
         {
             query = query
                 .Include(x => x.ProductCategory)
-                .Include(x => x.CarModels);
+                .Include(x => x.CarModels)
+                .ThenInclude(x => x.CarManufacturer);
 
             return query;
         }

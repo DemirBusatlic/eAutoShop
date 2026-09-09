@@ -19,7 +19,7 @@ namespace eAutoShop.Services.StateMachineService.AppointmentStateMachine
         {
         }
 
-        public override async Task<AppointmentModel> Update(Appointment entity,AppointmentUpdateRequest request)
+        public override async Task<AppointmentModel> Update(Appointment entity, AppointmentUpdateRequest request)
         {
             if (request.ReservationDate.HasValue)
             {
@@ -160,6 +160,10 @@ namespace eAutoShop.Services.StateMachineService.AppointmentStateMachine
             if (string.IsNullOrWhiteSpace(reason))
                 throw new UserException("Rejection reason is required.");
 
+            reason = reason.Trim();
+            if (reason.Length > 500)
+                throw new UserException("Rejection reason can contain at most 500 characters.");
+
             entity.State = AppointmentStates.Rejected;
             entity.RejectionReason = reason;
 
@@ -172,6 +176,10 @@ namespace eAutoShop.Services.StateMachineService.AppointmentStateMachine
         {
             if (string.IsNullOrWhiteSpace(reason))
                 throw new UserException("Cancellation reason is required.");
+
+            reason = reason.Trim();
+            if (reason.Length > 500)
+                throw new UserException("Cancellation reason can contain at most 500 characters.");
 
             entity.State = AppointmentStates.Cancelled;
             entity.CancellationReason = reason;

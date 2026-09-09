@@ -1,10 +1,12 @@
 ﻿using eAutoShop.Model.Request;
 using eAutoShop.Services.Database;
+using eAutoShop.Model.Exceptions;
 using eAutoShop.Services.Interfaces;
 using eAutoShop.Services.Services.eAutoShop.Services.Database;
 using MapsterMapper;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,6 +33,7 @@ namespace eAutoShop.Services.Services
 
         public async Task GenerateProductReport(ProductReportRequest request)
         {
+            await ValidateProductReportRequest(request);
             await _rabbitMQService.SendReportGenerationRequest(request);
         }
 
@@ -41,6 +44,7 @@ namespace eAutoShop.Services.Services
 
         public async Task GenerateTopSellingProductsReport(ProductReportRequest request)
         {
+            await ValidateProductReportRequest(request);
             await _rabbitMQService.SendTopSellingProductsReportRequest(request);
         }
 
@@ -51,6 +55,7 @@ namespace eAutoShop.Services.Services
 
         public async Task GenerateSalesByCategoryReport(ReportRequest request)
         {
+            ValidateDateRange(request);
             await _rabbitMQService.SendSalesByCategoryReportRequest(request);
         }
 
@@ -61,6 +66,7 @@ namespace eAutoShop.Services.Services
 
         public async Task GenerateMonthlyRevenueReport(ReportRequest request)
         {
+            ValidateDateRange(request);
             await _rabbitMQService.SendMonthlyRevenueReportRequest(request);
         }
 
@@ -71,6 +77,7 @@ namespace eAutoShop.Services.Services
 
         public async Task GenerateTopCustomersReport(ReportRequest request)
         {
+            ValidateDateRange(request);
             await _rabbitMQService.SendTopCustomersReportRequest(request);
         }
 
@@ -89,6 +96,26 @@ namespace eAutoShop.Services.Services
             }
 
             return Array.Empty<byte>();
+        }
+
+        private static void ValidateDateRange(ReportRequest request)
+        {
+            if (request.StartDate.HasValue && request.EndDate.HasValue &&
+                request.StartDate.Value > request.EndDate.Value)
+                throw new UserException("Start date cannot be after end date.");
+        }
+
+        private async Task ValidateProductReportRequest(ProductReportRequest request)
+        {
+            ValidateDateRange(request);
+
+            if (request.ProductId.HasValue &&
+                !await _context.Products.AnyAsync(x => x.Id == request.ProductId.Value))
+                throw new UserException("Selected product doesn't exist.");
+
+            if (request.ProductCategoryId.HasValue &&
+                !await _context.ProductCategories.AnyAsync(x => x.Id == request.ProductCategoryId.Value))
+                throw new UserException("Selected product category doesn't exist.");
         }
     }
 }

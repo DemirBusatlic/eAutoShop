@@ -29,27 +29,37 @@ namespace eAutoShop.Services.StateMachineService.ProductStateMachine
         {
             if (request.Name != null)
             {
-                entity.Name = request.Name;
+                if (string.IsNullOrWhiteSpace(request.Name))
+                    throw new UserException("Product name is required.");
+                entity.Name = request.Name.Trim();
             }
 
             if (request.Price.HasValue)
             {
+                if (request.Price.Value <= 0)
+                    throw new UserException("Product price must be greater than zero.");
                 entity.Price = request.Price.Value;
             }
 
             if (request.ProductCategoryId.HasValue)
             {
+                var categoryExists = await _context.ProductCategories.AnyAsync(
+                    x => x.Id == request.ProductCategoryId.Value);
+                if (!categoryExists)
+                    throw new UserException("Selected product category doesn't exist.");
                 entity.ProductCategoryId = request.ProductCategoryId.Value;
             }
 
             if (request.Description != null)
             {
-                entity.Description = request.Description;
+                entity.Description = string.IsNullOrWhiteSpace(request.Description)
+                    ? null
+                    : request.Description.Trim();
             }
 
             if (!string.IsNullOrWhiteSpace(request.ImageData))
             {
-                entity.Image = ParseBase64(request.ImageData);
+                entity.Image = ImageValidator.Parse(request.ImageData);
             }
 
             if (request.CarModelIds != null)
@@ -95,26 +105,6 @@ namespace eAutoShop.Services.StateMachineService.ProductStateMachine
             return _mapper.Map<ProductModel>(entity);
         }
 
-        private static byte[] ParseBase64(string base64)
-        {
-            try
-            {
-                var commaIndex = base64.IndexOf(',');
-
-                if (commaIndex >= 0)
-                {
-                    base64 = base64[(commaIndex + 1)..];
-                }
-
-                return Convert.FromBase64String(base64);
-            }
-            catch
-            {
-                throw new UserException(
-                    "Invalid image format.");
-            }
-        }
-
         public override async Task<ProductModel> Activate(Product entity)
         {
             var isValid =
@@ -137,6 +127,24 @@ namespace eAutoShop.Services.StateMachineService.ProductStateMachine
 
         public override async Task<bool> Delete(Product entity)
         {
+            var isUsedInOrders = await _context.OrderItems
+                .AnyAsync(x => x.ProductId == entity.Id);
+
+            var hasReviews = await _context.ProductReviews
+                .AnyAsync(x => x.ProductId == entity.Id);
+
+            if (isUsedInOrders || hasReviews)
+            {
+                throw new UserException(
+                    "Proizvod se ne može obrisati jer je korišten u narudžbama ili recenzijama. Možete ga ostaviti skrivenim.");
+            }
+
+            await _context.Entry(entity)
+                .Collection(x => x.CarModels)
+                .LoadAsync();
+
+            entity.CarModels.Clear();
+
             _context.Products.Remove(entity);
 
             await _context.SaveChangesAsync();

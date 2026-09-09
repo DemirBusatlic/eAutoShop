@@ -51,22 +51,21 @@ namespace eAutoShop.Services.StateMachineService.AppointmentStateMachine
                 throw new UserException("Please select at least one service.");
 
 
-            double totalAmount = 0;
-            TimeSpan totalDuration = TimeSpan.Zero;
+            var serviceIds = request.Services.Distinct().ToList();
+            var services = await _context.AutoShopServices
+                .Where(x => serviceIds.Contains(x.Id))
+                .ToListAsync();
 
-            foreach (var serviceId in request.Services)
-            {
-                var service = await _context.AutoShopServices.FirstOrDefaultAsync(x => x.Id == serviceId);
+            if (services.Count != serviceIds.Count)
+                throw new UserException("One or more selected services do not exist.");
 
-                if (service == null)
-                    throw new UserException($"Service #{serviceId} not found.");
+            if (services.Any(x => x.State != AutoShopServiceStates.Active))
+                throw new UserException("One or more selected services are not active.");
 
-                if (service.State != "active")
-                    throw new UserException($"Service #{serviceId} is not active.");
-
-                totalAmount += service.DiscountedPrice;
-                totalDuration += service.Duration.ToTimeSpan();
-            }
+            var totalAmount = services.Sum(x => x.DiscountedPrice);
+            var totalDuration = services.Aggregate(
+                TimeSpan.Zero,
+                (total, service) => total + service.Duration.ToTimeSpan());
 
 
             var shopIsAtCapacity = await IsShopAtCapacity(request.ReservationDate, totalDuration);
@@ -91,31 +90,34 @@ namespace eAutoShop.Services.StateMachineService.AppointmentStateMachine
                 DeletedByShop = false
             };
 
-            _context.Appointments.Add(appointment);
-            await _context.SaveChangesAsync();
+            await using var transaction = await _context.Database.BeginTransactionAsync();
 
-            foreach (var serviceId in request.Services)
+            try
             {
-                var service = await _context.AutoShopServices
-                    .FirstOrDefaultAsync(x => x.Id == serviceId);
+                _context.Appointments.Add(appointment);
+                await _context.SaveChangesAsync();
 
-                if (service == null)
-                    throw new UserException($"Service #{serviceId} not found.");
-
-                var detail = new AppointmentDetail
+                foreach (var service in services)
                 {
-                    AppointmentId = appointment.Id,
-                    ServiceId = service.Id,
-                    ServiceName = service.Name,
-                    ServicePrice = service.Price,
-                    ServiceDiscount = service.Discount,
-                    ServiceDiscountedPrice = service.DiscountedPrice
-                };
+                    _context.AppointmentDetails.Add(new AppointmentDetail
+                    {
+                        AppointmentId = appointment.Id,
+                        ServiceId = service.Id,
+                        ServiceName = service.Name,
+                        ServicePrice = service.Price,
+                        ServiceDiscount = service.Discount,
+                        ServiceDiscountedPrice = service.DiscountedPrice
+                    });
+                }
 
-                _context.AppointmentDetails.Add(detail);
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
             }
-
-            await _context.SaveChangesAsync();
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
 
             return _mapper.Map<AppointmentModel>(appointment);
         }

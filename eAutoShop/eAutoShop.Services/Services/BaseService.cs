@@ -49,7 +49,9 @@ namespace eAutoShop.Services.Services
 
             var pageSize = search.PageSize ?? DefaultPageSize;
 
-            if (pageSize > MaxPageSize)
+            if (pageSize < 1)
+                pageSize = DefaultPageSize;
+            else if (pageSize > MaxPageSize)
                 pageSize = MaxPageSize;
 
             query = query
@@ -97,4 +99,3 @@ namespace eAutoShop.Services.Services
         }
     }
 }
-

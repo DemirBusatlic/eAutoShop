@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace eAutoShop.Services.Interfaces
 {
-    public interface IRoleService : IBaseCRUDService<RoleModel, RoleSearchObject, RoleInsertRequest, RoleUpdateRequest>
+    public interface IRoleService : IService<RoleModel, RoleSearchObject>
     {
 
     }

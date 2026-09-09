@@ -904,12 +904,19 @@ class _ProductDialogState extends State<_ProductDialog> {
   Future<void> _pickImage() async {
     const imageTypes = XTypeGroup(
       label: 'Slike',
-      extensions: ['jpg', 'jpeg', 'png', 'webp'],
+      extensions: ['jpg', 'jpeg', 'png'],
     );
     final file = await openFile(acceptedTypeGroups: [imageTypes]);
     if (file == null) return;
 
     try {
+      final fileSize = await file.length();
+
+      if (fileSize > 5 * 1024 * 1024) {
+        _showError('Slika ne smije biti veća od 5 MB.');
+        return;
+      }
+
       final bytes = await file.readAsBytes();
       if (mounted) setState(() => _base64Image = base64Encode(bytes));
     } catch (_) {

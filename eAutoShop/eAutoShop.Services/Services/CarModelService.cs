@@ -9,9 +9,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace eAutoShop.Services.Services
 {
-    public class CarModelService: BaseCRUDService<CarModelModel,CarModel,CarModelSearchObject,CarModelInsertRequest,CarModelUpdateRequest>,ICarModelService
+    public class CarModelService : BaseCRUDService<CarModelModel, CarModel, CarModelSearchObject, CarModelInsertRequest, CarModelUpdateRequest>, ICarModelService
     {
-        public CarModelService(AutoShopContext context,IMapper mapper): base(context, mapper)
+        public CarModelService(AutoShopContext context, IMapper mapper) : base(context, mapper)
         {
         }
 
@@ -20,7 +20,7 @@ namespace eAutoShop.Services.Services
             return query.Include(x => x.CarManufacturer);
         }
 
-        public override IQueryable<CarModel> AddFilter(IQueryable<CarModel> query,CarModelSearchObject? search = null)
+        public override IQueryable<CarModel> AddFilter(IQueryable<CarModel> query, CarModelSearchObject? search = null)
         {
             if (!string.IsNullOrWhiteSpace(search?.Name))
             {
@@ -122,11 +122,25 @@ namespace eAutoShop.Services.Services
             }
         }
 
-        public async Task<PageResult<CarModelGetByManufacturerModel>>GetByManufacturerAll()
+        public async Task<PageResult<CarModelGetByManufacturerModel>> GetByManufacturerAll(
+            BaseSearchObject? search = null)
         {
-            var manufacturers = await _context.CarManufacturers
+            search ??= new BaseSearchObject();
+            var page = search.Page.GetValueOrDefault(1);
+            var pageSize = search.PageSize.GetValueOrDefault(10);
+            if (page < 1) page = 1;
+            if (pageSize < 1) pageSize = 10;
+            if (pageSize > 100) pageSize = 100;
+
+            var query = _context.CarManufacturers
+                .AsNoTracking()
+                .OrderBy(x => x.Name);
+
+            var count = await query.CountAsync();
+            var manufacturers = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
                 .Include(x => x.CarModels)
-                .OrderBy(x => x.Name)
                 .ToListAsync();
 
             var result = manufacturers.Select(manufacturer =>
@@ -145,8 +159,9 @@ namespace eAutoShop.Services.Services
             return new PageResult<CarModelGetByManufacturerModel>
             {
                 Result = result,
-                Count = result.Count
+                Count = count
             };
         }
     }
 }
+

@@ -1,23 +1,22 @@
 ﻿using System.Text;
 using System.Text.Json;
-using RabbitMQ.Client;
 using eAutoShop.Model.Model;
+using RabbitMQ.Client;
 
-public class RabbitMQService : IDisposable
+public class RabbitMQService : IAsyncDisposable
 {
-    private readonly IConnection _connection;
+    private readonly Lazy<Task<IConnection>> _connectionTask;
 
     public RabbitMQService(IConnectionFactory connectionFactory)
     {
-        _connection = connectionFactory.CreateConnectionAsync().GetAwaiter().GetResult();
+        _connectionTask = new Lazy<Task<IConnection>>(() => connectionFactory.CreateConnectionAsync());
     }
 
     public async Task SendReportNotification(ReportNotificationModel notification)
     {
-        var message = JsonSerializer.Serialize(notification);
-        var body = Encoding.UTF8.GetBytes(message);
+        var connection = await _connectionTask.Value;
 
-        await using var channel = await _connection.CreateChannelAsync();
+        await using var channel = await connection.CreateChannelAsync();
 
         await channel.QueueDeclareAsync(
             queue: "report_ready",
@@ -26,15 +25,23 @@ public class RabbitMQService : IDisposable
             autoDelete: false,
             arguments: null);
 
+        var message = JsonSerializer.Serialize(notification);
+        var body = Encoding.UTF8.GetBytes(message);
+
         await channel.BasicPublishAsync(
             exchange: "",
             routingKey: "report_ready",
             body: body);
     }
 
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
-        _connection.Dispose();
+        if (!_connectionTask.IsValueCreated)
+        {
+            return;
+        }
+
+        var connection = await _connectionTask.Value;
+        await connection.DisposeAsync();
     }
 }
-

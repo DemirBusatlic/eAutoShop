@@ -10,9 +10,9 @@ namespace eAutoShop.Api.Controllers
 {
 
     [ApiController]
-    public class RoleController : BaseCRUDController<RoleModel, RoleSearchObject, RoleInsertRequest, RoleUpdateRequest>
+    public class RoleController : BaseController<RoleModel, RoleSearchObject>
     {
-        public RoleController(IRoleService service, ILogger<BaseCRUDController<RoleModel, RoleSearchObject, RoleInsertRequest, RoleUpdateRequest>> logger) : base(logger, service)
+        public RoleController(IRoleService service, ILogger<BaseController<RoleModel, RoleSearchObject>> logger) : base(logger, service)
         {
         }
     }

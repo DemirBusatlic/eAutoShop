@@ -9,11 +9,11 @@ using Microsoft.AspNetCore.Mvc;
 namespace eAutoShop.Api.Controllers
 {
     [ApiController]
-    public class CarModelController: BaseCRUDController<CarModelModel,CarModelSearchObject,CarModelInsertRequest,CarModelUpdateRequest>
+    public class CarModelController : BaseCRUDController<CarModelModel, CarModelSearchObject, CarModelInsertRequest, CarModelUpdateRequest>
     {
         private readonly ICarModelService _carModelService;
 
-        public CarModelController(ICarModelService service,ILogger<BaseCRUDController<CarModelModel,CarModelSearchObject,CarModelInsertRequest,CarModelUpdateRequest>> logger): base(logger, service)
+        public CarModelController(ICarModelService service, ILogger<BaseCRUDController<CarModelModel, CarModelSearchObject, CarModelInsertRequest, CarModelUpdateRequest>> logger) : base(logger, service)
         {
             _carModelService = service;
         }
@@ -31,7 +31,7 @@ namespace eAutoShop.Api.Controllers
         }
 
         [Authorize(Roles = UserRoles.Manager)]
-        public override Task<CarModelModel> Update(int id,[FromBody] CarModelUpdateRequest update)
+        public override Task<CarModelModel> Update(int id, [FromBody] CarModelUpdateRequest update)
         {
             return base.Update(id, update);
         }
@@ -44,9 +44,10 @@ namespace eAutoShop.Api.Controllers
 
         [Authorize]
         [HttpGet("/GetByManufacturerAll")]
-        public async Task<PageResult<CarModelGetByManufacturerModel>>GetByManufacturerAll()
+        public async Task<PageResult<CarModelGetByManufacturerModel>> GetByManufacturerAll(
+            [FromQuery] BaseSearchObject? search = null)
         {
-            return await _carModelService.GetByManufacturerAll();
+            return await _carModelService.GetByManufacturerAll(search);
         }
     }
 }

@@ -21,7 +21,25 @@ namespace eAutoShop.Services.StateMachineService.ProductStateMachine
 
         public override async Task<ProductModel> Insert(ProductInsertRequest request)
         {
+            if (string.IsNullOrWhiteSpace(request.Name))
+                throw new UserException("Product name is required.");
+
+            if (request.Price <= 0)
+                throw new UserException("Product price must be greater than zero.");
+
+            if (request.ProductCategoryId.HasValue &&
+                !await _context.ProductCategories.AnyAsync(x => x.Id == request.ProductCategoryId.Value))
+                throw new UserException("Selected product category doesn't exist.");
+
             var entity = _mapper.Map<Product>(request);
+
+            entity.Name = request.Name.Trim();
+            entity.Description = string.IsNullOrWhiteSpace(request.Description)
+                ? null
+                : request.Description.Trim();
+            entity.Image = string.IsNullOrWhiteSpace(request.ImageData)
+                ? null
+                : ImageValidator.Parse(request.ImageData);
 
             entity.State = ProductStates.Draft;
             var discount = request.Discount ?? 0;

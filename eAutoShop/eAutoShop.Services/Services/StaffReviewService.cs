@@ -101,7 +101,7 @@ namespace eAutoShop.Services.Services
             db.UserId = insert.UserId.Value;
             db.EmployeeId = appointment.EmployeeId.Value;
             db.AppointmentId = appointment.Id;
-            db.CreatedAt = DateTime.Now;
+            db.CreatedAt = DateTime.UtcNow;
 
             await base.BeforeInsert(db, insert);
         }

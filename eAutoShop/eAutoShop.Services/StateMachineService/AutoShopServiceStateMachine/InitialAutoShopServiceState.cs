@@ -4,6 +4,7 @@ using eAutoShop.Model.Request;
 using eAutoShop.Services.Database;
 using eAutoShop.Services.Helpers;
 using MapsterMapper;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,7 +21,18 @@ namespace eAutoShop.Services.StateMachineService.AutoShopServiceStateMachine
 
         public override async Task<AutoShopServiceModel> Insert(AutoShopServiceInsertRequest request)
         {
+            if (!await _context.ServiceTypes.AnyAsync(x => x.Id == request.ServiceTypeId))
+                throw new UserException("Selected service type doesn't exist.");
+
+            if (!TimeOnly.TryParse(request.Duration, out var duration) || duration == TimeOnly.MinValue)
+                throw new UserException("Service duration is invalid.");
+
             var entity = _mapper.Map<AutoShopService>(request);
+
+            entity.Name = request.Name.Trim();
+            entity.Description = request.Description.Trim();
+            entity.Details = string.IsNullOrWhiteSpace(request.Details) ? null : request.Details.Trim();
+            entity.Duration = duration;
 
             entity.State = AutoShopServiceStates.Draft;
 
@@ -35,7 +47,9 @@ namespace eAutoShop.Services.StateMachineService.AutoShopServiceStateMachine
 
             entity.DiscountedPrice = discount > 0 ? Math.Round(entity.Price * (1 - discount), 2) : entity.Price;
 
-            entity.Image = !string.IsNullOrWhiteSpace(request.ImageData) ? Convert.FromBase64String(request.ImageData) : Array.Empty<byte>();
+            entity.Image = !string.IsNullOrWhiteSpace(request.ImageData)
+                ? ImageValidator.Parse(request.ImageData)
+                : Array.Empty<byte>();
 
             _context.AutoShopServices.Add(entity);
 

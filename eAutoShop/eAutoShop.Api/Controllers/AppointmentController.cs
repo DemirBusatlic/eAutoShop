@@ -7,6 +7,7 @@ using eAutoShop.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using eAutoShop.Api.SignalR;
 
 namespace eAutoShop.Api.Controllers
 {
@@ -15,9 +16,17 @@ namespace eAutoShop.Api.Controllers
     public class AppointmentController : BaseCRUDController<AppointmentModel, AppointmentSearchObject, AppointmentInsertRequest, AppointmentUpdateRequest>
     {
         private IAppointmentService AppointmentService => (IAppointmentService)_service;
+        private readonly NotificationService _notificationService;
+        private readonly ILogger<AppointmentController> _appointmentLogger;
 
-        public AppointmentController(IAppointmentService service, ILogger<BaseCRUDController<AppointmentModel, AppointmentSearchObject, AppointmentInsertRequest, AppointmentUpdateRequest>> logger) : base(logger, service)
+        public AppointmentController(IAppointmentService service,NotificationService notificationService,ILogger<AppointmentController> appointmentLogger,ILogger<BaseCRUDController<AppointmentModel,
+        AppointmentSearchObject,
+        AppointmentInsertRequest,
+        AppointmentUpdateRequest>> logger)
+    : base(logger, service)
         {
+            _notificationService = notificationService;
+            _appointmentLogger = appointmentLogger;
         }
 
         [Authorize(Roles = UserRoles.Manager)]
@@ -56,16 +65,54 @@ namespace eAutoShop.Api.Controllers
 
         [Authorize(Roles = UserRoles.Manager)]
         [HttpPut("Confirm/{id}")]
-        public async Task<AppointmentModel> Confirm(int id, [FromBody] AppointmentConfirmRequest request)
+        public async Task<AppointmentModel> Confirm(int id,[FromBody] AppointmentConfirmRequest request)
         {
-            return await AppointmentService.Confirm(id, request);
+            var appointment =
+                await AppointmentService.Confirm(id, request);
+
+            try
+            {
+                await _notificationService.SendUserNotification(
+                appointment.CustomerId,
+                "Vaša rezervacija je prihvaćena.",
+                "reservationstatuschanged");
+            }
+            catch (Exception exception)
+            {
+                _appointmentLogger.LogError(
+                    exception,
+                    "Slanje notifikacije o prihvatanju rezervacije {AppointmentId} korisniku {CustomerId} nije uspjelo.",
+                    appointment.Id,
+                    appointment.CustomerId);
+            }
+
+            return appointment;
         }
 
         [Authorize(Roles = UserRoles.Manager)]
         [HttpPut("Reject/{id}/{reason}")]
-        public async Task<AppointmentModel> Reject(int id, string reason)
+        public async Task<AppointmentModel> Reject(int id,string reason)
         {
-            return await AppointmentService.Reject(id, reason);
+            var appointment =
+                await AppointmentService.Reject(id, reason);
+
+            try
+            {
+                await _notificationService.SendUserNotification(
+                appointment.CustomerId,
+                $"Vaša rezervacija je odbijena. Razlog: {reason}",
+                "reservationstatuschanged");
+            }
+            catch (Exception exception)
+            {
+                _appointmentLogger.LogError(
+                    exception,
+                    "Slanje notifikacije o odbijanju rezervacije {AppointmentId} korisniku {CustomerId} nije uspjelo.",
+                    appointment.Id,
+                    appointment.CustomerId);
+            }
+
+            return appointment;
         }
 
         [Authorize(Roles = UserRoles.Customer)]

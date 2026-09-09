@@ -84,7 +84,7 @@ namespace eAutoShop.Services.Services
             db.UserId = insert.UserId.Value;
             db.ProductId = orderItem.ProductId;
             db.OrderItemId = orderItem.Id;
-            db.CreatedAt = DateTime.Now;
+            db.CreatedAt = DateTime.UtcNow;
 
             await base.BeforeInsert(db, insert);
         }

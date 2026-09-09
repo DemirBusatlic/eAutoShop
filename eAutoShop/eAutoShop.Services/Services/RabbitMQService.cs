@@ -1,8 +1,6 @@
 ﻿using eAutoShop.Model.Request;
 using RabbitMQ.Client;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -11,121 +9,91 @@ namespace eAutoShop.Services.Services
 {
     namespace eAutoShop.Services.Database
     {
-        public class RabbitMQService : IDisposable
+        public class RabbitMQService : IAsyncDisposable
         {
-            private readonly IConnection _connection;
+            private readonly Lazy<Task<IConnection>> _connectionTask;
 
             public RabbitMQService(IConnectionFactory connectionFactory)
             {
-                _connection = connectionFactory
-                    .CreateConnectionAsync()
-                    .GetAwaiter()
-                    .GetResult();
+                _connectionTask = new Lazy<Task<IConnection>>(
+                    () => connectionFactory.CreateConnectionAsync()
+                );
             }
 
-            public async Task SendReportGenerationRequest(ProductReportRequest reportRequest)
+            public Task SendReportGenerationRequest(
+                ProductReportRequest reportRequest)
             {
-                await using var channel = await _connection.CreateChannelAsync();
-
-                await channel.QueueDeclareAsync(
+                return SendMessage(
                     queue: "generate_product_report",
-                    durable: true,
-                    exclusive: false,
-                    autoDelete: false,
-                    arguments: null);
-
-                var message = JsonSerializer.Serialize(reportRequest);
-                var body = Encoding.UTF8.GetBytes(message);
-
-                await channel.BasicPublishAsync(
-                    exchange: "",
-                    routingKey: "generate_product_report",
-                    body: body);
+                    request: reportRequest);
             }
 
-            public async Task SendTopSellingProductsReportRequest(ProductReportRequest reportRequest)
+            public Task SendTopSellingProductsReportRequest(
+                ProductReportRequest reportRequest)
             {
-                await using var channel = await _connection.CreateChannelAsync();
-
-                await channel.QueueDeclareAsync(
+                return SendMessage(
                     queue: "generate_top_selling_products_report",
-                    durable: true,
-                    exclusive: false,
-                    autoDelete: false,
-                    arguments: null);
-
-                var message = JsonSerializer.Serialize(reportRequest);
-                var body = Encoding.UTF8.GetBytes(message);
-
-                await channel.BasicPublishAsync(
-                    exchange: "",
-                    routingKey: "generate_top_selling_products_report",
-                    body: body);
+                    request: reportRequest);
             }
 
-            public async Task SendSalesByCategoryReportRequest(ReportRequest reportRequest)
+            public Task SendSalesByCategoryReportRequest(
+                ReportRequest reportRequest)
             {
-                await using var channel = await _connection.CreateChannelAsync();
-
-                await channel.QueueDeclareAsync(
+                return SendMessage(
                     queue: "generate_sales_by_category_report",
-                    durable: true,
-                    exclusive: false,
-                    autoDelete: false,
-                    arguments: null);
-
-                var message = JsonSerializer.Serialize(reportRequest);
-                var body = Encoding.UTF8.GetBytes(message);
-
-                await channel.BasicPublishAsync(
-                    exchange: "",
-                    routingKey: "generate_sales_by_category_report",
-                    body: body);
+                    request: reportRequest);
             }
 
-            public async Task SendMonthlyRevenueReportRequest(ReportRequest reportRequest)
+            public Task SendMonthlyRevenueReportRequest(
+                ReportRequest reportRequest)
             {
-                await using var channel = await _connection.CreateChannelAsync();
-
-                await channel.QueueDeclareAsync(
+                return SendMessage(
                     queue: "generate_monthly_revenue_report",
-                    durable: true,
-                    exclusive: false,
-                    autoDelete: false,
-                    arguments: null);
-
-                var message = JsonSerializer.Serialize(reportRequest);
-                var body = Encoding.UTF8.GetBytes(message);
-
-                await channel.BasicPublishAsync(
-                    exchange: "",
-                    routingKey: "generate_monthly_revenue_report",
-                    body: body);
+                    request: reportRequest);
             }
 
-            public async Task SendTopCustomersReportRequest(ReportRequest reportRequest)
+            public Task SendTopCustomersReportRequest(
+                ReportRequest reportRequest)
             {
-                await using var channel = await _connection.CreateChannelAsync();
+                return SendMessage(
+                    queue: "generate_top_customers_report",
+                    request: reportRequest);
+            }
+
+            private async Task SendMessage<TRequest>(
+                string queue,
+                TRequest request)
+            {
+                var connection = await _connectionTask.Value;
+
+                await using var channel =
+                    await connection.CreateChannelAsync();
 
                 await channel.QueueDeclareAsync(
-                    queue: "generate_top_customers_report",
+                    queue: queue,
                     durable: true,
                     exclusive: false,
                     autoDelete: false,
                     arguments: null);
 
-                var message = JsonSerializer.Serialize(reportRequest);
+                var message = JsonSerializer.Serialize(request);
                 var body = Encoding.UTF8.GetBytes(message);
 
                 await channel.BasicPublishAsync(
                     exchange: "",
-                    routingKey: "generate_top_customers_report",
+                    routingKey: queue,
                     body: body);
             }
 
-            public void Dispose()
+            public async ValueTask DisposeAsync()
             {
-                _connection.Dispose();
+                if (!_connectionTask.IsValueCreated)
+                {
+                    return;
+                }
+
+                var connection = await _connectionTask.Value;
+                await connection.DisposeAsync();
             }
         }
     }

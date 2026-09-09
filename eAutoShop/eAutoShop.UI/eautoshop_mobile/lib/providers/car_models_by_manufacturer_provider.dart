@@ -16,7 +16,8 @@ class CarModelsByManufacturerProvider
 
     try {
       final SearchResult<CarModelsByManufacturer> searchResult = await get(
-        fromJson: (json) => CarModelsByManufacturer.fromJson(json),
+        filter: const {'page': 1, 'pageSize': 100},
+        fromJson: CarModelsByManufacturer.fromJson,
       );
 
       modelsByManufacturer = searchResult.result;

@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace eAutoShop.Services.Services
 {
-    public class RoleService : BaseCRUDService<RoleModel, Role, RoleSearchObject, RoleInsertRequest, RoleUpdateRequest>, IRoleService
+    public class RoleService : BaseService<RoleModel, Role, RoleSearchObject>, IRoleService
     {
         public RoleService(AutoShopContext context, IMapper mapper) : base(context, mapper) { }
     }

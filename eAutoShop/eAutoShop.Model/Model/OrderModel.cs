@@ -8,6 +8,8 @@ namespace eAutoShop.Model.Model
     {
         public int Id { get; set; }
 
+        public int? CustomerId { get; set; }
+
         public string Username { get; set; } = null!;
 
         public DateTime OrderDate { get; set; }

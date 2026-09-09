@@ -189,7 +189,7 @@ namespace eAutoShop.Services.Services
 
             if (request.Email != null)
             {
-                var email = request.Email.Trim();
+                var email = request.Email.Trim().ToLowerInvariant();
 
                 if (string.IsNullOrWhiteSpace(email))
                 {
@@ -274,14 +274,7 @@ namespace eAutoShop.Services.Services
                 }
                 else
                 {
-                    try
-                    {
-                        entity.Image = Convert.FromBase64String(request.Image);
-                    }
-                    catch (FormatException)
-                    {
-                        throw new UserException("Invalid image format.");
-                    }
+                    entity.Image = ImageValidator.Parse(request.Image);
                 }
             }
 
@@ -319,7 +312,12 @@ namespace eAutoShop.Services.Services
 
             if (request.Email != null)
             {
-                var email = request.Email.Trim();
+                var email = request.Email.Trim().ToLowerInvariant();
+
+                if (string.IsNullOrWhiteSpace(email))
+                {
+                    throw new UserException("Email is required.");
+                }
 
                 var emailTaken = await _context.Users.AnyAsync(
                     x => x.Id != entity.Id && x.Email == email
@@ -335,7 +333,10 @@ namespace eAutoShop.Services.Services
 
             if (request.Phone != null)
             {
-                entity.Phone = request.Phone.Trim();
+                var phone = request.Phone.Trim();
+                if (string.IsNullOrWhiteSpace(phone))
+                    throw new UserException("Phone is required.");
+                entity.Phone = phone;
             }
 
             if (request.Gender != null)
@@ -379,14 +380,7 @@ namespace eAutoShop.Services.Services
                 }
                 else
                 {
-                    try
-                    {
-                        entity.Image = Convert.FromBase64String(request.Image);
-                    }
-                    catch (FormatException)
-                    {
-                        throw new UserException("Invalid image format.");
-                    }
+                    entity.Image = ImageValidator.Parse(request.Image);
                 }
             }
 
@@ -395,20 +389,80 @@ namespace eAutoShop.Services.Services
             return await GetById(entity.Id);
         }
 
-        public override async Task BeforeInsert(User entity, UserInsertRequest request)
+        public override async Task BeforeInsert(
+    User entity,
+    UserInsertRequest request)
         {
-            var usernameTaken = await _context.Users.AnyAsync(x => x.Username == request.Username);
+            var username = request.Username?.Trim();
+            var email = request.Email?.Trim().ToLowerInvariant();
+            var name = request.Name?.Trim();
+            var surname = request.Surname?.Trim();
+            var phone = request.Phone?.Trim();
+            var gender = request.Gender?.Trim();
+
+            if (string.IsNullOrWhiteSpace(username))
+            {
+                throw new UserException("Username is required.");
+            }
+
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                throw new UserException("Email is required.");
+            }
+
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                throw new UserException("Name is required.");
+            }
+
+            if (string.IsNullOrWhiteSpace(surname))
+            {
+                throw new UserException("Surname is required.");
+            }
+
+            if (string.IsNullOrWhiteSpace(phone))
+            {
+                throw new UserException("Phone is required.");
+            }
+
+            if (string.IsNullOrWhiteSpace(gender))
+            {
+                throw new UserException("Gender is required.");
+            }
+
+            var cityExists = await _context.Cities
+                .AnyAsync(x => x.Id == request.CityId);
+
+            if (!cityExists)
+            {
+                throw new UserException(
+                    "Selected city doesn't exist.");
+            }
+
+            if (!request.RoleId.HasValue ||
+                !await _context.Roles.AnyAsync(
+                    x => x.Id == request.RoleId.Value))
+            {
+                throw new UserException(
+                    "Selected role doesn't exist.");
+            }
+
+            var usernameTaken = await _context.Users
+                .AnyAsync(x => x.Username == username);
 
             if (usernameTaken)
             {
-                throw new UserException("This username is already in use.");
+                throw new UserException(
+                    "This username is already in use.");
             }
 
-            var emailTaken = await _context.Users.AnyAsync(x => x.Email == request.Email);
+            var emailTaken = await _context.Users
+                .AnyAsync(x => x.Email == email);
 
             if (emailTaken)
             {
-                throw new UserException("This email is already in use.");
+                throw new UserException(
+                    "This email is already in use.");
             }
 
             if (request.Password != request.PasswordConfirm)
@@ -416,27 +470,33 @@ namespace eAutoShop.Services.Services
                 throw new UserException("Passwords must match.");
             }
 
-            entity.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
+            entity.Username = username;
+            entity.Email = email;
+            entity.Name = name;
+            entity.Surname = surname;
+            entity.Phone = phone;
+            entity.Gender = gender;
+
+            entity.Address =
+                string.IsNullOrWhiteSpace(request.Address)
+                    ? null
+                    : request.Address.Trim();
+
+            entity.PostalCode =
+                string.IsNullOrWhiteSpace(request.PostalCode)
+                    ? null
+                    : request.PostalCode.Trim();
+
+            entity.PasswordHash =
+                BCrypt.Net.BCrypt.HashPassword(request.Password);
 
             entity.CreatedAt = DateTime.UtcNow;
-
             entity.Active = true;
 
-            if (!string.IsNullOrWhiteSpace(request.Image))
-            {
-                try
-                {
-                    entity.Image = Convert.FromBase64String(request.Image);
-                }
-                catch (FormatException)
-                {
-                    throw new UserException("Invalid image format.");
-                }
-            }
-            else
-            {
-                entity.Image = null;
-            }
+            entity.Image =
+                string.IsNullOrWhiteSpace(request.Image)
+                    ? null
+                    : ImageValidator.Parse(request.Image);
 
             await base.BeforeInsert(entity, request);
         }
