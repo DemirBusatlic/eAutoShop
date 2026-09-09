@@ -1261,6 +1261,9 @@ Temporary Items
 #*.cab
 *.xar
 
+# Encrypted environment configuration archives required for submission
+!**/.env-tajne.zip
+
 # Packing-only formats
 *.iso
 *.tar
