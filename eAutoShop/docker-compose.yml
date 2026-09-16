@@ -14,29 +14,59 @@ services:
     volumes:
       - sql-data:/var/opt/mssql
       - ./eAutoShop.DB:/docker-entrypoint-initdb.d:ro
-    command: >
-      bash -c "/opt/mssql/bin/sqlservr &
-      sleep 30 &&
-      if [ ! -f /var/opt/mssql/data/190081.mdf ]; then
-        for f in /docker-entrypoint-initdb.d/*.sql; do
-          [ -e \"$$f\" ] ||
-          {
-            echo \"No SQL files found in /docker-entrypoint-initdb.d\";
-            exit 1;
-          };
-          echo \"Processing $$f\" &&
-          /opt/mssql-tools18/bin/sqlcmd
-          -S localhost
-          -U sa
-          -P \"$$MSSQL_SA_PASSWORD\"
-          -C
-          -b
-          -i \"$$f\" ||
-          exit 1;
-        done;
-      fi &&
-      touch /tmp/eautoshop-db-ready &
-      wait"
+    command:
+      - /bin/bash
+      - -c
+      - |
+          /opt/mssql/bin/sqlservr &
+          sql_pid=$$!
+
+          until /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$$MSSQL_SA_PASSWORD" -C -Q "SELECT 1" >/dev/null 2>&1; do
+            if ! kill -0 "$$sql_pid" 2>/dev/null; then
+              echo "SQL Server stopped before becoming ready."
+              wait "$$sql_pid"
+              exit 1
+            fi
+
+            echo "Waiting for SQL Server..."
+            sleep 2
+          done
+
+          echo "SQL Server is ready."
+
+          if [ ! -f /var/opt/mssql/data/190081.mdf ]; then
+            found_sql=false
+
+            for f in /docker-entrypoint-initdb.d/*.sql; do
+              if [ ! -e "$$f" ]; then
+                continue
+              fi
+
+              found_sql=true
+              echo "Processing $$f"
+
+              /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$$MSSQL_SA_PASSWORD" -C -b -i "$$f" || {
+                echo "Failed to process $$f"
+                kill "$$sql_pid" 2>/dev/null || true
+                wait "$$sql_pid" || true
+                exit 1
+              }
+            done
+
+            if [ "$$found_sql" != "true" ]; then
+              echo "No SQL files found in /docker-entrypoint-initdb.d"
+              kill "$$sql_pid" 2>/dev/null || true
+              wait "$$sql_pid" || true
+              exit 1
+            fi
+
+            echo "Database initialization completed successfully."
+          else
+            echo "Database 190081 already exists. Initialization skipped."
+          fi
+
+          touch /tmp/eautoshop-db-ready
+          wait "$$sql_pid"
     networks:
       - autoshopnet
     healthcheck:
