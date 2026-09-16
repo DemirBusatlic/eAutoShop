@@ -1,6 +1,6 @@
 ﻿using eAutoShop.Model.Request;
 
-namespace eAutoShop.HelperApi.Interfaces
+namespace eAutoShop.Worker.Interfaces
 {
     public interface IGenerateProductReportService
     {

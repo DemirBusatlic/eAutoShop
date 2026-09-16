@@ -1,15 +1,10 @@
-using eAutoShop.HelperApi.Interfaces;
-using eAutoShop.HelperApi.Services;
+using eAutoShop.Worker.Interfaces;
+using eAutoShop.Worker.Services;
 using eAutoShop.Services.Database;
-using eAutoShop.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using RabbitMQ.Client;
 
-var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+var builder = Host.CreateApplicationBuilder(args);
 
 builder.Services.AddScoped<IGenerateProductReportService, GenerateProductReportService>();
 
@@ -36,18 +31,7 @@ builder.Services.AddHostedService<RabbitMqListener>();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-builder.Services.AddDbContext<AutoShopContext>(options =>options.UseSqlServer(connectionString));
+builder.Services.AddDbContext<AutoShopContext>(options => options.UseSqlServer(connectionString));
 
-var app = builder.Build();
-
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
-app.UseAuthorization();
-
-app.MapControllers();
-
-app.Run();
+var host = builder.Build();
+host.Run();

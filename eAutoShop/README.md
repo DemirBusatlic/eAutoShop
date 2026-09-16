@@ -51,7 +51,7 @@ Predmet: **Razvoj softvera II**
 ```text
 eAutoShop/
 ├── eAutoShop.Api/                  glavni REST API
-├── eAutoShop.HelperApi/            RabbitMQ obrada i izvještaji
+├── eAutoShop.Worker/               RabbitMQ Worker za obradu i generisanje izvještaja
 ├── eAutoShop.Model/                modeli, requesti i search objekti
 ├── eAutoShop.Services/             poslovna logika i pristup podacima
 ├── eAutoShop.DB/                   SQL skripta 190081.sql
@@ -155,7 +155,7 @@ Prvo pokretanje može trajati nekoliko minuta. Docker Compose pokreće:
 |---|---|
 | Glavni API | `http://localhost:5236` |
 | Swagger | `http://localhost:5236/swagger` |
-| Helper API | `http://localhost:5233` |
+| Worker | Nema HTTP endpoint; komunicira preko RabbitMQ-a |
 | SQL Server | `localhost:1401` |
 | RabbitMQ | `localhost:5672` |
 | RabbitMQ Management | `http://localhost:15672` |
@@ -306,7 +306,7 @@ Desktop aplikacija omogućava generisanje izvještaja prema izabranim parametrim
 Izvještaji se mogu pregledati, preuzeti kao PDF dokument i poslati na ispis. Generisani podaci se spremaju u zajednički direktorij:
 
 ```text
-eAutoShop.HelperApi/Reports
+eAutoShop.Worker/Reports
 ```
 
 ## Sistem preporuke

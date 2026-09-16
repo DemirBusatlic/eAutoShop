@@ -1,4 +1,4 @@
-﻿using eAutoShop.HelperApi.Interfaces;
+﻿using eAutoShop.Worker.Interfaces;
 using eAutoShop.Model.Model;
 using eAutoShop.Model.Request;
 using eAutoShop.Services.Database;
@@ -6,7 +6,7 @@ using eAutoShop.Services.Helpers;
 using Microsoft.EntityFrameworkCore;
 using System.Text;
 
-namespace eAutoShop.HelperApi.Services
+namespace eAutoShop.Worker.Services
 {
     public class GenerateProductReportService : IGenerateProductReportService
     {

@@ -1,4 +1,4 @@
-﻿using eAutoShop.HelperApi.Interfaces;
+﻿using eAutoShop.Worker.Interfaces;
 using eAutoShop.Model.Request;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -7,7 +7,7 @@ using RabbitMQ.Client.Events;
 using System.Text;
 using System.Text.Json;
 
-namespace eAutoShop.HelperApi.Services
+namespace eAutoShop.Worker.Services
 {
     public class RabbitMqListener : BackgroundService
     {
@@ -159,6 +159,8 @@ namespace eAutoShop.HelperApi.Services
                 autoAck: false,
                 consumer: consumer,
                 cancellationToken: stoppingToken);
+
+            await Task.Delay(Timeout.Infinite, stoppingToken);
         }
 
         public override void Dispose()

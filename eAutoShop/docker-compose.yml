@@ -131,23 +131,21 @@ services:
         condition: service_healthy
     volumes:
       - ./eAutoShop.Api/RecommenderModels:/app/RecommenderModels
-      - ./eAutoShop.HelperApi/Reports:/app/reports
+      - ./eAutoShop.Worker/Reports:/app/reports
 
-  eautoshop-helperapi:
-    container_name: eautoshop-helperapi
+  eautoshop-worker:
+    container_name: eautoshop-worker
     restart: unless-stopped
     build:
       context: .
-      dockerfile: eAutoShop.HelperApi/Dockerfile
+      dockerfile: eAutoShop.Worker/Dockerfile
     environment:
       ConnectionStrings__DefaultConnection: "Server=eautoshop-sql,1433;Database=190081;User Id=sa;Password=${MSSQL_SA_PASSWORD};ConnectRetryCount=10;TrustServerCertificate=True"
-      ASPNETCORE_ENVIRONMENT: "Development"
+      DOTNET_ENVIRONMENT: "Development"
       RABBITMQ_HOST: "rabbitmq"
       RABBITMQ_USERNAME: "${RABBITMQ_USERNAME}"
       RABBITMQ_PASSWORD: "${RABBITMQ_PASSWORD}"
       REPORTS_PATH: "/app/reports"
-    ports:
-      - "5233:5233"
     networks:
       - autoshopnet
     depends_on:
@@ -156,7 +154,7 @@ services:
       rabbitmq:
         condition: service_healthy
     volumes:
-      - ./eAutoShop.HelperApi/Reports:/app/reports
+      - ./eAutoShop.Worker/Reports:/app/reports
 
 volumes:
   sql-data:
