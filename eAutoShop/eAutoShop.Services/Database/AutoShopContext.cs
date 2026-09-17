@@ -19,6 +19,8 @@ public partial class AutoShopContext : DbContext
 
     public virtual DbSet<AppointmentDetail> AppointmentDetails { get; set; }
 
+    public virtual DbSet<EmployeeTask> EmployeeTasks { get; set; }
+
     public virtual DbSet<AuthToken> AuthTokens { get; set; }
 
     public virtual DbSet<AutoShopService> AutoShopServices { get; set; }
@@ -84,6 +86,30 @@ public partial class AutoShopContext : DbContext
                 .HasForeignKey(d => d.ServiceId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_AppointmentDetails_Services");
+        });
+
+        modelBuilder.Entity<EmployeeTask>(entity =>
+        {
+            entity.Property(e => e.Title)
+                .HasMaxLength(150);
+
+            entity.Property(e => e.Description)
+                .HasMaxLength(1000);
+
+            entity.Property(e => e.State)
+                .HasMaxLength(20);
+
+            entity.HasOne(d => d.Employee)
+                .WithMany(p => p.EmployeeTaskEmployees)
+                .HasForeignKey(d => d.EmployeeId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_EmployeeTasks_Users_EmployeeId");
+
+            entity.HasOne(d => d.CreatedBy)
+                .WithMany(p => p.EmployeeTaskCreatedBy)
+                .HasForeignKey(d => d.CreatedById)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_EmployeeTasks_Users_CreatedById");
         });
 
         modelBuilder.Entity<AuthToken>(entity =>

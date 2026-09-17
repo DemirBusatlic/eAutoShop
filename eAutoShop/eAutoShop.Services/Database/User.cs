@@ -39,6 +39,10 @@ public partial class User
 
     public virtual ICollection<Appointment> AppointmentEmployees { get; set; } = new List<Appointment>();
 
+    public virtual ICollection<EmployeeTask> EmployeeTaskEmployees { get; set; } = new List<EmployeeTask>();
+
+    public virtual ICollection<EmployeeTask> EmployeeTaskCreatedBy { get; set; } = new List<EmployeeTask>();
+
     public virtual ICollection<AuthToken> AuthTokens { get; set; } = new List<AuthToken>();
 
     public virtual City City { get; set; } = null!;

@@ -88,14 +88,20 @@ class HomeScreen extends StatelessWidget {
       if (auth.isManager || auth.isTechnician)
         _HomeModule(
           key: 'appointments',
-          title: auth.isTechnician ? 'Zaduženja' : 'Rezervacije',
+          title: 'Rezervacije',
           description: auth.isTechnician
               ? 'Pregled i obrada dodijeljenih rezervacija.'
               : 'Pregled, dodjela i obrada zakazanih termina.',
-          icon: auth.isTechnician
-              ? Icons.assignment_outlined
-              : Icons.calendar_month_outlined,
+          icon: Icons.calendar_month_outlined,
         ),
+      _HomeModule(
+        key: 'employee_tasks',
+        title: 'Zaduženja',
+        description: auth.isManager
+            ? 'Kreiranje i pregled zaduženja zaposlenika.'
+            : 'Pregled i završavanje vlastitih zaduženja.',
+        icon: Icons.assignment_outlined,
+      ),
       if (auth.isManager) ...[
         const _HomeModule(
           key: 'customers',

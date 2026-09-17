@@ -47,11 +47,13 @@ builder.Services.AddScoped<IAutoShopServiceService,AutoShopServiceService>();
 builder.Services.AddScoped<IServiceTypeService, ServiceTypeService>();
 builder.Services.AddScoped<IAppointmentDetailService,AppointmentDetailService>();
 builder.Services.AddScoped<IAppointmentService, AppointmentService>();
+builder.Services.AddScoped<IEmployeeTaskService, EmployeeTaskService>();
 builder.Services.AddScoped<IStaffReviewService, StaffReviewService>();
 builder.Services.AddScoped<IProductReviewService, ProductReviewService>();
 builder.Services.AddScoped<IStripeService, StripeService>();
 builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddScoped<ICarManufacturerService,CarManufacturerService>();
+
 
 builder.Services.AddScoped<IRecommenderTrainService,RecommenderTrainService>();
 

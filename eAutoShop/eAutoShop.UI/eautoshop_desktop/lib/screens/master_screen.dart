@@ -10,6 +10,7 @@ import 'package:eautoshop_desktop/screens/order_screen.dart';
 import 'package:eautoshop_desktop/screens/service_screen.dart';
 import 'package:eautoshop_desktop/screens/review_screen.dart';
 import 'package:eautoshop_desktop/screens/report_screen.dart';
+import 'package:eautoshop_desktop/screens/employee_task_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -220,12 +221,16 @@ class _MasterScreenState extends State<MasterScreen> {
       if (authProvider.isManager || authProvider.isTechnician)
         _DesktopDestination(
           key: 'appointments',
-          label: authProvider.isTechnician ? 'Zaduženja' : 'Rezervacije',
-          icon: authProvider.isTechnician
-              ? Icons.assignment_outlined
-              : Icons.calendar_month_outlined,
+          label: 'Rezervacije',
+          icon: Icons.calendar_month_outlined,
           screen: const AppointmentScreen(),
         ),
+      const _DesktopDestination(
+        key: 'employee_tasks',
+        label: 'Zaduženja',
+        icon: Icons.assignment_outlined,
+        screen: EmployeeTaskScreen(),
+      ),
       if (authProvider.isManager) ...[
         const _DesktopDestination(
           key: 'customers',
