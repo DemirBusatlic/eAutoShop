@@ -9,7 +9,6 @@ namespace eAutoShop.Services.Interfaces
 {
     public interface IRecommenderPredictService
     {
-        Task<PageResult<ProductModel>> RecommendProduct(int storeItemId);
-
+        Task<PageResult<ProductModel>> RecommendProductsForUser(int customerId);
     }
 }

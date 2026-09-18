@@ -1,123 +1,164 @@
-Dokumentacija sistema preporuke proizvoda
+# Dokumentacija sistema preporuke proizvoda
 
-1. Namjena sistema
+## 1. Namjena sistema
 
-Sistem preporuke u aplikaciji eAutoShop korisniku prikazuje proizvode koji se često pojavljuju u zajedničkim kupovinama s trenutno odabranim proizvodom. Cilj je olakšati pronalazak povezanih proizvoda i unaprijediti korisničko iskustvo mobilne aplikacije.
+Sistem preporuke u aplikaciji eAutoShop prikazuje personalizovane preporuke na osnovu historije kupovine prijavljenog kupca.
 
-Sistem je implementiran korištenjem ML.NET biblioteke i algoritma matrične faktorizacije. Preporuke nisu zasnovane na ručno definisanim vezama između proizvoda, nego na stvarnim podacima iz završenih narudžbi.
+Početni proizvod ne određuje se prema proizvodu koji je trenutno otvoren u mobilnoj aplikaciji. Sistem iz završenih narudžbi prijavljenog kupca nasumično bira jedan prethodno kupljeni proizvod, a zatim pronalazi proizvode koji su se s njim najčešće kupovali.
 
-2. Izvor podataka
+Osnovni kriterij rangiranja predstavlja stvarni broj zajedničkih kupovina. ML.NET model koristi se kao dopuna kada na osnovu direktnih zajedničkih kupovina nije moguće pronaći tri preporuke.
 
-Za treniranje modela koriste se podaci iz tabela Orders i OrderItems.
+## 2. Izvor podataka
 
-U obzir se uzimaju samo narudžbe čije je stanje completed. Narudžbe koje su odbijene, otkazane, nisu plaćene ili još nisu završene ne učestvuju u treniranju modela.
+Sistem koristi podatke iz tabela `Orders` i `OrderItems`.
 
-Za svaku završenu narudžbu izdvajaju se jedinstveni identifikatori kupljenih proizvoda. Ako narudžba sadrži najmanje dva različita proizvoda, od njih se formiraju parovi zajedničke kupovine.
+U obzir se uzimaju samo narudžbe čije je stanje `completed`. Otkazane, odbijene i nezavršene narudžbe ne učestvuju u formiranju preporuka niti u treniranju modela.
 
-Primjer: ako jedna završena narudžba sadrži proizvode A, B i C, formiraju se parovi A-B, A-C, B-A, B-C, C-A i C-B. Svaki par predstavlja pozitivan primjer zajedničke kupovine.
+Za personalizaciju se prvo pronalaze jedinstveni identifikatori proizvoda iz završenih narudžbi prijavljenog kupca.
 
-Količina istog proizvoda unutar jedne narudžbe ne stvara duplikate jer se identifikatori proizvoda prije formiranja parova filtriraju korištenjem operacije Distinct.
+Za treniranje ML.NET modela iz svake završene narudžbe izdvajaju se različiti proizvodi i formiraju usmjereni parovi zajedničke kupovine.
 
-3. Treniranje modela
+Ako narudžba sadrži proizvode A, B i C, formiraju se parovi A-B, A-C, B-A, B-C, C-A i C-B.
 
-Podaci za treniranje predstavljeni su objektima ProductEntry, koji sadrže:
+Količina istog proizvoda unutar jedne narudžbe ne stvara dodatne parove jer se identifikatori proizvoda filtriraju operacijom `Distinct`.
 
-ProductId - identifikator početnog proizvoda;
+## 3. Izbor početnog proizvoda
 
-CoPurchaseProductId - identifikator proizvoda kupljenog zajedno s početnim proizvodom;
+Prijavljeni kupac identifikuje se pomoću identifikatora iz JWT tokena. Klijent ne šalje ID kupca niti ID otvorenog proizvoda.
 
-Label - vrijednost 1, koja označava zabilježenu zajedničku kupovinu.
+Iz završenih narudžbi tog kupca učitavaju se svi jedinstveni kupljeni proizvodi. Sistem zatim nasumično bira jedan proizvod koji predstavlja početni kontekst preporuke.
 
-Model se trenira pomoću ML.NET MatrixFactorizationTrainer algoritma. Koristi se SquareLossOneClass funkcija gubitka, pogodna za podatke u kojima su evidentirane pozitivne interakcije, odnosno zajedničke kupovine.
+Ako kupac nema nijednu završenu narudžbu ili nema proizvoda u historiji kupovine, sistem vraća praznu listu preporuka.
 
-Konfiguracija algoritma u implementaciji koristi sljedeće vrijednosti:
+## 4. Direktne preporuke prema zajedničkim kupovinama
 
-Parametar
+Nakon izbora početnog proizvoda sistem pronalazi sve završene narudžbe koje sadrže taj proizvod.
 
-Vrijednost
+Za svaki drugi aktivni proizvod računa se broj različitih završenih narudžbi u kojima se pojavio zajedno s početnim proizvodom.
 
-Alpha
+Rezultati se sortiraju:
 
-0.01
+1. opadajuće prema broju zajedničkih kupovina;
+2. prema identifikatoru proizvoda kada više proizvoda ima isti broj zajedničkih kupovina.
 
-Lambda
+Početni proizvod isključuje se iz rezultata. Drugi proizvodi koje je kupac ranije kupio mogu se pojaviti u preporukama ako su se često kupovali zajedno s početnim proizvodom.
 
-0.025
+Sistem vraća najviše tri preporučena proizvoda.
 
-NumberOfIterations
+## 5. ML.NET dopuna preporuka
 
-100
+Ako direktne zajedničke kupovine daju manje od tri rezultata, preostala mjesta dopunjavaju se pomoću ML.NET modela.
 
-C
+Podaci za treniranje predstavljeni su objektima `ProductEntry`, koji sadrže:
 
-0.00001
+- `ProductId` – identifikator početnog proizvoda;
+- `CoPurchaseProductId` – identifikator proizvoda kupljenog zajedno s početnim proizvodom;
+- `Label` – vrijednost `1`, koja označava evidentiranu zajedničku kupovinu.
 
-Treniranje je zaštićeno statičkim SemaphoreSlim mehanizmom kako se više procesa treniranja ne bi izvršavalo istovremeno.
+Model se trenira pomoću algoritma `MatrixFactorizationTrainer` i funkcije gubitka `SquareLossOneClass`.
 
-Ako ne postoji nijedna završena narudžba ili nema narudžbi s najmanje dva različita proizvoda, model se ne može trenirati i aplikacija vraća odgovarajuću korisničku poruku.
+Konfiguracija treniranja:
 
-4. Čuvanje i pokretanje modela
+| Parametar | Vrijednost |
+|---|---:|
+| Alpha | 0.01 |
+| Lambda | 0.025 |
+| NumberOfIterations | 100 |
+| C | 0.00001 |
 
-Nakon uspješnog treniranja ML.NET model se čuva u fajlu:
+ML.NET kandidati sortiraju se prema predviđenoj ocjeni. Proizvodi koji su već izabrani direktnim brojanjem ne mogu se ponovo dodati.
 
-RecommenderModels/productsmodel.zip
+Ako ML.NET model nije moguće učitati, greška se evidentira u API logovima, dok direktne preporuke ostaju dostupne.
+
+## 6. Treniranje i čuvanje modela
+
+Treniranje modela zaštićeno je statičkim `SemaphoreSlim` mehanizmom kako se više procesa treniranja ne bi izvršavalo istovremeno.
+
+Ako nema završenih narudžbi s najmanje dva različita proizvoda, model nije moguće trenirati.
+
+Nakon uspješnog treniranja model se čuva u datoteci:
+
+`RecommenderModels/productsmodel.zip`
 
 Direktorij se automatski kreira ako ne postoji.
 
-Prilikom pokretanja glavnog API-ja sistem automatski pokušava trenirati novi model koristeći trenutne podatke iz baze. Ako treniranje ne uspije, greška se evidentira putem loggera, a API nastavlja s radom kako nedostupan recommender ne bi onemogućio ostale funkcionalnosti aplikacije.
+Prilikom pokretanja glavnog API-ja sistem pokušava trenirati model koristeći trenutne podatke iz baze. Eventualna greška evidentira se u logovima, a ostatak API-ja nastavlja raditi.
 
-Docker konfiguracija mapira direktorij RecommenderModels, čime se omogućava čuvanje generisanog modela izvan životnog ciklusa pojedinačnog kontejnera.
+Docker konfiguracija mapira direktorij `RecommenderModels`, čime se generisani model čuva izvan životnog ciklusa pojedinačnog kontejnera.
 
-5. Generisanje preporuka
+Ručno pokretanje treniranja dostupno je samo korisniku s ulogom menadžera.
 
-Mobilna aplikacija traži preporuke za konkretan proizvod putem endpointa:
+## 7. Recommender endpoint
 
-GET /Recommender/RecommendProducts/{productId}
+Mobilna aplikacija učitava preporuke putem endpointa:
 
-Prije predikcije provjerava se da traženi proizvod postoji i da je u aktivnom stanju. Nakon toga se učitava sačuvani ML.NET model i svi ostali aktivni proizvodi.
+`GET /Recommender/RecommendProducts`
 
-Za svaki aktivni proizvod, osim trenutno odabranog, model izračunava rezultat povezanosti sa početnim proizvodom. Kandidati se sortiraju opadajuće prema izračunatom rezultatu, nakon čega se vraćaju najviše tri najbolje preporuke.
+Endpoint ne prima `productId` ni `customerId`.
 
-Neaktivni proizvodi i proizvod za koji se preporuke traže ne mogu se pojaviti među rezultatima.
+Identifikator prijavljenog kupca preuzima se iz JWT tokena. Endpoint je dostupan samo autentifikovanom korisniku s ulogom kupca.
 
-6. Objašnjivost preporuka
+Ovim se sprječava da korisnik zatraži preporuke u ime drugog kupca.
 
-Svaki preporučeni proizvod sadrži polje RecommendationReason. Korisniku se u mobilnoj aplikaciji prikazuje poruka:
+## 8. Objašnjivost preporuka
 
-Preporučeno na osnovu obrazaca zajedničke kupovine sa proizvodom „Naziv proizvoda“.
+Svaki preporučeni proizvod sadrži polje `RecommendationReason`.
 
-Na taj način korisnik dobija jasno objašnjenje zbog čega je određeni proizvod preporučen. Preporuka se ne prikazuje kao proizvoljan rezultat, nego se direktno povezuje s obrascima stvarnih završenih kupovina.
+Za direktne zajedničke kupovine prikazuje se poruka koja navodi:
 
-7. Integracija s mobilnom aplikacijom
+- naziv preporučenog proizvoda;
+- broj zajedničkih kupovina;
+- naziv početnog proizvoda iz historije kupca.
 
-Preporuke se učitavaju prilikom prikaza detalja proizvoda. Mobilni provider poziva recommender endpoint i rezultat sprema kao listu preporučenih proizvoda.
+Primjer:
+
+> Proizvod „205/55R16 Ljetna Guma“ kupljen je 3 puta zajedno sa proizvodom „5W30 Sintetičko Ulje 1L“ iz vaše historije kupovine.
+
+Za ML.NET dopunu prikazuje se korisniku razumljiva poruka:
+
+> Preporučeno na osnovu proizvoda „Naziv proizvoda“ iz vaše historije kupovine i sličnih kupovina drugih kupaca.
+
+Tehnički naziv ML.NET ne prikazuje se korisniku.
+
+## 9. Integracija s mobilnom aplikacijom
+
+Preporuke se učitavaju prilikom prikaza detalja proizvoda, ali otvoreni proizvod ne utiče na njihov izbor.
+
+Mobilni provider poziva endpoint bez slanja `productId`. Rezultat se prikazuje u sekciji **„Preporučeno za vas“**.
 
 Za svaki rezultat prikazuju se:
 
-slika proizvoda;
+- slika proizvoda;
+- naziv proizvoda;
+- redovna ili snižena cijena;
+- razlog preporuke.
 
-naziv proizvoda;
+Ako kupac nema historiju završenih kupovina ili nema dostupnih kandidata, prikazuje se informativna poruka da trenutno nema preporučenih proizvoda.
 
-redovna ili snižena cijena;
+## 10. Ograničenja sistema
 
-razlog preporuke.
+Kvalitet preporuka zavisi od broja i raznovrsnosti završenih narudžbi.
 
-Ako preporuke nisu dostupne ili lista nema rezultata, korisniku se prikazuje informativna poruka da trenutno nema preporučenih proizvoda.
+Kod manjeg broja podataka više proizvoda može imati isti ili veoma mali broj zajedničkih kupovina. ML.NET dopuna u takvim slučajevima može biti manje precizna.
 
-8. Ograničenja sistema
+Nasumičan izbor početnog proizvoda znači da isti kupac pri različitim pozivima može dobiti različite preporuke. To je očekivano ponašanje i odgovara algoritmu opisanom u prijavi teme.
 
-Kvalitet preporuka zavisi od broja i raznovrsnosti završenih narudžbi. Kod manjeg broja podataka rezultati mogu biti manje precizni. Novi proizvodi koji se još nisu pojavljivali u zajedničkim kupovinama nemaju dovoljno historijskih podataka za kvalitetno rangiranje.
+Sistem ne koristi historiju pretrage, demografske podatke, podatke o plaćanju niti ručno definisane veze između kategorija proizvoda.
 
-Trenutna implementacija predstavlja item-to-item sistem zasnovan na zajedničkim kupovinama. Model ne koristi lične karakteristike korisnika, historiju pretrage, demografske podatke niti ručno definisane kategorijske veze.
+## 11. Privatnost i sigurnost
 
-Sistem trenutno nema poseban fallback algoritam zasnovan na popularnosti. Ako model nije moguće učitati ili predikcija ne uspije, korisniku se vraća kontrolisana poruka da sistem preporuke trenutno nije dostupan.
+Za preporuke se koristi samo identifikator prijavljenog kupca kako bi se pronašle njegove završene narudžbe.
 
-9. Privatnost i sigurnost
+Sistem ne obrađuje lozinke, podatke kartice niti druge osjetljive podatke.
 
-Za treniranje se koriste identifikatori proizvoda i veze nastale iz završenih narudžbi. Model ne obrađuje lozinke, podatke o plaćanju niti druge osjetljive korisničke podatke.
+Kupac se identifikuje iz važećeg JWT tokena i ne može kroz recommender endpoint poslati proizvoljan identifikator drugog korisnika.
 
-Endpointi recommender sistema zahtijevaju autentifikovanog korisnika. Greške pri učitavanju ili korištenju modela pretvaraju se u kontrolisane korisničke poruke, bez izlaganja internih detalja sistema.
+Endpoint za preporuke ograničen je na kupce, dok je endpoint za ručno treniranje modela ograničen na menadžera.
 
-10. Zaključak
+## 12. Zaključak
 
-Recommender sistem aplikacije eAutoShop koristi stvarne završene narudžbe kako bi naučio obrasce zajedničke kupovine proizvoda. ML.NET model matrične faktorizacije rangira aktivne proizvode i vraća tri najrelevantnija rezultata. Mobilna aplikacija uz svaki rezultat prikazuje i objašnjenje preporuke, čime je korisniku jasno predstavljen razlog izbora proizvoda.
+Recommender sistem aplikacije eAutoShop koristi historiju kupovine prijavljenog kupca kao početni signal.
+
+Iz historije se nasumično bira jedan proizvod, nakon čega se ostali proizvodi prvenstveno rangiraju prema stvarnom broju zajedničkih kupovina u završenim narudžbama.
+
+Ako nema dovoljno direktnih rezultata, lista se dopunjava postojećim ML.NET modelom matrične faktorizacije.

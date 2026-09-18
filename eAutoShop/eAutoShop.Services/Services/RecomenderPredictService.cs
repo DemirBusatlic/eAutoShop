@@ -1,111 +1,221 @@
-﻿using eAutoShop.Model.Exceptions;
-using eAutoShop.Model.Model;
+﻿using eAutoShop.Model.Model;
 using eAutoShop.Services.Database;
+using eAutoShop.Services.Helpers;
 using eAutoShop.Services.Interfaces;
 using eAutoShop.Services.Utilities;
-using eAutoShop.Services.Helpers;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Microsoft.ML;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace eAutoShop.Services.Services
 {
-    public class RecommenderPredictService : IRecommenderPredictService
+    public class RecommenderPredictService: IRecommenderPredictService
     {
-        protected readonly AutoShopContext _context;
-        protected readonly IMapper _mapper;
-        private static readonly MLContext mlContext = new MLContext();
+        private readonly AutoShopContext _context;
+        private readonly IMapper _mapper;
+        private readonly ILogger<RecommenderPredictService> _logger;
 
-        public RecommenderPredictService(AutoShopContext context, IMapper mapper)
+        private static readonly MLContext MlContext = new();
+
+        public RecommenderPredictService(AutoShopContext context, IMapper mapper, ILogger<RecommenderPredictService> logger)
         {
             _context = context;
             _mapper = mapper;
+            _logger = logger;
         }
 
-        public async Task<PageResult<ProductModel>> RecommendProduct(int productId)
+        public async Task<PageResult<ProductModel>>RecommendProductsForUser(int customerId)
         {
+            var purchasedProductIds = await _context.Orders
+                .AsNoTracking()
+                .Where(order =>
+                    order.CustomerId == customerId &&
+                    order.State == OrderStates.Completed)
+                .SelectMany(order => order.OrderItems)
+                .Select(orderItem => orderItem.ProductId)
+                .Distinct()
+                .ToListAsync();
+
+            if (purchasedProductIds.Count == 0)
+            {
+                return EmptyResult();
+            }
+
+            var sourceProductId = purchasedProductIds[
+                Random.Shared.Next(purchasedProductIds.Count)];
+
             var sourceProduct = await _context.Products
                 .AsNoTracking()
-                .FirstOrDefaultAsync(x =>
-                    x.Id == productId &&
-                    x.State == ProductStates.Active);
+                .FirstOrDefaultAsync(product =>
+                    product.Id == sourceProductId);
 
             if (sourceProduct == null)
             {
-                throw new UserException("Proizvod za koji se traže preporuke nije pronađen.");
+                return EmptyResult();
             }
 
+            var candidateProducts = await _context.Products
+                .AsNoTracking()
+                .Include(product => product.ProductCategory)
+                .Include(product => product.CarModels)
+                .ThenInclude(carModel => carModel.CarManufacturer)
+                .Where(product =>
+                product.State == ProductStates.Active &&
+                product.Id != sourceProductId)
+                .ToListAsync();
+
+            if (candidateProducts.Count == 0)
+            {
+                return EmptyResult();
+            }
+
+            var candidateProductIds = candidateProducts
+                .Select(product => product.Id)
+                .ToList();
+
+            var coPurchaseCounts = await _context.Orders
+                .AsNoTracking()
+                .Where(order =>
+                    order.State == OrderStates.Completed &&
+                    order.OrderItems.Any(orderItem =>
+                        orderItem.ProductId == sourceProductId))
+                .SelectMany(order => order.OrderItems
+                    .Where(orderItem =>
+                        orderItem.ProductId != sourceProductId &&
+                        candidateProductIds.Contains(
+                            orderItem.ProductId))
+                    .Select(orderItem => new
+                    {
+                        orderItem.ProductId,
+                        OrderId = order.Id
+                    }))
+                .GroupBy(item => item.ProductId)
+                .Select(group => new
+                {
+                    ProductId = group.Key,
+                    Count = group
+                        .Select(item => item.OrderId)
+                        .Distinct()
+                        .Count()
+                })
+                .OrderByDescending(item => item.Count)
+                .ThenBy(item => item.ProductId)
+                .ToListAsync();
+
+            var productsById = candidateProducts
+                .ToDictionary(product => product.Id);
+
+            var rankedProducts = coPurchaseCounts
+                .Take(3)
+                .Select(item => productsById[item.ProductId])
+                .ToList();
+
+            var directRecommendationIds = rankedProducts
+                .Select(product => product.Id)
+                .ToHashSet();
+
+            if (rankedProducts.Count < 3)
+            {
+                AddMlRecommendations(
+                    sourceProductId,
+                    candidateProducts,
+                    rankedProducts);
+            }
+
+            var mappedProducts =
+                _mapper.Map<List<ProductModel>>(rankedProducts);
+
+            var coPurchaseCountByProductId = coPurchaseCounts
+                .ToDictionary(
+                    item => item.ProductId,
+                    item => item.Count);
+
+            foreach (var product in mappedProducts)
+            {
+                if (directRecommendationIds.Contains(product.Id))
+                {
+                    var purchaseCount = coPurchaseCountByProductId[product.Id];
+
+                    var purchaseCountText = purchaseCount == 1? "1 put" : $"{purchaseCount} puta";
+
+
+                    product.RecommendationReason =$"Proizvod „{product.Name}“ kupljen je " + $"{purchaseCountText} zajedno sa proizvodom " + $"„{sourceProduct.Name}“ iz vaše historije kupovine.";
+                }
+                else
+                {
+                    product.RecommendationReason =$"Preporučeno na osnovu proizvoda „{sourceProduct.Name}“ " + "iz vaše historije kupovine i sličnih kupovina drugih kupaca.";
+                }
+            }
+
+            return new PageResult<ProductModel>
+            {
+                Result = mappedProducts,
+                Count = mappedProducts.Count
+            };
+        }
+
+        private void AddMlRecommendations(int sourceProductId,List<Product> candidateProducts,List<Product> rankedProducts)
+        {
             try
             {
-                var modelsPath = Path.Combine(
+                var modelPath = Path.Combine(
                     AppDomain.CurrentDomain.BaseDirectory,
-                    "RecommenderModels");
-
-                var productsModelPath = Path.Combine(
-                    modelsPath,
+                    "RecommenderModels",
                     "productsmodel.zip");
 
-                var model = mlContext.Model.Load(
-                    productsModelPath,
-                    out DataViewSchema modelSchema);
+                var model = MlContext.Model.Load(
+                    modelPath,
+                    out _);
 
-                var products = await _context.Products
-                    .AsNoTracking()
-                    .Include(x => x.ProductCategory)
-                    .Include(x => x.CarModels)
-                    .Where(x =>
-                        x.Id != productId &&
-                        x.State == ProductStates.Active)
-                    .ToListAsync();
+                var predictionEngine =
+                    MlContext.Model.CreatePredictionEngine<
+                        ProductEntry,
+                        CopurchasePrediction>(model);
 
-                var predictionResult =new List<Tuple<Product, float>>();
+                var selectedProductIds = rankedProducts
+                    .Select(product => product.Id)
+                    .ToHashSet();
 
-                var predictionEngine = mlContext.Model.CreatePredictionEngine<ProductEntry,CopurchasePrediction>(model);
+                var additionalProducts = candidateProducts
+                    .Where(product =>
+                        !selectedProductIds.Contains(product.Id))
+                    .Select(product =>
+                    {
+                        var prediction = predictionEngine.Predict(
+                            new ProductEntry
+                            {
+                                ProductId =
+                                    (uint)sourceProductId,
+                                CoPurchaseProductId =
+                                    (uint)product.Id
+                            });
 
-                foreach (var product in products)
-                {
-                    var prediction = predictionEngine.Predict(
-                        new ProductEntry
+                        return new
                         {
-                            ProductId = (uint)productId,
-                            CoPurchaseProductId = (uint)product.Id
-                        });
+                            Product = product,
+                            prediction.Score
+                        };
+                    })
+                    .OrderByDescending(item => item.Score)
+                    .Take(3 - rankedProducts.Count)
+                    .Select(item => item.Product);
 
-                    predictionResult.Add(new Tuple<Product, float>(product,prediction.Score));
-                }
-
-                var finalResults = predictionResult
-                    .OrderByDescending(x => x.Item2)
-                    .Select(x => x.Item1)
-                    .Take(3)
-                    .ToList();
-
-                var mappedResults =
-                    _mapper.Map<List<ProductModel>>(finalResults);
-
-                foreach (var product in mappedResults)
-                {
-                    product.RecommendationReason =
-                        "Preporučeno na osnovu obrazaca zajedničke " +
-                        $"kupovine sa proizvodom „{sourceProduct.Name}“.";
-                }
-
-                return new PageResult<ProductModel>
-                {
-                    Result = mappedResults,
-                    Count = mappedResults.Count
-                };
+                rankedProducts.AddRange(additionalProducts);
             }
-            catch
+            catch (Exception exception)
             {
-                throw new UserException(
-                    "Sistem preporuke trenutno nije dostupan.");
+                _logger.LogWarning(exception,"ML.NET model nije mogao dopuniti preporuke za proizvod {ProductId}.",sourceProductId);
             }
+        }
+
+        private static PageResult<ProductModel> EmptyResult()
+        {
+            return new PageResult<ProductModel>
+            {
+                Result = new List<ProductModel>(),
+                Count = 0
+            };
         }
     }
 }

@@ -1,4 +1,7 @@
-﻿using eAutoShop.Model.Model;
+﻿using System.Security.Claims;
+using eAutoShop.Model.Exceptions;
+using eAutoShop.Model.Model;
+using eAutoShop.Services.Helpers;
 using eAutoShop.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -19,6 +22,7 @@ namespace eAutoShop.Api.Controllers
             _recommenderPredictService = recommenderPredictService;
         }
 
+        [Authorize(Roles = UserRoles.Manager)]
         [HttpPost("TrainProductsModel")]
         public IActionResult TrainProductsModel()
         {
@@ -26,10 +30,18 @@ namespace eAutoShop.Api.Controllers
             return Ok();
         }
 
-        [HttpGet("RecommendProducts/{productId}")]
-        public async Task<PageResult<ProductModel>> RecommendProducts(int productId)
+        [Authorize(Roles = UserRoles.Customer)]
+        [HttpGet("RecommendProducts")]
+        public async Task<PageResult<ProductModel>> RecommendProducts()
         {
-            return await _recommenderPredictService.RecommendProduct(productId);
+            var customerIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (!int.TryParse(customerIdClaim, out var customerId))
+            {
+                throw new UserException("Neispravan korisnički token.");
+            }
+
+            return await _recommenderPredictService.RecommendProductsForUser(customerId);
         }
     }
 }

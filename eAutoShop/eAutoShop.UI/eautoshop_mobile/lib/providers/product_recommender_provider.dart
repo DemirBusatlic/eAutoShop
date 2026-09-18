@@ -9,13 +9,13 @@ class ProductRecommenderProvider extends BaseProvider<Product, Product> {
 
   ProductRecommenderProvider() : super('Recommender');
 
-  Future<void> getProductRecommendations({required int productId}) async {
+  Future<void> getProductRecommendations() async {
     isLoading = true;
     notifyListeners();
 
     try {
       final SearchResult<Product> searchResult = await get(
-        customEndpoint: 'RecommendProducts/$productId',
+        customEndpoint: 'RecommendProducts',
         fromJson: (json) => Product.fromJson(json),
       );
 

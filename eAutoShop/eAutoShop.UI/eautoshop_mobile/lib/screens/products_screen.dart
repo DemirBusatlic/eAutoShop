@@ -506,10 +506,10 @@ class _ProductsScreenState extends State<ProductsScreen> {
     );
   }
 
-  Future<List<Product>> _loadRecommendations(int productId) async {
+  Future<List<Product>> _loadRecommendations() async {
     try {
       final provider = context.read<ProductRecommenderProvider>();
-      await provider.getProductRecommendations(productId: productId);
+      await provider.getProductRecommendations();
       return List<Product>.of(provider.recommendedProducts);
     } catch (_) {
       return <Product>[];
@@ -517,7 +517,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
   }
 
   void _showProductDetails(Product product) {
-    final recommendations = _loadRecommendations(product.id);
+    final recommendations = _loadRecommendations();
 
     showDialog<void>(
       context: context,
@@ -567,7 +567,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      'Preporučeni proizvodi',
+                      'Preporučeno za vas',
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                   ),
