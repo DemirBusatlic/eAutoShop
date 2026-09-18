@@ -381,6 +381,25 @@ namespace eAutoShop.Services.Services
             return await GetById(entity.Id);
         }
 
+        public async Task<UserModel> Register(UserRegistrationRequest request)
+        {
+            var customerRoleId = await _context.Roles
+                .Where(role => role.Name == UserRoles.Customer)
+                .Select(role => (int?)role.Id)
+                .SingleOrDefaultAsync();
+
+            if (!customerRoleId.HasValue)
+            {
+                throw new UserException("Customer role is not configured.");
+            }
+
+            var insertRequest = _mapper.Map<UserInsertRequest>(request);
+
+            insertRequest.RoleId = customerRoleId.Value;
+
+            return await Insert(insertRequest);
+        }
+
         public override async Task BeforeInsert(User entity,UserInsertRequest request)
         {
             var username = request.Username?.Trim();

@@ -16,10 +16,17 @@ namespace eAutoShop.Api.Controllers
         {
         }
 
-        [AllowAnonymous]
+        [Authorize]
         public override async Task<PageResult<CityModel>> Get([FromQuery] CitySearchObject? search = null)
         {
             return await _service.Get(search);
+        }
+
+        [AllowAnonymous]
+        [HttpGet("RegistrationLookup")]
+        public async Task<PageResult<CityModel>>GetRegistrationLookup()
+        {
+            return await _service.Get(new CitySearchObject{Page = 1, PageSize = 100});
         }
 
         [Authorize(Roles = UserRoles.Manager)]

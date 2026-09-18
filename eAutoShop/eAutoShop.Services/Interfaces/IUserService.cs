@@ -11,9 +11,9 @@ namespace eAutoShop.Services.Interfaces
 {
     public interface IUserService : IBaseCRUDService<UserModel, UserSearchObject, UserInsertRequest, UserUpdateRequest>
     {
+        Task<UserModel> Register(UserRegistrationRequest request);
 
         Task<UserModel> UpdateByToken(UserUpdateRequest request);
-
 
         Task ChangePassword(int userId, UserChangePasswordRequest request);
 

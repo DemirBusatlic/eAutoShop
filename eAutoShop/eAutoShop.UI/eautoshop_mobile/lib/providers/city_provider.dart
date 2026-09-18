@@ -24,7 +24,28 @@ class CityProvider extends BaseProvider<City, City> {
       cities = [];
       countOfItems = 0;
 
-      // RegisterScreen hvata grešku i prikazuje opciju pokušaja ponovo.
+      rethrow;
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> getRegistrationCities() async {
+    isLoading = true;
+    notifyListeners();
+
+    try {
+      final SearchResult<City> searchResult = await get(
+        customEndpoint: 'RegistrationLookup',
+        fromJson: (json) => City.fromJson(json),
+      );
+
+      cities = searchResult.result;
+      countOfItems = searchResult.count;
+    } catch (_) {
+      cities = [];
+      countOfItems = 0;
       rethrow;
     } finally {
       isLoading = false;

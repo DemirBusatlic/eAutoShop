@@ -47,11 +47,9 @@ namespace eAutoShop.Api.Controllers
 
         [AllowAnonymous]
         [HttpPost("Register")]
-        public async Task<UserModel> Register(UserInsertRequest request)
+        public async Task<UserModel> Register(UserRegistrationRequest request)
         {
-            request.RoleId = 2;
-
-            return await ((IUserService)_service).Insert(request);
+            return await _userService.Register(request);
         }
 
         [Authorize]

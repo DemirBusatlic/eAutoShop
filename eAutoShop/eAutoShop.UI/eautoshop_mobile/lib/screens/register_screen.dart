@@ -71,7 +71,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     try {
       final cityProvider = context.read<CityProvider>();
-      await cityProvider.getCities();
+      await cityProvider.getRegistrationCities();
 
       if (!mounted) return;
       setState(() {
@@ -138,8 +138,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
 
     try {
-      // Backend mora sam postaviti ulogu "customer". RoleId se namjerno
-      // ne bira i ne šalje iz mobilne aplikacije.
       await context.read<UserProvider>().register(request);
 
       if (!mounted) return;
