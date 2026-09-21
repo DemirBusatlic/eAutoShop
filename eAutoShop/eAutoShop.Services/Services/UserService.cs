@@ -144,6 +144,8 @@ namespace eAutoShop.Services.Services
                 throw new UserException("User doesn't exist.");
             }
 
+            var claimsChanged = false;
+
             if (request.Username != null)
             {
                 var username = request.Username.Trim();
@@ -160,7 +162,11 @@ namespace eAutoShop.Services.Services
                     throw new UserException("This username is already in use.");
                 }
 
-                entity.Username = username;
+                if (entity.Username != username)
+                {
+                    entity.Username = username;
+                    claimsChanged = true;
+                }
             }
 
             if (request.Name != null)
@@ -263,7 +269,11 @@ namespace eAutoShop.Services.Services
                     throw new UserException("Selected role doesn't exist.");
                 }
 
-                entity.RoleId = request.RoleId.Value;
+                if (entity.RoleId != request.RoleId.Value)
+                {
+                    entity.RoleId = request.RoleId.Value;
+                    claimsChanged = true;
+                }
             }
 
             if (request.Image != null)
@@ -275,6 +285,18 @@ namespace eAutoShop.Services.Services
                 else
                 {
                     entity.Image = ImageValidator.Parse(request.Image);
+                }
+            }
+
+            if (claimsChanged)
+            {
+                var now = DateTime.UtcNow;
+
+                var activeTokens = await _context.AuthTokens.Where(x => x.UserId == entity.Id && x.Revoked == null).ToListAsync();
+
+                foreach (var token in activeTokens)
+                {
+                    token.Revoked = now;
                 }
             }
 
