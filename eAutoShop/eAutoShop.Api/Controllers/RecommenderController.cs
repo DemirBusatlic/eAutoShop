@@ -24,9 +24,9 @@ namespace eAutoShop.Api.Controllers
 
         [Authorize(Roles = UserRoles.Manager)]
         [HttpPost("TrainProductsModel")]
-        public IActionResult TrainProductsModel()
+        public async Task<IActionResult> TrainProductsModel()
         {
-            _recommenderTrainService.TrainProductsModel();
+            await _recommenderTrainService.TrainProductsModel();
             return Ok();
         }
 
