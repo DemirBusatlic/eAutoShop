@@ -213,9 +213,18 @@ namespace eAutoShop.Services.Services
             var entity = await _context.Orders.FindAsync(id);
 
             if (entity == null)
+
                 throw new UserException("Order not found.");
 
-            var role = GetCurrentUserRole(_httpContextAccessor.HttpContext!.User);
+            var user = _httpContextAccessor.HttpContext!.User;
+
+            var role = GetCurrentUserRole(user);
+            var userId = GetCurrentUserId(user);
+
+            if (role == "customer" && entity.CustomerId != userId)
+            {
+                throw new UserException("You cannot delete another user's order.");
+            }
 
             var state = _baseOrderState.CreateState(entity.State);
 
