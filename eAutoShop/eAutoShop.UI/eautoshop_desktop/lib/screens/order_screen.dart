@@ -1009,10 +1009,6 @@ class _OrderFilterDialogState extends State<_OrderFilterDialog> {
                             value: 'missingpayment',
                             child: Text('Nedostaje uplata'),
                           ),
-                          DropdownMenuItem(
-                            value: 'paymentfailed',
-                            child: Text('Plaćanje neuspješno'),
-                          ),
                         ],
                         onChanged: (value) => setState(() => _state = value),
                       ),
@@ -1304,7 +1300,6 @@ List<_OrderAction> _actionsForState(String state) {
     case 'rejected':
     case 'cancelled':
     case 'missingpayment':
-    case 'paymentfailed':
       return const [_OrderAction.deleteHistory];
     default:
       return const [];
@@ -1355,8 +1350,6 @@ String _stateLabel(String state) {
       return 'Odbijena';
     case 'cancelled':
       return 'Otkazana';
-    case 'paymentfailed':
-      return 'Plaćanje neuspješno';
     case 'completed':
       return 'Završena';
     default:
@@ -1374,7 +1367,6 @@ _StatusColors _statusColors(String state) {
       return const _StatusColors(Color(0xFFE7F6EC), Color(0xFF1B7F3A));
     case 'rejected':
     case 'cancelled':
-    case 'paymentfailed':
       return const _StatusColors(Color(0xFFFDECEB), Color(0xFFB3261E));
     case 'missingpayment':
       return const _StatusColors(Color(0xFFFFF0E2), Color(0xFF9A4A00));

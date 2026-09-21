@@ -256,18 +256,6 @@ namespace eAutoShop.Services.Services
             return await state.Cancel(entity);
         }
 
-        public async Task<OrderModel> Resend(int id)
-        {
-            var entity = await _context.Orders.FindAsync(id);
-
-            if (entity == null)
-                throw new UserException("Order not found.");
-
-            var state = _baseOrderState.CreateState(entity.State);
-
-            return await state.Resend(entity);
-        }
-
         public async Task<List<string>> AllowedActions(int id)
         {
             var entity = await _context.Orders.FindAsync(id);

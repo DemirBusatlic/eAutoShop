@@ -53,10 +53,6 @@ namespace eAutoShop.Services.StateMachineService.OrderStateMachine
             throw new UserException("Action not allowed.");
         }
 
-        public virtual Task<OrderModel> Resend(Order entity)
-        {
-            throw new UserException("Action not allowed.");
-        }
 
         public virtual Task<OrderModel> SoftDelete(Order entity, string role)
         {
@@ -96,9 +92,6 @@ namespace eAutoShop.Services.StateMachineService.OrderStateMachine
 
                 OrderStates.Cancelled =>
                     _serviceProvider.GetRequiredService<CancelledOrderState>(),
-
-                OrderStates.PaymentFailed =>
-                    _serviceProvider.GetRequiredService<PaymentFailedOrderState>(),
 
                 OrderStates.Completed =>
                     _serviceProvider.GetRequiredService<CompletedOrderState>(),

@@ -73,7 +73,6 @@ builder.Services.AddScoped<AcceptedOrderState>();
 builder.Services.AddScoped<CompletedOrderState>();
 builder.Services.AddScoped<MissingPaymentOrderState>();
 builder.Services.AddScoped<OnHoldOrderState>();
-builder.Services.AddScoped<PaymentFailedOrderState>();
 builder.Services.AddScoped<RejectedOrderState>();
 
 

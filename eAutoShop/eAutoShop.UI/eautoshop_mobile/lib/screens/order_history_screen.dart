@@ -78,8 +78,6 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
         return 'Kreirana';
       case 'missingpayment':
         return 'Čeka plaćanje';
-      case 'paymentfailed':
-        return 'Plaćanje neuspješno';
       case 'onhold':
         return 'Plaćeno – čeka obradu';
       case 'accepted':
@@ -115,7 +113,6 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
         return Colors.orange.shade800;
       case 'rejected':
       case 'cancelled':
-      case 'paymentfailed':
         return Theme.of(context).colorScheme.error;
       default:
         return Theme.of(context).colorScheme.onSurfaceVariant;
@@ -655,10 +652,6 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                         DropdownMenuItem(
                           value: 'rejected',
                           child: Text('Odbijena'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'paymentfailed',
-                          child: Text('Plaćanje neuspješno'),
                         ),
                       ],
                       onChanged: (value) {

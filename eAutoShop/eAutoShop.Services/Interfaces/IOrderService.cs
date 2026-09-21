@@ -15,7 +15,6 @@ namespace eAutoShop.Services.Interfaces
         Task<OrderModel> Complete(int id);
         Task<OrderModel> Reject(int id);
         Task<OrderModel> Cancel(int id);
-        Task<OrderModel> Resend(int id);
         Task<List<string>> AllowedActions(int id);
         Task<OrderBasicInfoModel> GetBasicOrderInfo(int id);
         Task<OrderModel> SoftDelete(int id);

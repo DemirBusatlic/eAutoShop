@@ -100,12 +100,7 @@ namespace eAutoShop.Api.Controllers
         {
             return await (_service as IOrderService)!.Cancel(id);
         }
-        [Authorize(Roles = UserRoles.Customer)]
-        [HttpPut("Resend/{id}")]
-        public virtual async Task<OrderModel> Resend(int id)
-        {
-            return await (_service as IOrderService)!.Resend(id);
-        }
+      
         [Authorize(Roles = UserRoles.Manager + "," + UserRoles.Salesperson + "," + UserRoles.Customer + "," + UserRoles.Technician)]
         [HttpPut("SoftDelete/{id}")]
         public virtual async Task<OrderModel> SoftDelete(int id)

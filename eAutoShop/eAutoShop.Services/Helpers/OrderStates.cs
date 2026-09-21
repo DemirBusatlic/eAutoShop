@@ -14,7 +14,6 @@ namespace eAutoShop.Services.Helpers
         public const string Accepted = "accepted";
         public const string Rejected = "rejected";
         public const string Cancelled = "cancelled";
-        public const string PaymentFailed = "paymentfailed";
         public const string Completed = "completed";
     }
 }
