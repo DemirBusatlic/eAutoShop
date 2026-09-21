@@ -54,6 +54,11 @@ namespace eAutoShop.Services.StateMachineService.OrderStateMachine
                 throw new UserException("One or more products do not exist.");
             }
 
+            if (products.Any(x => x.State != ProductStates.Active))
+            {
+                throw new UserException("One or more products are not active and cannot be ordered.");
+            }
+
             var entity = new Order
             {
                 CustomerId = user.Id,
