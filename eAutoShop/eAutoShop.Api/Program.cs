@@ -175,21 +175,14 @@ builder.Services.AddAuthentication(options =>
             {
                 var authService = context.HttpContext.RequestServices.GetRequiredService<IAuthTokenService>();
 
-                var authHeader = context.HttpContext
-                    .Request
-                    .Headers["Authorization"]
-                    .FirstOrDefault();
-
-                if (string.IsNullOrWhiteSpace(authHeader))
+                var token = context.SecurityToken switch
                 {
-                    context.Fail("Nedostaje Authorization zaglavlje.");
+                    Microsoft.IdentityModel.JsonWebTokens.JsonWebToken jsonWebToken=> jsonWebToken.EncodedToken,
 
-                    return;
-                }
+                    System.IdentityModel.Tokens.Jwt.JwtSecurityToken jwtSecurityToken=> jwtSecurityToken.RawData,
 
-                var token = authHeader.StartsWith("Bearer ",StringComparison.OrdinalIgnoreCase)
-                    ? authHeader["Bearer ".Length..].Trim()
-                    : authHeader.Trim();
+                    _ => null
+                };
 
                 if (string.IsNullOrWhiteSpace(token))
                 {
@@ -214,8 +207,7 @@ builder.Services.AddAuthentication(options =>
                     path.StartsWithSegments("/reportNotificationHub") ||
                     path.StartsWithSegments("/notificationHub");
 
-                if (!string.IsNullOrWhiteSpace(accessToken) &&
-                    isSignalRPath)
+                if (!string.IsNullOrWhiteSpace(accessToken) && isSignalRPath)
                 {
                     context.Token = accessToken;
                 }
