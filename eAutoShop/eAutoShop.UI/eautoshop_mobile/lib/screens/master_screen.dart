@@ -1,8 +1,10 @@
 import 'package:eautoshop_mobile/providers/auth_provider.dart';
+import 'package:eautoshop_mobile/providers/notification_provider.dart';
+import 'package:eautoshop_mobile/screens/appointment_history_screen.dart';
 import 'package:eautoshop_mobile/screens/home_screen.dart';
 import 'package:eautoshop_mobile/screens/login_screen.dart';
+import 'package:eautoshop_mobile/screens/notification_screen.dart';
 import 'package:eautoshop_mobile/screens/order_history_screen.dart';
-import 'package:eautoshop_mobile/screens/appointment_history_screen.dart';
 import 'package:eautoshop_mobile/screens/user_profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -15,7 +17,10 @@ class MasterScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final authProvider = context.watch<AuthProvider>();
+    final notificationProvider = context.watch<NotificationProvider>();
+
     final isLoggedIn = authProvider.isLoggedIn;
+    final unreadCount = notificationProvider.unreadCount;
 
     return Scaffold(
       appBar: AppBar(
@@ -106,7 +111,6 @@ class MasterScreen extends StatelessWidget {
                       ],
                     ),
                   ),
-
                   ListTile(
                     leading: const Icon(Icons.home_outlined),
                     title: const Text('Početna'),
@@ -120,7 +124,6 @@ class MasterScreen extends StatelessWidget {
                       );
                     },
                   ),
-
                   ListTile(
                     leading: const Icon(Icons.receipt_long_outlined),
                     title: const Text('Moje narudžbe'),
@@ -135,7 +138,6 @@ class MasterScreen extends StatelessWidget {
                       );
                     },
                   ),
-
                   ListTile(
                     leading: const Icon(Icons.calendar_month_outlined),
                     title: const Text('Moje rezervacije'),
@@ -150,9 +152,65 @@ class MasterScreen extends StatelessWidget {
                       );
                     },
                   ),
+                  ListTile(
+                    leading: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        const Icon(Icons.notifications_outlined),
+                        if (unreadCount > 0)
+                          Positioned(
+                            top: -8,
+                            right: -10,
+                            child: Container(
+                              constraints: const BoxConstraints(
+                                minWidth: 18,
+                                minHeight: 18,
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 5,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).colorScheme.error,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              alignment: Alignment.center,
+                              child: Text(
+                                unreadCount > 99
+                                    ? '99+'
+                                    : unreadCount.toString(),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                    title: const Text('Notifikacije'),
+                    trailing: unreadCount > 0
+                        ? Text(
+                            '$unreadCount nepročitano',
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.primary,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          )
+                        : null,
+                    onTap: () {
+                      Navigator.pop(context);
 
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const NotificationScreen(),
+                        ),
+                      );
+                    },
+                  ),
                   const Divider(),
-
                   ListTile(
                     leading: Icon(
                       Icons.logout,
@@ -181,6 +239,8 @@ class MasterScreen extends StatelessWidget {
     BuildContext context,
     AuthProvider authProvider,
   ) async {
+    final notificationProvider = context.read<NotificationProvider>();
+
     final shouldLogout = await showDialog<bool>(
       context: context,
       builder: (dialogContext) {
@@ -211,6 +271,7 @@ class MasterScreen extends StatelessWidget {
 
     try {
       await authProvider.logout();
+      notificationProvider.clear();
 
       if (!context.mounted) {
         return;

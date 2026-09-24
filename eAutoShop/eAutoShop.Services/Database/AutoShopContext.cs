@@ -31,6 +31,8 @@ public partial class AutoShopContext : DbContext
 
     public virtual DbSet<City> Cities { get; set; }
 
+    public virtual DbSet<Notification> Notifications { get; set; }
+
     public virtual DbSet<Order> Orders { get; set; }
 
     public virtual DbSet<OrderItem> OrderItems { get; set; }
@@ -120,6 +122,35 @@ public partial class AutoShopContext : DbContext
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_AuthTokens_Users");
+        });
+
+        modelBuilder.Entity<Notification>(entity =>
+        {
+            entity.HasIndex(
+                    e => new { e.UserId, e.CreatedAt },
+                    "IX_Notifications_UserId_CreatedAt"
+                );
+
+            entity.Property(e => e.Title)
+                .HasMaxLength(150);
+
+            entity.Property(e => e.Message)
+                .HasMaxLength(1000);
+
+            entity.Property(e => e.Type)
+                .HasMaxLength(100);
+
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(sysutcdatetime())");
+
+            entity.Property(e => e.IsRead)
+                .HasDefaultValue(false);
+
+            entity.HasOne(d => d.User)
+                .WithMany(p => p.Notifications)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Notifications_Users");
         });
 
         modelBuilder.Entity<AutoShopService>(entity =>

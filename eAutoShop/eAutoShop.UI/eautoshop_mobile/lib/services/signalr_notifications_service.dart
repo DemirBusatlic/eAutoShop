@@ -5,9 +5,13 @@ import 'package:eautoshop_mobile/constants.dart';
 import 'notification_service.dart';
 
 class SignalRNotificationsService {
-  SignalRNotificationsService(this._notificationService);
+  SignalRNotificationsService(
+    this._notificationService, {
+    this.onNotificationReceived,
+  });
 
   final NotificationService _notificationService;
+  final Future<void> Function()? onNotificationReceived;
 
   HubConnection? _connection;
 
@@ -46,6 +50,13 @@ class SignalRNotificationsService {
 
     try {
       await connection.start();
+
+      try {
+        await onNotificationReceived?.call();
+      } catch (error) {
+        debugPrint('Početno učitavanje notifikacija nije uspjelo: $error');
+      }
+
       debugPrint('SignalR konekcija je uspostavljena.');
     } catch (error) {
       _connection = null;
@@ -70,6 +81,8 @@ class SignalRNotificationsService {
 
     final type = notificationMap['type']?.toString().toLowerCase() ?? '';
 
+    final title = notificationMap['title']?.toString() ?? 'eAutoShop';
+
     final message = notificationMap['message']?.toString() ?? '';
 
     if (message.isEmpty) {
@@ -77,10 +90,16 @@ class SignalRNotificationsService {
       return;
     }
 
+    try {
+      await onNotificationReceived?.call();
+    } catch (error) {
+      debugPrint('Automatsko osvježavanje inboxa nije uspjelo: $error');
+    }
+
     switch (type) {
-      case 'newproduct':
+      case 'product_activated':
         await _notificationService.showNotification(
-          title: 'Novi proizvod',
+          title: title,
           body: message,
           channelId: 'new_products_channel',
           channelName: 'Novi proizvodi',
@@ -89,7 +108,7 @@ class SignalRNotificationsService {
 
       case 'orderstatuschanged':
         await _notificationService.showNotification(
-          title: 'Promjena statusa narudžbe',
+          title: title,
           body: message,
           channelId: 'order_status_channel',
           channelName: 'Status narudžbi',
@@ -98,7 +117,7 @@ class SignalRNotificationsService {
 
       case 'reservationstatuschanged':
         await _notificationService.showNotification(
-          title: 'Promjena statusa rezervacije',
+          title: title,
           body: message,
           channelId: 'reservation_status_channel',
           channelName: 'Status rezervacija',
@@ -107,7 +126,7 @@ class SignalRNotificationsService {
 
       default:
         await _notificationService.showNotification(
-          title: 'eAutoShop',
+          title: title,
           body: message,
           channelId: 'general_notifications_channel',
           channelName: 'Opće obavijesti',

@@ -19,6 +19,7 @@ import 'package:eautoshop_mobile/providers/autoshop_service_provider.dart';
 import 'package:eautoshop_mobile/providers/appointment_provider.dart';
 import 'package:eautoshop_mobile/providers/appointment_detail_provider.dart';
 import 'package:eautoshop_mobile/providers/staff_review_provider.dart';
+import 'package:eautoshop_mobile/providers/notification_provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -53,13 +54,16 @@ Future<void> main() async {
   await notificationService.init();
   await notificationService.requestPermission();
 
+  final notificationProvider = NotificationProvider();
+
   final signalRNotificationsService = SignalRNotificationsService(
     notificationService,
+    onNotificationReceived: notificationProvider.fetchNotifications,
   );
-
   runApp(
     MultiProvider(
       providers: [
+        ChangeNotifierProvider.value(value: notificationProvider),
         ChangeNotifierProvider(
           create: (_) => AuthProvider(signalRNotificationsService),
         ),

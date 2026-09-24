@@ -53,6 +53,7 @@ builder.Services.AddScoped<IProductReviewService, ProductReviewService>();
 builder.Services.AddScoped<IStripeService, StripeService>();
 builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddScoped<ICarManufacturerService,CarManufacturerService>();
+builder.Services.AddScoped<INotificationService, UserNotificationService>();
 
 
 builder.Services.AddScoped<IRecommenderTrainService,RecommenderTrainService>();

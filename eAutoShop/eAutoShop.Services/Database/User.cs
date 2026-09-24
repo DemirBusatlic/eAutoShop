@@ -45,6 +45,8 @@ public partial class User
 
     public virtual ICollection<AuthToken> AuthTokens { get; set; } = new List<AuthToken>();
 
+    public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
+
     public virtual City City { get; set; } = null!;
 
     public virtual ICollection<Order> OrderCustomers { get; set; } = new List<Order>();
