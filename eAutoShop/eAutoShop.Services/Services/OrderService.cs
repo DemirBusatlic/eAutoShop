@@ -30,9 +30,7 @@ namespace eAutoShop.Services.Services
 
             if (search?.IncludeItems == true)
             {
-                query = query
-                    .Include(o => o.OrderItems)
-                    .ThenInclude(oi => oi.Product);
+                query = query.Include(o => o.OrderItems).ThenInclude(oi => oi.Product);
             }
 
             return base.AddInclude(query, search);
@@ -143,9 +141,7 @@ namespace eAutoShop.Services.Services
 
             var model = _mapper.Map<OrderBasicInfoModel>(entity);
 
-            model.Items = entity.OrderItems
-                .Select(oi => $"{oi.Quantity}x {oi.Product.Name}")
-                .ToList();
+            model.Items = entity.OrderItems.Select(oi => $"{oi.Quantity}x {oi.Product.Name}").ToList();
 
             return model;
         }
@@ -171,40 +167,38 @@ namespace eAutoShop.Services.Services
 
         public async Task<OrderModel> Accept(int id, OrderAcceptRequest orderAccept)
         {
-            var entity = await _context.Orders.FindAsync(id);
+            var entity = await GetOrderForStateChange(id);
 
-            if (entity == null)
-                throw new UserException("Order not found.");
+            var user = _httpContextAccessor.HttpContext?.User ?? throw new UserException("Unauthorized.");
 
+            var actorUsername = GetCurrentUsername(user);
             var state = _baseOrderState.CreateState(entity.State);
 
-            return await state.Accept(entity, orderAccept);
+            return await state.Accept(entity, orderAccept, actorUsername);
         }
 
         public async Task<OrderModel> Complete(int id)
         {
-            var entity = await _context.Orders.FindAsync(id);
+            var entity = await GetOrderForStateChange(id);
 
-            if (entity == null)
-            {
-                throw new UserException("Order not found.");
-            }
+            var user = _httpContextAccessor.HttpContext?.User?? throw new UserException("Unauthorized.");
 
+            var actorUsername = GetCurrentUsername(user);
             var state = _baseOrderState.CreateState(entity.State);
 
-            return await state.Complete(entity);
+            return await state.Complete(entity, actorUsername);
         }
 
-        public async Task<OrderModel> Reject(int id)
+        public async Task<OrderModel> Reject(int id, string reason)
         {
-            var entity = await _context.Orders.FindAsync(id);
+            var entity = await GetOrderForStateChange(id);
 
-            if (entity == null)
-                throw new UserException("Order not found.");
+            var user = _httpContextAccessor.HttpContext?.User ?? throw new UserException("Unauthorized.");
 
+            var actorUsername = GetCurrentUsername(user);
             var state = _baseOrderState.CreateState(entity.State);
 
-            return await state.Reject(entity);
+            return await state.Reject(entity,reason, actorUsername);
         }
 
 
@@ -231,29 +225,24 @@ namespace eAutoShop.Services.Services
             return await state.SoftDelete(entity, role);
         }
 
-        public async Task<OrderModel> Cancel(int id)
+        public async Task<OrderModel> Cancel(int id, string reason)
         {
-            var entity = await _context.Orders
-                .Include(x => x.Customer)
-                .FirstOrDefaultAsync(x => x.Id == id);
+            var entity = await GetOrderForStateChange(id);
 
-            if (entity == null)
-                throw new UserException("Order not found.");
-
-            var user = _httpContextAccessor.HttpContext!.User;
+            var user = _httpContextAccessor.HttpContext?.User ?? throw new UserException("Unauthorized.");
 
             var role = GetCurrentUserRole(user);
-
             var userId = GetCurrentUserId(user);
+            var actorUsername = GetCurrentUsername(user);
 
-            if (role == "customer" && entity.CustomerId != userId)
+            if (role == UserRoles.Customer && entity.CustomerId != userId)
             {
                 throw new UserException("You cannot cancel another user's order.");
             }
 
             var state = _baseOrderState.CreateState(entity.State);
 
-            return await state.Cancel(entity);
+            return await state.Cancel(entity, reason, actorUsername);
         }
 
         public async Task<List<string>> AllowedActions(int id)
@@ -266,6 +255,10 @@ namespace eAutoShop.Services.Services
             var state = _baseOrderState.CreateState(entity.State);
 
             return await state.AllowedActions();
+        }
+        private async Task<Order> GetOrderForStateChange(int id)
+        {
+            return await _context.Orders.Include(x => x.Customer).Include(x => x.City).FirstOrDefaultAsync(x => x.Id == id)?? throw new UserException("Order not found.");
         }
     }
 }

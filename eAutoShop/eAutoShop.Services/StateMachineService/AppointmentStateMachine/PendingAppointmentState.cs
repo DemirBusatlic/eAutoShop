@@ -64,7 +64,7 @@ namespace eAutoShop.Services.StateMachineService.AppointmentStateMachine
             return _mapper.Map<AppointmentModel>(entity);
         }
 
-        public override async Task<AppointmentModel> Confirm(Appointment entity, AppointmentConfirmRequest request)
+        public override async Task<AppointmentModel> Confirm(Appointment entity, AppointmentConfirmRequest request, string actorUsername)
         {
             if (request.EstimatedCompletionDate.HasValue && request.EstimatedCompletionDate.Value <= entity.ReservationDate)
             {
@@ -121,16 +121,19 @@ namespace eAutoShop.Services.StateMachineService.AppointmentStateMachine
             }
 
             entity.EmployeeId = technician.Id;
+            var now = DateTime.UtcNow;
+
+            entity.ConfirmedBy = actorUsername;
+            entity.ConfirmedAt = now;
             entity.State = AppointmentStates.Confirmed;
-            entity.EstimatedCompletionDate =
-                request.EstimatedCompletionDate;
+            entity.EstimatedCompletionDate =request.EstimatedCompletionDate;
 
             await _context.SaveChangesAsync();
 
             return _mapper.Map<AppointmentModel>(entity);
         }
 
-        public override async Task<AppointmentModel> Reject(Appointment entity, string reason)
+        public override async Task<AppointmentModel> Reject(Appointment entity, string reason, string actorUsername)
         {
             if (string.IsNullOrWhiteSpace(reason))
                 throw new UserException("Rejection reason is required.");
@@ -139,15 +142,19 @@ namespace eAutoShop.Services.StateMachineService.AppointmentStateMachine
             if (reason.Length > 500)
                 throw new UserException("Rejection reason can contain at most 500 characters.");
 
-            entity.State = AppointmentStates.Rejected;
+            var now = DateTime.UtcNow;
+
             entity.RejectionReason = reason;
+            entity.RejectedBy = actorUsername;
+            entity.RejectedAt = now;
+            entity.State = AppointmentStates.Rejected;
 
             await _context.SaveChangesAsync();
 
             return _mapper.Map<AppointmentModel>(entity);
         }
 
-        public override async Task<AppointmentModel> Cancel(Appointment entity, string reason)
+        public override async Task<AppointmentModel> Cancel(Appointment entity, string reason, string actorUsername)
         {
             if (string.IsNullOrWhiteSpace(reason))
                 throw new UserException("Cancellation reason is required.");
@@ -156,8 +163,12 @@ namespace eAutoShop.Services.StateMachineService.AppointmentStateMachine
             if (reason.Length > 500)
                 throw new UserException("Cancellation reason can contain at most 500 characters.");
 
-            entity.State = AppointmentStates.Cancelled;
+            var now = DateTime.UtcNow;
+
             entity.CancellationReason = reason;
+            entity.CancelledBy = actorUsername;
+            entity.CancelledAt = now;
+            entity.State = AppointmentStates.Cancelled;
 
             await _context.SaveChangesAsync();
 

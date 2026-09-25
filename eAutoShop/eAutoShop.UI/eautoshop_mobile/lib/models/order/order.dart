@@ -10,6 +10,16 @@ class Order {
   DateTime? shippingDate;
   double totalAmount;
   String state;
+  String? acceptedBy;
+  DateTime? acceptedAt;
+  String? rejectedBy;
+  DateTime? rejectedAt;
+  String? rejectionReason;
+  String? cancelledBy;
+  DateTime? cancelledAt;
+  String? cancellationReason;
+  String? completedBy;
+  DateTime? completedAt;
   int cityId;
   String shippingCity;
   String shippingAddress;
@@ -25,8 +35,18 @@ class Order {
     this.cityId,
     this.shippingCity,
     this.shippingAddress,
-    this.shippingPostalCode,
-  );
+    this.shippingPostalCode, [
+    this.acceptedBy,
+    this.acceptedAt,
+    this.rejectedBy,
+    this.rejectedAt,
+    this.rejectionReason,
+    this.cancelledBy,
+    this.cancelledAt,
+    this.cancellationReason,
+    this.completedBy,
+    this.completedAt,
+  ]);
 
   factory Order.fromJson(Map<String, dynamic> json) => _$OrderFromJson(json);
 

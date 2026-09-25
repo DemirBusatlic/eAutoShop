@@ -37,27 +37,27 @@ namespace eAutoShop.Services.StateMachineService.AppointmentStateMachine
             throw new UserException("Action not allowed.");
         }
 
-        public virtual Task<AppointmentModel> Confirm(Appointment entity, AppointmentConfirmRequest request)
+        public virtual Task<AppointmentModel> Confirm(Appointment entity, AppointmentConfirmRequest request, string actorUsername)
         {
             throw new UserException("Action not allowed.");
         }
 
-        public virtual Task<AppointmentModel> Reject(Appointment entity, string reason)
+        public virtual Task<AppointmentModel> Reject(Appointment entity, string reason, string actorUsername)
         {
             throw new UserException("Action not allowed.");
         }
 
-        public virtual Task<AppointmentModel> Cancel(Appointment entity, string reason)
+        public virtual Task<AppointmentModel> Cancel(Appointment entity, string reason, string actorUsername)
         {
             throw new UserException("Action not allowed.");
         }
 
-        public virtual Task<AppointmentModel> Start(Appointment entity)
+        public virtual Task<AppointmentModel> Start(Appointment entity, string actorUsername)
         {
             throw new UserException("Action not allowed.");
         }
 
-        public virtual Task<AppointmentModel> Complete(Appointment entity)
+        public virtual Task<AppointmentModel> Complete(Appointment entity, string actorUsername)
         {
             throw new UserException("Action not allowed.");
         }

@@ -10,6 +10,8 @@ namespace eAutoShop.Model.Model
 
         public int? CustomerId { get; set; }
 
+        public int EmployeeId { get; set; }
+
         public string Username { get; set; } = null!;
 
         public DateTime OrderDate { get; set; }
@@ -19,6 +21,26 @@ namespace eAutoShop.Model.Model
         public double TotalAmount { get; set; }
 
         public string State { get; set; } = null!;
+
+        public string? AcceptedBy { get; set; }
+
+        public DateTime? AcceptedAt { get; set; }
+
+        public string? RejectedBy { get; set; }
+
+        public DateTime? RejectedAt { get; set; }
+
+        public string? RejectionReason { get; set; }
+
+        public string? CancelledBy { get; set; }
+
+        public DateTime? CancelledAt { get; set; }
+
+        public string? CancellationReason { get; set; }
+
+        public string? CompletedBy { get; set; }
+
+        public DateTime? CompletedAt { get; set; }
 
         public int CityId { get; set; }
 

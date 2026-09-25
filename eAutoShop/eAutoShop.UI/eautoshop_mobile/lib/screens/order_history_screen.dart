@@ -521,28 +521,72 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
   }
 
   Future<bool> _confirmCancel(int orderId) async {
-    final confirmed = await showDialog<bool>(
+    String enteredReason = '';
+    String? errorText;
+
+    final reason = await showDialog<String>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Otkazivanje narudžbe'),
-        content: const Text('Da li ste sigurni da želite otkazati narudžbu?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext, false),
-            child: const Text('Ne'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(dialogContext, true),
-            child: const Text('Da, otkaži'),
-          ),
-        ],
-      ),
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: const Text('Otkazivanje narudžbe'),
+              content: TextField(
+                autofocus: true,
+                maxLength: 500,
+                maxLines: 4,
+                onChanged: (value) {
+                  enteredReason = value;
+
+                  if (errorText != null && value.trim().isNotEmpty) {
+                    setDialogState(() {
+                      errorText = null;
+                    });
+                  }
+                },
+                decoration: InputDecoration(
+                  labelText: 'Razlog otkazivanja',
+                  hintText: 'Unesite razlog',
+                  errorText: errorText,
+                  border: const OutlineInputBorder(),
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(dialogContext);
+                  },
+                  child: const Text('Odustani'),
+                ),
+                FilledButton(
+                  onPressed: () {
+                    final value = enteredReason.trim();
+
+                    if (value.isEmpty) {
+                      setDialogState(() {
+                        errorText = 'Razlog je obavezan.';
+                      });
+                      return;
+                    }
+
+                    Navigator.pop(dialogContext, value);
+                  },
+                  child: const Text('Otkaži narudžbu'),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
 
-    if (confirmed != true || !mounted) return false;
+    if (reason == null || !mounted) {
+      return false;
+    }
 
     try {
-      await context.read<OrderProvider>().cancel(orderId);
+      await context.read<OrderProvider>().cancel(id: orderId, reason: reason);
+
       await _loadOrders();
 
       if (mounted) {
@@ -554,6 +598,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
       if (mounted) {
         _showMessage(e.toString(), isError: true);
       }
+
       return false;
     }
   }

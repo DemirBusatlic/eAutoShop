@@ -17,11 +17,13 @@ namespace eAutoShop.Services.StateMachineService.AppointmentStateMachine
         {
         }
 
-        public override async Task<AppointmentModel> Complete(Appointment entity)
+        public override async Task<AppointmentModel> Complete(Appointment entity, string actorUsername)
         {
-            entity.State = AppointmentStates.Completed;
+            var now = DateTime.UtcNow;
 
-            entity.CompletionDate = DateTime.UtcNow;
+            entity.CompletedBy = actorUsername;
+            entity.CompletionDate = now;
+            entity.State = AppointmentStates.Completed;
 
             await _context.SaveChangesAsync();
 

@@ -37,6 +37,24 @@ public partial class Appointment
 
     public string? CancellationReason { get; set; }
 
+    public string? ConfirmedBy { get; set; }
+
+    public DateTime? ConfirmedAt { get; set; }
+
+    public string? RejectedBy { get; set; }
+
+    public DateTime? RejectedAt { get; set; }
+
+    public string? CancelledBy { get; set; }
+
+    public DateTime? CancelledAt { get; set; }
+
+    public string? StartedBy { get; set; }
+
+    public DateTime? StartedAt { get; set; }
+
+    public string? CompletedBy { get; set; }
+
     public virtual ICollection<AppointmentDetail> AppointmentDetails { get; set; } = new List<AppointmentDetail>();
 
     public virtual CarModel CarModel { get; set; } = null!;

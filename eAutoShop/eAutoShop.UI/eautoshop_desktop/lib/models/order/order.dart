@@ -10,6 +10,16 @@ class Order {
   final DateTime? shippingDate;
   final double totalAmount;
   final String state;
+  final String? acceptedBy;
+  final DateTime? acceptedAt;
+  final String? rejectedBy;
+  final DateTime? rejectedAt;
+  final String? rejectionReason;
+  final String? cancelledBy;
+  final DateTime? cancelledAt;
+  final String? cancellationReason;
+  final String? completedBy;
+  final DateTime? completedAt;
   final int cityId;
   final String shippingCity;
   final String shippingAddress;
@@ -21,6 +31,16 @@ class Order {
     required this.orderDate,
     required this.totalAmount,
     required this.state,
+    this.acceptedBy,
+    this.acceptedAt,
+    this.rejectedBy,
+    this.rejectedAt,
+    this.rejectionReason,
+    this.cancelledBy,
+    this.cancelledAt,
+    this.cancellationReason,
+    this.completedBy,
+    this.completedAt,
     required this.cityId,
     required this.shippingCity,
     required this.shippingAddress,

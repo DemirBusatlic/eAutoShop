@@ -63,7 +63,7 @@ namespace eAutoShop.Api.Controllers
         [HttpPut("Confirm/{id}")]
         public async Task<AppointmentModel> Confirm(int id,[FromBody] AppointmentConfirmRequest request)
         {
-            var appointment = await AppointmentService.Confirm(id, request);
+            var appointment = await AppointmentService.Confirm(id, request, GetRequiredUsername());
 
             try
             {
@@ -81,7 +81,7 @@ namespace eAutoShop.Api.Controllers
         [HttpPut("Reject/{id}/{reason}")]
         public async Task<AppointmentModel> Reject(int id,string reason)
         {
-            var appointment =await AppointmentService.Reject(id, reason);
+            var appointment = await AppointmentService.Reject(id, reason, GetRequiredUsername());
 
             try
             {

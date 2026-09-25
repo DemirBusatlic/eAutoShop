@@ -61,6 +61,11 @@ public partial class AutoShopContext : DbContext
             entity.Property(e => e.ReservationCreatedDate).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.State).HasMaxLength(50);
             entity.Property(e => e.Type).HasMaxLength(50);
+            entity.Property(e => e.ConfirmedBy).HasMaxLength(100);
+            entity.Property(e => e.RejectedBy).HasMaxLength(100);
+            entity.Property(e => e.CancelledBy).HasMaxLength(100);
+            entity.Property(e => e.StartedBy).HasMaxLength(100);
+            entity.Property(e => e.CompletedBy).HasMaxLength(100);
 
             entity.HasOne(d => d.CarModel).WithMany(p => p.Appointments)
                 .HasForeignKey(d => d.CarModelId)
@@ -193,6 +198,12 @@ public partial class AutoShopContext : DbContext
             entity.Property(e => e.PostalCode).HasMaxLength(20);
             entity.Property(e => e.ShippingAddress).HasMaxLength(255);
             entity.Property(e => e.State).HasMaxLength(50);
+            entity.Property(e => e.AcceptedBy).HasMaxLength(100);
+            entity.Property(e => e.RejectedBy).HasMaxLength(100);
+            entity.Property(e => e.RejectionReason).HasMaxLength(500);
+            entity.Property(e => e.CancelledBy).HasMaxLength(100);
+            entity.Property(e => e.CancellationReason).HasMaxLength(500);
+            entity.Property(e => e.CompletedBy).HasMaxLength(100);
 
             entity.HasOne(d => d.City).WithMany(p => p.Orders)
                 .HasForeignKey(d => d.CityId)

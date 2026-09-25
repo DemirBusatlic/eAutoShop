@@ -12,9 +12,9 @@ namespace eAutoShop.Services.Interfaces
 
         Task<AppointmentModel> UpdateForCustomer(int id, AppointmentUpdateRequest request, string customerUsername);
 
-        Task<AppointmentModel> Confirm(int id, AppointmentConfirmRequest request);
+        Task<AppointmentModel> Confirm(int id, AppointmentConfirmRequest request, string managerUsername);
 
-        Task<AppointmentModel> Reject(int id, string reason);
+        Task<AppointmentModel> Reject(int id, string reason, string managerUsername);
 
         Task<AppointmentModel> CancelForCustomer(int id, string reason, string customerUsername);
 

@@ -16,8 +16,12 @@ namespace eAutoShop.Services.StateMachineService.AppointmentStateMachine
         {
         }
 
-        public override async Task<AppointmentModel> Start(Appointment entity)
+        public override async Task<AppointmentModel> Start(Appointment entity, string actorUsername)
         {
+            var now = DateTime.UtcNow;
+
+            entity.StartedBy = actorUsername;
+            entity.StartedAt = now;
             entity.State = AppointmentStates.Ongoing;
 
             await _context.SaveChangesAsync();

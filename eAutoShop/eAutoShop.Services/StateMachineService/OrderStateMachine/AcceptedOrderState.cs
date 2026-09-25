@@ -41,8 +41,12 @@ namespace eAutoShop.Services.StateMachineService.OrderStateMachine
 
             return _mapper.Map<OrderModel>(entity);
         }
-        public override async Task<OrderModel> Complete(Order entity)
+        public override async Task<OrderModel> Complete(Order entity,string actorUsername)
         {
+            var now = DateTime.UtcNow;
+
+            entity.CompletedBy = actorUsername;
+            entity.CompletedAt = now;
             entity.State = OrderStates.Completed;
 
             await _context.SaveChangesAsync();

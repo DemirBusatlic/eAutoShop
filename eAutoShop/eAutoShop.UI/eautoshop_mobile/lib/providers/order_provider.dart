@@ -187,11 +187,12 @@ class OrderProvider extends BaseProvider<Order, OrderInsert> {
     );
   }
 
-  Future<void> cancel(int id) async {
+  Future<void> cancel({required int id, required String reason}) async {
     try {
       final response = await http.put(
         Uri.parse('${BaseProvider.baseUrl}/$endpoint/Cancel/$id'),
         headers: await createHeaders(),
+        body: jsonEncode({'reason': reason}),
       );
 
       if (!_isSuccessful(response.statusCode)) {
@@ -203,7 +204,8 @@ class OrderProvider extends BaseProvider<Order, OrderInsert> {
       rethrow;
     } catch (_) {
       throw CustomException(
-        "Can't reach the server. Please check whether the API is running.",
+        "Can't reach the server. "
+        "Please check whether the API is running.",
       );
     }
   }

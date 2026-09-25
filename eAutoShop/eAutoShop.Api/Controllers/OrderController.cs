@@ -55,19 +55,19 @@ namespace eAutoShop.Api.Controllers
 
         [Authorize(Roles = UserRoles.Manager + "," + UserRoles.Salesperson)]
         [HttpPut("Reject/{id}")]
-        public virtual async Task<OrderModel> Reject(int id)
+        public virtual async Task<OrderModel> Reject(int id, [FromBody] OrderReasonRequest request)
         {
-            var order = await (_service as IOrderService)!.Reject(id);
+            var order = await (_service as IOrderService)!.Reject(id, request.Reason);
 
             if (order.CustomerId.HasValue)
             {
                 try
                 {
-                    await _notificationService.SendUserNotification(order.CustomerId.Value,"Vaša narudžba je odbijena.","orderstatuschanged");
+                    await _notificationService.SendUserNotification(order.CustomerId.Value, $"Vaša narudžba je odbijena. Razlog: {order.RejectionReason}","orderstatuschanged");
                 }
                 catch (Exception exception)
                 {
-                    _orderLogger.LogError(exception, "Slanje notifikacije o odbijanju narudžbe {OrderId} korisniku {CustomerId} nije uspjelo.",order.Id, order.CustomerId.Value);
+                    _orderLogger.LogError(exception, "Slanje notifikacije o odbijanju narudžbe {OrderId} korisniku {CustomerId} nije uspjelo.",order.Id,order.CustomerId.Value);
                 }
             }
 
@@ -94,13 +94,44 @@ namespace eAutoShop.Api.Controllers
 
             return order;
         }
-        [Authorize(Roles = UserRoles.Manager + "," + UserRoles.Salesperson + "," + UserRoles.Customer)]
+
+        [Authorize(Roles = UserRoles.Manager + "," +UserRoles.Salesperson + "," +UserRoles.Customer)]
         [HttpPut("Cancel/{id}")]
-        public virtual async Task<OrderModel> Cancel(int id)
+        public virtual async Task<OrderModel> Cancel(int id, [FromBody] OrderReasonRequest request)
         {
-            return await (_service as IOrderService)!.Cancel(id);
+            var order = await (_service as IOrderService)!.Cancel(id, request.Reason);
+
+            var role = User.FindFirst(ClaimTypes.Role)?.Value;
+
+            int? notificationUserId;
+            string notificationMessage;
+
+            if (role == UserRoles.Customer)
+            {
+                notificationUserId = order.EmployeeId;
+                notificationMessage =$"Narudžba #{order.Id} je otkazana od strane kupca. " + $"Razlog: {order.CancellationReason}";
+            }
+            else
+            {
+                notificationUserId = order.CustomerId;
+                notificationMessage =$"Vaša narudžba je otkazana. " + $"Razlog: {order.CancellationReason}";
+            }
+
+            if (notificationUserId.HasValue)
+            {
+                try
+                {
+                    await _notificationService.SendUserNotification(notificationUserId.Value, notificationMessage,"orderstatuschanged");
+                }
+                catch (Exception exception)
+                {
+                    _orderLogger.LogError(exception, "Slanje notifikacije o otkazivanju narudžbe {OrderId} korisniku {UserId} nije uspjelo.", order.Id,notificationUserId.Value);
+                }
+            }
+
+            return order;
         }
-      
+
         [Authorize(Roles = UserRoles.Manager + "," + UserRoles.Salesperson + "," + UserRoles.Customer + "," + UserRoles.Technician)]
         [HttpPut("SoftDelete/{id}")]
         public virtual async Task<OrderModel> SoftDelete(int id)

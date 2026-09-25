@@ -141,14 +141,20 @@ class _OrderScreenState extends State<OrderScreen> {
 
     if (action == _OrderAction.accept) {
       final selectedDate = await _selectShippingDate();
-      if (selectedDate == null || !mounted) return;
+
+      if (selectedDate == null || !mounted) {
+        return;
+      }
 
       try {
         await provider.acceptOrder(
           id: order.id,
           request: OrderAccept(shippingDate: selectedDate),
         );
-        if (!mounted) return;
+
+        if (!mounted) {
+          return;
+        }
 
         await _loadOrders();
         _showMessage('Narudžba je prihvaćena.');
@@ -157,32 +163,56 @@ class _OrderScreenState extends State<OrderScreen> {
       } catch (_) {
         _showMessage('Prihvatanje narudžbe nije uspjelo.', isError: true);
       }
+
       return;
     }
 
     final configuration = _actionConfiguration(order, action);
-    final confirmed = await _confirm(
-      title: configuration.title,
-      message: configuration.message,
-      confirmLabel: configuration.confirmLabel,
-    );
 
-    if (!confirmed || !mounted) return;
+    String? reason;
+
+    if (action == _OrderAction.reject || action == _OrderAction.cancel) {
+      reason = await _requestReason(
+        title: configuration.title,
+        label: action == _OrderAction.reject
+            ? 'Razlog odbijanja'
+            : 'Razlog otkazivanja',
+        confirmLabel: configuration.confirmLabel,
+      );
+
+      if (reason == null || !mounted) {
+        return;
+      }
+    } else {
+      final confirmed = await _confirm(
+        title: configuration.title,
+        message: configuration.message,
+        confirmLabel: configuration.confirmLabel,
+      );
+
+      if (!confirmed || !mounted) {
+        return;
+      }
+    }
 
     try {
       switch (action) {
         case _OrderAction.reject:
-          await provider.rejectOrder(order.id);
+          await provider.rejectOrder(id: order.id, reason: reason!);
           break;
+
         case _OrderAction.cancel:
-          await provider.cancelOrder(order.id);
+          await provider.cancelOrder(id: order.id, reason: reason!);
           break;
+
         case _OrderAction.complete:
           await provider.completeOrder(order.id);
           break;
+
         case _OrderAction.deleteHistory:
           await provider.softDeleteOrder(order.id);
           break;
+
         case _OrderAction.accept:
           break;
       }
@@ -193,7 +223,9 @@ class _OrderScreenState extends State<OrderScreen> {
         _page--;
       }
 
-      if (!mounted) return;
+      if (!mounted) {
+        return;
+      }
 
       await _loadOrders();
       _showMessage(configuration.successMessage);
@@ -264,6 +296,74 @@ class _OrderScreenState extends State<OrderScreen> {
           successMessage: '',
         );
     }
+  }
+
+  Future<String?> _requestReason({
+    required String title,
+    required String label,
+    required String confirmLabel,
+  }) async {
+    String enteredReason = '';
+    String? errorText;
+
+    return showDialog<String>(
+      context: context,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: Text(title),
+              content: SizedBox(
+                width: 450,
+                child: TextField(
+                  autofocus: true,
+                  maxLength: 500,
+                  maxLines: 4,
+                  onChanged: (value) {
+                    enteredReason = value;
+
+                    if (errorText != null && value.trim().isNotEmpty) {
+                      setDialogState(() {
+                        errorText = null;
+                      });
+                    }
+                  },
+                  decoration: InputDecoration(
+                    labelText: label,
+                    hintText: 'Unesite razlog',
+                    errorText: errorText,
+                    border: const OutlineInputBorder(),
+                  ),
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(dialogContext);
+                  },
+                  child: const Text('Odustani'),
+                ),
+                FilledButton(
+                  onPressed: () {
+                    final value = enteredReason.trim();
+
+                    if (value.isEmpty) {
+                      setDialogState(() {
+                        errorText = 'Razlog je obavezan.';
+                      });
+                      return;
+                    }
+
+                    Navigator.pop(dialogContext, value);
+                  },
+                  child: Text(confirmLabel),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
   }
 
   Future<bool> _confirm({

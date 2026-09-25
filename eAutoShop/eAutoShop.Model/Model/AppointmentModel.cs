@@ -9,6 +9,7 @@ namespace eAutoShop.Model.Model
         public int Id { get; set; }
 
         public int CustomerId { get; set; }
+
         public string CustomerUsername { get; set; } = null!;
 
         public int? EmployeeId { get; set; }
@@ -18,20 +19,43 @@ namespace eAutoShop.Model.Model
         public bool HasStaffReview { get; set; }
 
         public string CarModel { get; set; } = null!;
+
         public string? RejectionReason { get; set; }
 
         public string? CancellationReason { get; set; }
 
+        public string? ConfirmedBy { get; set; }
+
+        public DateTime? ConfirmedAt { get; set; }
+
+        public string? RejectedBy { get; set; }
+
+        public DateTime? RejectedAt { get; set; }
+
+        public string? CancelledBy { get; set; }
+
+        public DateTime? CancelledAt { get; set; }
+
+        public string? StartedBy { get; set; }
+
+        public DateTime? StartedAt { get; set; }
+
+        public string? CompletedBy { get; set; }
+
         public DateTime ReservationCreatedDate { get; set; }
+
         public DateTime ReservationDate { get; set; }
 
         public DateTime? EstimatedCompletionDate { get; set; }
+
         public DateTime? CompletionDate { get; set; }
 
         public double TotalAmount { get; set; }
+
         public TimeSpan TotalDuration { get; set; }
 
         public string State { get; set; } = null!;
+
         public string Type { get; set; } = null!;
     }
 }

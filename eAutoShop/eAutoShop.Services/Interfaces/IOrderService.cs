@@ -13,8 +13,8 @@ namespace eAutoShop.Services.Interfaces
     {
         Task<OrderModel> Accept(int id, OrderAcceptRequest orderAccept);
         Task<OrderModel> Complete(int id);
-        Task<OrderModel> Reject(int id);
-        Task<OrderModel> Cancel(int id);
+        Task<OrderModel> Reject(int id, string reason);
+        Task<OrderModel> Cancel(int id, string reason);
         Task<List<string>> AllowedActions(int id);
         Task<OrderBasicInfoModel> GetBasicOrderInfo(int id);
         Task<OrderModel> SoftDelete(int id);

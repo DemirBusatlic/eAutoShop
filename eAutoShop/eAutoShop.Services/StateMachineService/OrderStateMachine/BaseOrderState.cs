@@ -37,20 +37,20 @@ namespace eAutoShop.Services.StateMachineService.OrderStateMachine
             throw new UserException("Action not allowed.");
         }
 
-        public virtual Task<OrderModel> Accept(Order entity, OrderAcceptRequest orderAccept)
+        public virtual Task<OrderModel> Accept(Order entity, OrderAcceptRequest orderAccept, string actorUsername)
         {
-            throw new UserException("Action not allowed.");
+            throw new UserException("Method not allowed.");
         }
 
-        public virtual Task<OrderModel> Reject(Order entity)
+        public virtual Task<OrderModel> Reject(Order entity, string reason, string actorUsername)
         {
-            throw new UserException("Action not allowed.");
+            throw new UserException("Method not allowed.");
         }
 
 
-        public virtual Task<OrderModel> Cancel(Order entity)
+        public virtual Task<OrderModel> Cancel(Order entity, string reason, string actorUsername)
         {
-            throw new UserException("Action not allowed.");
+            throw new UserException("Method not allowed.");
         }
 
 
@@ -59,9 +59,9 @@ namespace eAutoShop.Services.StateMachineService.OrderStateMachine
             throw new UserException("Action not allowed.");
         }
 
-        public virtual Task<OrderModel> Complete(Order entity)
+        public virtual Task<OrderModel> Complete(Order entity, string actorUsername)
         {
-            throw new UserException("Action not allowed.");
+            throw new UserException("Method not allowed.");
         }
 
         public virtual Task<List<string>> AllowedActions()

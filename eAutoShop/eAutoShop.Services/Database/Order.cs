@@ -27,6 +27,26 @@ public partial class Order
 
     public string State { get; set; } = null!;
 
+    public string? AcceptedBy { get; set; }
+
+    public DateTime? AcceptedAt { get; set; }
+
+    public string? RejectedBy { get; set; }
+
+    public DateTime? RejectedAt { get; set; }
+
+    public string? RejectionReason { get; set; }
+
+    public string? CancelledBy { get; set; }
+
+    public DateTime? CancelledAt { get; set; }
+
+    public string? CancellationReason { get; set; }
+
+    public string? CompletedBy { get; set; }
+
+    public DateTime? CompletedAt { get; set; }
+
     public bool DeletedByShop { get; set; }
 
     public bool DeletedByCustomer { get; set; }

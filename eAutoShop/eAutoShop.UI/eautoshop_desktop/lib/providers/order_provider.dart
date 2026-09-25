@@ -59,16 +59,16 @@ class OrderProvider extends BaseProvider<Order, OrderAccept> {
     );
   }
 
-  Future<void> rejectOrder(int id) async {
-    await _executeAction(action: 'Reject', id: id);
+  Future<void> rejectOrder({required int id, required String reason}) async {
+    await _executeAction(action: 'Reject', id: id, body: {'reason': reason});
   }
 
   Future<void> completeOrder(int id) async {
     await _executeAction(action: 'Complete', id: id);
   }
 
-  Future<void> cancelOrder(int id) async {
-    await _executeAction(action: 'Cancel', id: id);
+  Future<void> cancelOrder({required int id, required String reason}) async {
+    await _executeAction(action: 'Cancel', id: id, body: {'reason': reason});
   }
 
   Future<void> softDeleteOrder(int id) async {
@@ -102,11 +102,16 @@ class OrderProvider extends BaseProvider<Order, OrderAccept> {
     }
   }
 
-  Future<void> _executeAction({required String action, required int id}) async {
+  Future<void> _executeAction({
+    required String action,
+    required int id,
+    Map<String, dynamic>? body,
+  }) async {
     try {
       final response = await http.put(
         Uri.parse('${BaseProvider.baseUrl}/$endpoint/$action/$id'),
         headers: await createHeaders(),
+        body: body == null ? null : jsonEncode(body),
       );
 
       if (_isSuccessful(response.statusCode)) {

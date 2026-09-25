@@ -123,18 +123,20 @@ namespace eAutoShop.Services.Services
             return await state.Update(entity, request);
         }
 
-        public async Task<AppointmentModel> Confirm(int id, AppointmentConfirmRequest request)
+        public async Task<AppointmentModel> Confirm(int id, AppointmentConfirmRequest request, string managerUsername)
         {
             var entity = await GetAppointment(id);
             var state = _baseAppointmentState.CreateState(entity.State);
-            return await state.Confirm(entity, request);
+
+            return await state.Confirm(entity,request,managerUsername);
         }
 
-        public async Task<AppointmentModel> Reject(int id, string reason)
+        public async Task<AppointmentModel> Reject(int id, string reason, string managerUsername)
         {
             var entity = await GetAppointment(id);
             var state = _baseAppointmentState.CreateState(entity.State);
-            return await state.Reject(entity, reason);
+
+            return await state.Reject(entity, reason, managerUsername);
         }
 
         public async Task<AppointmentModel> CancelForCustomer(int id, string reason, string customerUsername)
@@ -143,7 +145,8 @@ namespace eAutoShop.Services.Services
             EnsureCustomerOwnsAppointment(entity, customerUsername);
 
             var state = _baseAppointmentState.CreateState(entity.State);
-            return await state.Cancel(entity, reason);
+
+            return await state.Cancel(entity, reason, customerUsername);
         }
 
         public async Task<AppointmentModel> StartForEmployee(int id, string employeeUsername)
@@ -152,7 +155,8 @@ namespace eAutoShop.Services.Services
             EnsureAssignedToEmployee(entity, employeeUsername);
 
             var state = _baseAppointmentState.CreateState(entity.State);
-            return await state.Start(entity);
+
+            return await state.Start(entity, employeeUsername);
         }
 
         public async Task<AppointmentModel> UpdateEstimatedDateForEmployee(int id, DateTime newEstimatedCompletion, string employeeUsername)
@@ -170,7 +174,8 @@ namespace eAutoShop.Services.Services
             EnsureAssignedToEmployee(entity, employeeUsername);
 
             var state = _baseAppointmentState.CreateState(entity.State);
-            return await state.Complete(entity);
+
+            return await state.Complete(entity, employeeUsername);
         }
 
         public async Task<AppointmentModel> SoftDeleteForUser(int id, string role, string username)

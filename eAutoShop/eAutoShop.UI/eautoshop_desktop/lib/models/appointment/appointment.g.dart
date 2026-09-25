@@ -16,6 +16,23 @@ Appointment _$AppointmentFromJson(Map<String, dynamic> json) => Appointment(
   carModel: json['carModel'] as String,
   rejectionReason: json['rejectionReason'] as String?,
   cancellationReason: json['cancellationReason'] as String?,
+  confirmedBy: json['confirmedBy'] as String?,
+  confirmedAt: json['confirmedAt'] == null
+      ? null
+      : DateTime.parse(json['confirmedAt'] as String),
+  rejectedBy: json['rejectedBy'] as String?,
+  rejectedAt: json['rejectedAt'] == null
+      ? null
+      : DateTime.parse(json['rejectedAt'] as String),
+  cancelledBy: json['cancelledBy'] as String?,
+  cancelledAt: json['cancelledAt'] == null
+      ? null
+      : DateTime.parse(json['cancelledAt'] as String),
+  startedBy: json['startedBy'] as String?,
+  startedAt: json['startedAt'] == null
+      ? null
+      : DateTime.parse(json['startedAt'] as String),
+  completedBy: json['completedBy'] as String?,
   reservationCreatedDate: DateTime.parse(
     json['reservationCreatedDate'] as String,
   ),
@@ -44,6 +61,15 @@ Map<String, dynamic> _$AppointmentToJson(
   'carModel': instance.carModel,
   'rejectionReason': instance.rejectionReason,
   'cancellationReason': instance.cancellationReason,
+  'confirmedBy': instance.confirmedBy,
+  'confirmedAt': instance.confirmedAt?.toIso8601String(),
+  'rejectedBy': instance.rejectedBy,
+  'rejectedAt': instance.rejectedAt?.toIso8601String(),
+  'cancelledBy': instance.cancelledBy,
+  'cancelledAt': instance.cancelledAt?.toIso8601String(),
+  'startedBy': instance.startedBy,
+  'startedAt': instance.startedAt?.toIso8601String(),
+  'completedBy': instance.completedBy,
   'reservationCreatedDate': instance.reservationCreatedDate.toIso8601String(),
   'reservationDate': instance.reservationDate.toIso8601String(),
   'estimatedCompletionDate': instance.estimatedCompletionDate

@@ -16,6 +16,15 @@ class Appointment {
   String carModel;
   String? rejectionReason;
   String? cancellationReason;
+  String? confirmedBy;
+  DateTime? confirmedAt;
+  String? rejectedBy;
+  DateTime? rejectedAt;
+  String? cancelledBy;
+  DateTime? cancelledAt;
+  String? startedBy;
+  DateTime? startedAt;
+  String? completedBy;
   DateTime reservationCreatedDate;
   DateTime reservationDate;
   DateTime? estimatedCompletionDate;
@@ -35,6 +44,15 @@ class Appointment {
     required this.carModel,
     this.rejectionReason,
     this.cancellationReason,
+    this.confirmedBy,
+    this.confirmedAt,
+    this.rejectedBy,
+    this.rejectedAt,
+    this.cancelledBy,
+    this.cancelledAt,
+    this.startedBy,
+    this.startedAt,
+    this.completedBy,
     required this.reservationCreatedDate,
     required this.reservationDate,
     this.estimatedCompletionDate,

@@ -40,50 +40,85 @@ namespace eAutoShop.Services.StateMachineService.OrderStateMachine
             return _mapper.Map<OrderModel>(entity);
         }
 
-        public override async Task<OrderModel> Accept(Order entity, OrderAcceptRequest orderAccept)
+        public override async Task<OrderModel> Accept(Order entity, OrderAcceptRequest orderAccept, string actorUsername)
         {
             if (orderAccept.ShippingDate <= DateTime.UtcNow)
             {
                 throw new UserException("Shipping date must be in the future.");
             }
 
-            entity.State = OrderStates.Accepted;
-            entity.ShippingDate = orderAccept.ShippingDate;
+            var now = DateTime.UtcNow;
 
+            entity.AcceptedBy = actorUsername;
+            entity.AcceptedAt = now;
+            entity.ShippingDate = orderAccept.ShippingDate;
+            entity.State = OrderStates.Accepted;
 
             await _context.SaveChangesAsync();
 
             return _mapper.Map<OrderModel>(entity);
         }
 
-        public override async Task<OrderModel> Reject(Order entity)
+        public override async Task<OrderModel> Reject(Order entity, string reason, string actorUsername)
         {
+            if (string.IsNullOrWhiteSpace(reason))
+            {
+                throw new UserException("Rejection reason is required.");
+            }
+
+            reason = reason.Trim();
+
+            if (reason.Length > 500)
+            {
+                throw new UserException("Rejection reason can contain at most 500 characters.");
+            }
+
             if (string.IsNullOrWhiteSpace(entity.PaymentIntentId))
             {
                 throw new UserException("Payment intent does not exist.");
             }
 
-            await _serviceProvider.GetRequiredService<IStripeService>().CreateRefundAsync(entity.PaymentIntentId,$"order-refund-{entity.Id}");
+            await _serviceProvider.GetRequiredService<IStripeService>().CreateRefundAsync(entity.PaymentIntentId, $"order-refund-{entity.Id}");
 
+            var now = DateTime.UtcNow;
+
+            entity.RejectionReason = reason;
+            entity.RejectedBy = actorUsername;
+            entity.RejectedAt = now;
             entity.State = OrderStates.Rejected;
 
-
             await _context.SaveChangesAsync();
 
             return _mapper.Map<OrderModel>(entity);
         }
 
-        public override async Task<OrderModel> Cancel(Order entity)
+        public override async Task<OrderModel> Cancel(Order entity,string reason,string actorUsername)
         {
+            if (string.IsNullOrWhiteSpace(reason))
+            {
+                throw new UserException("Cancellation reason is required.");
+            }
+
+            reason = reason.Trim();
+
+            if (reason.Length > 500)
+            {
+                throw new UserException("Cancellation reason can contain at most 500 characters.");
+            }
+
             if (string.IsNullOrWhiteSpace(entity.PaymentIntentId))
             {
                 throw new UserException("Payment intent does not exist.");
             }
 
-            await _serviceProvider.GetRequiredService<IStripeService>().CreateRefundAsync(entity.PaymentIntentId,$"order-refund-{entity.Id}");
+            await _serviceProvider.GetRequiredService<IStripeService>().CreateRefundAsync(entity.PaymentIntentId, $"order-refund-{entity.Id}");
 
+            var now = DateTime.UtcNow;
+
+            entity.CancellationReason = reason;
+            entity.CancelledBy = actorUsername;
+            entity.CancelledAt = now;
             entity.State = OrderStates.Cancelled;
-
 
             await _context.SaveChangesAsync();
 
