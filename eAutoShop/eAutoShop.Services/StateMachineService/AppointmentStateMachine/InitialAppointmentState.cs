@@ -41,27 +41,47 @@ namespace eAutoShop.Services.StateMachineService.AppointmentStateMachine
             var carModel = await _context.CarModels.FirstOrDefaultAsync(x => x.Id == request.CarModelId);
 
             if (carModel == null)
+            {
                 throw new UserException("Car model not found.");
+            }
 
             if (request.ReservationDate <= DateTime.UtcNow)
+            {
                 throw new UserException("Reservation date must be in the future.");
+            }
 
             if (request.Services == null || !request.Services.Any())
+            {
                 throw new UserException("Please select at least one service.");
-
+            }
 
             var serviceIds = request.Services.Distinct().ToList();
+
             var services = await _context.AutoShopServices.Where(x => serviceIds.Contains(x.Id)).ToListAsync();
 
             if (services.Count != serviceIds.Count)
+            {
                 throw new UserException("One or more selected services do not exist.");
+            }
 
             if (services.Any(x => x.State != AutoShopServiceStates.Active))
+            {
                 throw new UserException("One or more selected services are not active.");
+            }
 
             var totalAmount = services.Sum(x => x.DiscountedPrice);
+
             var totalDuration = services.Aggregate(TimeSpan.Zero,(total, service) => total + service.Duration.ToTimeSpan());
 
+            if (totalDuration <= TimeSpan.Zero)
+            {
+                throw new UserException("Total appointment duration must be greater than zero.");
+            }
+
+            if (totalDuration >= TimeSpan.FromDays(1))
+            {
+                throw new UserException("Total appointment duration must be less than 24 hours.");
+            }
 
             var shopIsAtCapacity = await IsShopAtCapacity(request.ReservationDate, totalDuration);
 
@@ -94,15 +114,16 @@ namespace eAutoShop.Services.StateMachineService.AppointmentStateMachine
 
                 foreach (var service in services)
                 {
-                    _context.AppointmentDetails.Add(new AppointmentDetail
-                    {
-                        AppointmentId = appointment.Id,
-                        ServiceId = service.Id,
-                        ServiceName = service.Name,
-                        ServicePrice = service.Price,
-                        ServiceDiscount = service.Discount,
-                        ServiceDiscountedPrice = service.DiscountedPrice
-                    });
+                    _context.AppointmentDetails.Add(
+                        new AppointmentDetail
+                        {
+                            AppointmentId = appointment.Id,
+                            ServiceId = service.Id,
+                            ServiceName = service.Name,
+                            ServicePrice = service.Price,
+                            ServiceDiscount = service.Discount,
+                            ServiceDiscountedPrice = service.DiscountedPrice
+                        });
                 }
 
                 await _context.SaveChangesAsync();
