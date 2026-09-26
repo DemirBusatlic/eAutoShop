@@ -34,6 +34,9 @@ namespace eAutoShop.Services.Services
         public async Task GenerateProductReport(ProductReportRequest request)
         {
             await ValidateProductReportRequest(request);
+
+            InvalidateReport("product_report.csv");
+
             await _rabbitMQService.SendReportGenerationRequest(request);
         }
 
@@ -45,6 +48,9 @@ namespace eAutoShop.Services.Services
         public async Task GenerateTopSellingProductsReport(ProductReportRequest request)
         {
             await ValidateProductReportRequest(request);
+
+            InvalidateReport("top_selling_products_report.csv");
+
             await _rabbitMQService.SendTopSellingProductsReportRequest(request);
         }
 
@@ -53,9 +59,13 @@ namespace eAutoShop.Services.Services
             return await GetReportFile("top_selling_products_report.csv");
         }
 
+
         public async Task GenerateSalesByCategoryReport(ReportRequest request)
         {
             ValidateDateRange(request);
+
+            InvalidateReport("sales_by_category_report.csv");
+
             await _rabbitMQService.SendSalesByCategoryReportRequest(request);
         }
 
@@ -67,6 +77,9 @@ namespace eAutoShop.Services.Services
         public async Task GenerateMonthlyRevenueReport(ReportRequest request)
         {
             ValidateDateRange(request);
+
+            InvalidateReport("monthly_revenue_report.csv");
+
             await _rabbitMQService.SendMonthlyRevenueReportRequest(request);
         }
 
@@ -78,6 +91,9 @@ namespace eAutoShop.Services.Services
         public async Task GenerateTopCustomersReport(ReportRequest request)
         {
             ValidateDateRange(request);
+
+            InvalidateReport("top_customers_report.csv");
+
             await _rabbitMQService.SendTopCustomersReportRequest(request);
         }
 
@@ -90,14 +106,23 @@ namespace eAutoShop.Services.Services
         {
             var reportFilePath = Path.Combine(_sharedVolumePath, fileName);
 
-            if (File.Exists(reportFilePath))
+            if (!File.Exists(reportFilePath))
             {
-                return await File.ReadAllBytesAsync(reportFilePath);
+                throw new UserException("Report is not available. Generate the report again.");
             }
 
-            return Array.Empty<byte>();
+            return await File.ReadAllBytesAsync(reportFilePath);
         }
 
+        private void InvalidateReport(string fileName)
+        {
+            var reportFilePath = Path.Combine(_sharedVolumePath, fileName);
+
+            if (File.Exists(reportFilePath))
+            {
+                File.Delete(reportFilePath);
+            }
+        }
         private static void ValidateDateRange(ReportRequest request)
         {
             if (request.StartDate.HasValue && request.EndDate.HasValue &&

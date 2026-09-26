@@ -1330,3 +1330,5 @@ Temporary Items
 # Archives         - https://github.com/github/gitignore/blob/main/Global/Archives.gitignore
 # Backup           - https://github.com/github/gitignore/blob/main/Global/Backup.gitignore
 # JEnv             - https://github.com/github/gitignore/blob/main/Global/JEnv.gitignore
+# Generated report files
+eAutoShop/eAutoShop.Worker/Reports/*.csv
