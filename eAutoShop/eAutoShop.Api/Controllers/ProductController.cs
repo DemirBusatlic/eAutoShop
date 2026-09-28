@@ -6,36 +6,45 @@ using eAutoShop.Services.Helpers;
 using eAutoShop.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace eAutoShop.Api.Controllers
 {
-
     [ApiController]
-    public class ProductController : BaseCRUDController<ProductModel, ProductSearchObject, ProductInsertRequest, ProductUpdateRequest>
+    public class ProductController : BaseCRUDController<ProductModel, ProductSearchObject,ProductInsertRequest, ProductUpdateRequest>
     {
         private readonly NotificationService _notificationService;
+
+        private readonly ILogger<BaseCRUDController<ProductModel,ProductSearchObject,ProductInsertRequest, ProductUpdateRequest>> _productLogger;
 
         public ProductController(IProductService service, ILogger<BaseCRUDController<ProductModel, ProductSearchObject, ProductInsertRequest, ProductUpdateRequest>> logger, NotificationService notificationService): base(logger, service)
         {
             _notificationService = notificationService;
+            _productLogger = logger;
         }
-        [Authorize(Roles = UserRoles.Manager + "," + UserRoles.Salesperson)]
+
+        [Authorize(Roles =UserRoles.Manager + "," + UserRoles.Salesperson)]
         [HttpPut("{id}/activate")]
         public async Task<ProductModel> Activate(int id)
         {
-            var activatedProduct = await (_service as IProductService)!.Activate(id);
+            var activatedProduct =await (_service as IProductService)!.Activate(id);
 
-            var price = activatedProduct.DiscountedPrice > 0 ? activatedProduct.DiscountedPrice : activatedProduct.Price;
+            try
+            {
+                var price =activatedProduct.DiscountedPrice > 0? activatedProduct.DiscountedPrice : activatedProduct.Price;
 
-            var message = $"Product activated: " + $"{activatedProduct.Name} " + $"({activatedProduct.Category}) - " + $"{price:0.00}";
+                var message = $"Product activated: " + $"{activatedProduct.Name} " + $"({activatedProduct.Category}) - " + $"{price:0.00}";
 
-            await _notificationService.SendServiceNotification(message, "product_activated");
+                await _notificationService.SendServiceNotification(message, "product_activated");
+            }
+            catch (Exception exception)
+            {
+                _productLogger.LogError(exception, "Proizvod {ProductId} je aktiviran, " + "ali slanje notifikacije nije uspjelo.", activatedProduct.Id);
+            }
 
             return activatedProduct;
         }
 
-        [Authorize(Roles = UserRoles.Manager + "," + UserRoles.Salesperson)]
+        [Authorize(Roles =UserRoles.Manager + "," + UserRoles.Salesperson)]
         [HttpPut("{id}/hide")]
         public virtual async Task<ProductModel> Hide(int id)
         {
@@ -49,13 +58,14 @@ namespace eAutoShop.Api.Controllers
             return await (_service as IProductService)!.AllowedActions(id);
         }
 
-        [Authorize(Roles = UserRoles.Manager + "," + UserRoles.Salesperson)]
+        [Authorize(Roles =UserRoles.Manager + "," + UserRoles.Salesperson)]
         [HttpPost]
         public override async Task<ProductModel> Insert(ProductInsertRequest request)
         {
             return await (_service as IProductService)!.Insert(request);
         }
-        [Authorize(Roles = UserRoles.Manager + "," + UserRoles.Salesperson + "," + UserRoles.Technician + "," + UserRoles.Customer)]
+
+        [Authorize(Roles =UserRoles.Manager + "," + UserRoles.Salesperson + "," + UserRoles.Technician + "," + UserRoles.Customer)]
         [HttpGet("active")]
         public async Task<PageResult<ProductModel>> GetActive([FromQuery] ProductSearchObject? search = null)
         {
