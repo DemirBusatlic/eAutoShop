@@ -1,10 +1,11 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:eautoshop_mobile/constants.dart';
 import 'package:eautoshop_mobile/providers/auth_provider.dart';
+import 'package:eautoshop_mobile/screens/home_screen.dart';
 import 'package:eautoshop_mobile/screens/master_screen.dart';
 import 'package:eautoshop_mobile/screens/register_screen.dart';
 import 'package:eautoshop_mobile/utilities/custom_exception.dart';
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -41,18 +42,27 @@ class _LoginScreenState extends State<LoginScreen> {
         _passwordController.text,
       );
 
-      /*
-       * Ako MyApp preko AuthProvider.isLoggedIn automatski
-       * prikazuje HomeScreen, ovdje nije potrebna navigacija.
-       */
+      if (!mounted) {
+        return;
+      }
+
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => const HomeScreen()),
+        (route) => false,
+      );
     } on CustomException catch (e) {
-      if (!mounted) return;
+      if (!mounted) {
+        return;
+      }
 
       setState(() {
         _errorMessage = e.toString();
       });
     } catch (_) {
-      if (!mounted) return;
+      if (!mounted) {
+        return;
+      }
 
       setState(() {
         _errorMessage = 'Došlo je do greške. Pokušajte ponovo.';
@@ -160,11 +170,13 @@ class _LoginScreenState extends State<LoginScreen> {
                             labelText: AppConstants.passwordLabel,
                             prefixIcon: const Icon(Icons.lock_outline),
                             suffixIcon: IconButton(
-                              onPressed: () {
-                                setState(() {
-                                  _obscurePassword = !_obscurePassword;
-                                });
-                              },
+                              onPressed: _isLoading
+                                  ? null
+                                  : () {
+                                      setState(() {
+                                        _obscurePassword = !_obscurePassword;
+                                      });
+                                    },
                               icon: Icon(
                                 _obscurePassword
                                     ? Icons.visibility_outlined

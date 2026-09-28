@@ -60,13 +60,16 @@ Future<void> main() async {
     notificationService,
     onNotificationReceived: notificationProvider.fetchNotifications,
   );
+
+  final authProvider = AuthProvider(signalRNotificationsService);
+
+  await authProvider.initializeSession();
+
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider.value(value: notificationProvider),
-        ChangeNotifierProvider(
-          create: (_) => AuthProvider(signalRNotificationsService),
-        ),
+        ChangeNotifierProvider.value(value: authProvider),
         ChangeNotifierProvider(create: (_) => CityProvider()),
         ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(create: (_) => ProductProvider()),
