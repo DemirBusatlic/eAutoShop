@@ -3,11 +3,13 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
 
 class PdfReportService {
   PdfReportService._();
 
   static const PdfColor _primaryBlue = PdfColor.fromInt(0xFF2848C7);
+
   static const PdfColor _headerBackground = PdfColor.fromInt(0xFFE8ECFA);
 
   static Future<bool> generateAndSave({
@@ -19,36 +21,93 @@ class PdfReportService {
     DateTime? endDate,
     List<String> filters = const <String>[],
   }) async {
-    if (headers.isEmpty) {
-      throw ArgumentError('PDF izvještaj mora imati najmanje jednu kolonu.');
+    final bytes = await _generatePdf(
+      title: title,
+      headers: headers,
+      rows: rows,
+      startDate: startDate,
+      endDate: endDate,
+      filters: filters,
+    );
+
+    final normalizedFileName = _normalizeFileName(fileName);
+
+    const pdfType = XTypeGroup(label: 'PDF', extensions: <String>['pdf']);
+
+    final location = await getSaveLocation(
+      suggestedName: normalizedFileName,
+      acceptedTypeGroups: const <XTypeGroup>[pdfType],
+    );
+
+    if (location == null) {
+      return false;
     }
 
-    if (rows.isEmpty) {
-      throw StateError('Nema podataka za kreiranje PDF izvještaja.');
-    }
+    final file = XFile.fromData(
+      bytes,
+      mimeType: 'application/pdf',
+      name: normalizedFileName,
+    );
 
-    if (rows.any((row) => row.length != headers.length)) {
-      throw ArgumentError(
-        'Svaki red PDF izvještaja mora imati isti broj vrijednosti kao zaglavlje.',
-      );
-    }
+    await file.saveTo(location.path);
+
+    return true;
+  }
+
+  static Future<bool> generateAndPrint({
+    required String title,
+    required String fileName,
+    required List<String> headers,
+    required List<List<String>> rows,
+    DateTime? startDate,
+    DateTime? endDate,
+    List<String> filters = const <String>[],
+  }) async {
+    final bytes = await _generatePdf(
+      title: title,
+      headers: headers,
+      rows: rows,
+      startDate: startDate,
+      endDate: endDate,
+      filters: filters,
+    );
+
+    return Printing.layoutPdf(
+      name: _normalizeFileName(fileName),
+      onLayout: (_) async => bytes,
+    );
+  }
+
+  static Future<Uint8List> _generatePdf({
+    required String title,
+    required List<String> headers,
+    required List<List<String>> rows,
+    DateTime? startDate,
+    DateTime? endDate,
+    List<String> filters = const <String>[],
+  }) async {
+    _validateReportData(headers: headers, rows: rows);
 
     final regularFontData = await rootBundle.load(
       'lib/assets/fonts/Roboto-Regular.ttf',
     );
+
     final boldFontData = await rootBundle.load(
       'lib/assets/fonts/Roboto-Bold.ttf',
     );
 
     final regularFont = pw.Font.ttf(regularFontData);
     final boldFont = pw.Font.ttf(boldFontData);
+
     final document = pw.Document(
       theme: pw.ThemeData.withFont(base: regularFont, bold: boldFont),
     );
 
     final dateFormat = DateFormat('dd.MM.yyyy.');
     final dateTimeFormat = DateFormat('dd.MM.yyyy. HH:mm');
+
     final period = _formatPeriod(startDate, endDate, dateFormat);
+
     final pageFormat = headers.length > 5
         ? PdfPageFormat.a4.landscape
         : PdfPageFormat.a4;
@@ -73,7 +132,8 @@ class PdfReportService {
           alignment: pw.Alignment.centerRight,
           margin: const pw.EdgeInsets.only(top: 12),
           child: pw.Text(
-            'Stranica ${context.pageNumber} od ${context.pagesCount}',
+            'Stranica ${context.pageNumber} '
+            'od ${context.pagesCount}',
             style: const pw.TextStyle(color: PdfColors.grey700, fontSize: 8),
           ),
         ),
@@ -88,7 +148,10 @@ class PdfReportService {
           ),
           pw.SizedBox(height: 8),
           pw.Text('Period: $period'),
-          pw.Text('Generisano: ${dateTimeFormat.format(DateTime.now())}'),
+          pw.Text(
+            'Generisano: '
+            '${dateTimeFormat.format(DateTime.now())}',
+          ),
           if (filters.isNotEmpty) ...<pw.Widget>[
             pw.SizedBox(height: 4),
             pw.Text('Filteri: ${filters.join(', ')}'),
@@ -119,28 +182,31 @@ class PdfReportService {
       ),
     );
 
-    final normalizedFileName = fileName.toLowerCase().endsWith('.pdf')
-        ? fileName
-        : '$fileName.pdf';
-    const pdfType = XTypeGroup(label: 'PDF', extensions: <String>['pdf']);
-    final location = await getSaveLocation(
-      suggestedName: normalizedFileName,
-      acceptedTypeGroups: const <XTypeGroup>[pdfType],
-    );
+    return document.save();
+  }
 
-    if (location == null) {
-      return false;
+  static void _validateReportData({
+    required List<String> headers,
+    required List<List<String>> rows,
+  }) {
+    if (headers.isEmpty) {
+      throw ArgumentError('PDF izvještaj mora imati najmanje jednu kolonu.');
     }
 
-    final Uint8List bytes = await document.save();
-    final file = XFile.fromData(
-      bytes,
-      mimeType: 'application/pdf',
-      name: normalizedFileName,
-    );
+    if (rows.isEmpty) {
+      throw StateError('Nema podataka za kreiranje PDF izvještaja.');
+    }
 
-    await file.saveTo(location.path);
-    return true;
+    if (rows.any((row) => row.length != headers.length)) {
+      throw ArgumentError(
+        'Svaki red PDF izvještaja mora imati isti broj '
+        'vrijednosti kao zaglavlje.',
+      );
+    }
+  }
+
+  static String _normalizeFileName(String fileName) {
+    return fileName.toLowerCase().endsWith('.pdf') ? fileName : '$fileName.pdf';
   }
 
   static String _formatPeriod(
@@ -153,7 +219,8 @@ class PdfReportService {
     }
 
     if (startDate != null && endDate != null) {
-      return '${formatter.format(startDate)} - ${formatter.format(endDate)}';
+      return '${formatter.format(startDate)} - '
+          '${formatter.format(endDate)}';
     }
 
     if (startDate != null) {

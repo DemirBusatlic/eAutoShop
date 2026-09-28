@@ -1,6 +1,5 @@
 import 'dart:math' as math;
 import 'dart:typed_data';
-
 import 'package:eautoshop_desktop/models/product/product.dart';
 import 'package:eautoshop_desktop/models/product_category/product_category.dart';
 import 'package:eautoshop_desktop/models/report/monthly_revenue_item.dart';
@@ -69,60 +68,45 @@ extension ReportTypeExtension on ReportType {
 
 class ReportScreen extends StatefulWidget {
   const ReportScreen({super.key});
-
   @override
   State<ReportScreen> createState() => _ReportScreenState();
 }
 
 class _ReportScreenState extends State<ReportScreen> {
   static const Color _primaryBlue = Color(0xFF2848C7);
-
   final DateFormat _dateFormat = DateFormat('dd.MM.yyyy');
   final NumberFormat _moneyFormat = NumberFormat('#,##0.00');
-
   final ProductProvider _filterProductProvider = ProductProvider();
   final ProductCategoryProvider _filterCategoryProvider =
       ProductCategoryProvider();
-
   late final ReportNotificationService _notificationService;
-
   ReportType _selectedReport = ReportType.products;
-
   DateTime? _startDate;
   DateTime? _endDate;
-
   int? _selectedCategoryId;
   int? _selectedProductId;
-
   List<ProductCategory> _categories = [];
   List<Product> _products = [];
-
   bool _filterDataLoading = true;
   bool _productsLoading = false;
   String? _filterLoadError;
-
   bool _isGenerating = false;
   bool _isDownloading = false;
   bool _isPdfDownloading = false;
-
+  bool _isPdfPrinting = false;
   String? _expectedNotificationType;
-
   List<ProductReportItem> _productReport = [];
   List<TopSellingProductItem> _topSellingProducts = [];
   List<SalesByCategoryItem> _salesByCategory = [];
   List<MonthlyRevenueItem> _monthlyRevenue = [];
   List<TopCustomerItem> _topCustomers = [];
-
   @override
   void initState() {
     super.initState();
-
     _notificationService = context
         .read<AuthProvider>()
         .reportNotificationService;
-
     _notificationService.onNotificationReceived = _onReportNotification;
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadFilterData();
     });
@@ -131,10 +115,8 @@ class _ReportScreenState extends State<ReportScreen> {
   @override
   void dispose() {
     _notificationService.onNotificationReceived = null;
-
     _filterProductProvider.dispose();
     _filterCategoryProvider.dispose();
-
     super.dispose();
   }
 
@@ -142,24 +124,18 @@ class _ReportScreenState extends State<ReportScreen> {
     if (!mounted) {
       return;
     }
-
     setState(() {
       _filterDataLoading = true;
       _filterLoadError = null;
     });
-
     try {
       await _filterCategoryProvider.getCategories();
-
       final products = await _fetchProducts();
-
       final categories = [..._filterCategoryProvider.categories]
         ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
-
       if (!mounted) {
         return;
       }
-
       setState(() {
         _categories = categories;
         _products = products;
@@ -168,7 +144,6 @@ class _ReportScreenState extends State<ReportScreen> {
       if (!mounted) {
         return;
       }
-
       setState(() {
         _filterLoadError = error.message;
       });
@@ -176,7 +151,6 @@ class _ReportScreenState extends State<ReportScreen> {
       if (!mounted) {
         return;
       }
-
       setState(() {
         _filterLoadError = 'Kategorije i proizvodi nisu mogli biti učitani.';
       });
@@ -191,34 +165,25 @@ class _ReportScreenState extends State<ReportScreen> {
 
   Future<List<Product>> _fetchProducts({int? categoryId}) async {
     const int pageSize = 100;
-
     final List<Product> products = [];
-
     int page = 1;
-
     while (true) {
       await _filterProductProvider.getProducts(
         page: page,
         pageSize: pageSize,
         productCategoryId: categoryId,
       );
-
       final pageItems = [..._filterProductProvider.products];
-
       products.addAll(pageItems);
-
       if (pageItems.isEmpty ||
           products.length >= _filterProductProvider.countOfItems) {
         break;
       }
-
       page++;
     }
-
     products.sort(
       (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
     );
-
     return products;
   }
 
@@ -226,20 +191,16 @@ class _ReportScreenState extends State<ReportScreen> {
     if (_isGenerating) {
       return;
     }
-
     setState(() {
       _selectedCategoryId = categoryId;
       _selectedProductId = null;
       _productsLoading = true;
     });
-
     try {
       final products = await _fetchProducts(categoryId: categoryId);
-
       if (!mounted || _selectedCategoryId != categoryId) {
         return;
       }
-
       setState(() {
         _products = products;
       });
@@ -247,13 +208,11 @@ class _ReportScreenState extends State<ReportScreen> {
       if (!mounted) {
         return;
       }
-
       _showMessage(error.message, isError: true);
     } catch (_) {
       if (!mounted) {
         return;
       }
-
       _showMessage('Proizvodi nisu mogli biti učitani.', isError: true);
     } finally {
       if (mounted && _selectedCategoryId == categoryId) {
@@ -271,14 +230,11 @@ class _ReportScreenState extends State<ReportScreen> {
       firstDate: DateTime(2000),
       lastDate: DateTime.now(),
     );
-
     if (selected == null || !mounted) {
       return;
     }
-
     setState(() {
       _startDate = selected;
-
       if (_endDate != null && _endDate!.isBefore(selected)) {
         _endDate = selected;
       }
@@ -292,11 +248,9 @@ class _ReportScreenState extends State<ReportScreen> {
       firstDate: _startDate ?? DateTime(2000),
       lastDate: DateTime.now(),
     );
-
     if (selected == null || !mounted) {
       return;
     }
-
     setState(() {
       _endDate = selected;
     });
@@ -306,13 +260,11 @@ class _ReportScreenState extends State<ReportScreen> {
     if (_isGenerating) {
       return;
     }
-
     setState(() {
       _startDate = null;
       _endDate = null;
       _selectedProductId = null;
     });
-
     if (_selectedCategoryId != null) {
       await _onCategoryChanged(null);
     }
@@ -326,29 +278,22 @@ class _ReportScreenState extends State<ReportScreen> {
         'Početni datum ne može biti nakon završnog datuma.',
         isError: true,
       );
-
       return;
     }
-
     if (!_notificationService.isInitialized) {
       _showMessage(
         'Veza za obavijesti o izvještajima nije aktivna. '
         'Odjavite se i ponovo prijavite.',
         isError: true,
       );
-
       return;
     }
-
     final reportProvider = context.read<ReportProvider>();
-
     setState(() {
       _clearCurrentReportData();
-
       _isGenerating = true;
       _expectedNotificationType = _selectedReport.notificationType;
     });
-
     try {
       switch (_selectedReport) {
         case ReportType.products:
@@ -360,9 +305,7 @@ class _ReportScreenState extends State<ReportScreen> {
               productId: _selectedProductId,
             ),
           );
-
           break;
-
         case ReportType.topSellingProducts:
           await reportProvider.generateTopSellingProductsReport(
             ProductReportRequest(
@@ -372,40 +315,31 @@ class _ReportScreenState extends State<ReportScreen> {
               productId: _selectedProductId,
             ),
           );
-
           break;
-
         case ReportType.salesByCategory:
           await reportProvider.generateSalesByCategoryReport(
             ReportRequest(startDate: _startDate, endDate: _endDate),
           );
-
           break;
-
         case ReportType.monthlyRevenue:
           await reportProvider.generateMonthlyRevenueReport(
             ReportRequest(startDate: _startDate, endDate: _endDate),
           );
-
           break;
-
         case ReportType.topCustomers:
           await reportProvider.generateTopCustomersReport(
             ReportRequest(startDate: _startDate, endDate: _endDate),
           );
-
           break;
       }
     } catch (error) {
       if (!mounted) {
         return;
       }
-
       setState(() {
         _isGenerating = false;
         _expectedNotificationType = null;
       });
-
       _showMessage(_cleanError(error), isError: true);
     }
   }
@@ -416,114 +350,84 @@ class _ReportScreenState extends State<ReportScreen> {
         notificationType != _expectedNotificationType) {
       return;
     }
-
     final normalizedMessage = message.toLowerCase();
-
     if (!normalizedMessage.contains('uspješno')) {
       setState(() {
         _isGenerating = false;
         _expectedNotificationType = null;
       });
-
       _showMessage(message, isError: true);
-
       return;
     }
-
     _loadGeneratedReport(message);
   }
 
   Future<void> _loadGeneratedReport(String notificationMessage) async {
     final provider = context.read<ReportProvider>();
-
     try {
       switch (_selectedReport) {
         case ReportType.products:
           final data = await provider.getProductReport();
-
           if (!mounted) {
             return;
           }
-
           setState(() {
             _productReport = data;
           });
-
           break;
-
         case ReportType.topSellingProducts:
           final data = await provider.getTopSellingProductsReport();
-
           if (!mounted) {
             return;
           }
-
           setState(() {
             _topSellingProducts = data;
           });
-
           break;
-
         case ReportType.salesByCategory:
           final data = await provider.getSalesByCategoryReport();
-
           if (!mounted) {
             return;
           }
-
           setState(() {
             _salesByCategory = data;
           });
-
           break;
-
         case ReportType.monthlyRevenue:
           final data = await provider.getMonthlyRevenueReport();
-
           if (!mounted) {
             return;
           }
-
           setState(() {
             _monthlyRevenue = data;
           });
-
           break;
-
         case ReportType.topCustomers:
           final data = await provider.getTopCustomersReport();
-
           if (!mounted) {
             return;
           }
-
           setState(() {
             _topCustomers = data;
           });
-
           break;
       }
-
       if (!mounted) {
         return;
       }
-
       setState(() {
         _isGenerating = false;
         _expectedNotificationType = null;
       });
-
       _showMessage(notificationMessage);
     } catch (error) {
       if (!mounted) {
         return;
       }
-
       setState(() {
         _isGenerating = false;
         _expectedNotificationType = null;
       });
-
       _showMessage(_cleanError(error), isError: true);
     }
   }
@@ -532,69 +436,53 @@ class _ReportScreenState extends State<ReportScreen> {
     if (!_hasData || _isDownloading) {
       return;
     }
-
     setState(() {
       _isDownloading = true;
     });
-
     try {
       final provider = context.read<ReportProvider>();
-
       late final Uint8List bytes;
       late final String fileName;
-
       switch (_selectedReport) {
         case ReportType.products:
           bytes = await provider.downloadProductReport();
           fileName = 'product_report.csv';
           break;
-
         case ReportType.topSellingProducts:
           bytes = await provider.downloadTopSellingProductsReport();
           fileName = 'top_selling_products_report.csv';
           break;
-
         case ReportType.salesByCategory:
           bytes = await provider.downloadSalesByCategoryReport();
           fileName = 'sales_by_category_report.csv';
           break;
-
         case ReportType.monthlyRevenue:
           bytes = await provider.downloadMonthlyRevenueReport();
           fileName = 'monthly_revenue_report.csv';
           break;
-
         case ReportType.topCustomers:
           bytes = await provider.downloadTopCustomersReport();
           fileName = 'top_customers_report.csv';
           break;
       }
-
       const csvType = XTypeGroup(label: 'CSV', extensions: ['csv']);
-
       final location = await getSaveLocation(
         suggestedName: fileName,
         acceptedTypeGroups: const [csvType],
       );
-
       if (location == null) {
         return;
       }
-
       final file = XFile.fromData(bytes, mimeType: 'text/csv', name: fileName);
-
       await file.saveTo(location.path);
-
       if (!mounted) {
         return;
       }
-
       _showMessage('Izvještaj je uspješno sačuvan.');
     } catch (error) {
       if (!mounted) {
         return;
       }
-
       _showMessage(_cleanError(error), isError: true);
     } finally {
       if (mounted) {
@@ -609,20 +497,81 @@ class _ReportScreenState extends State<ReportScreen> {
     if (!_hasData || _isPdfDownloading) {
       return;
     }
-
     setState(() {
       _isPdfDownloading = true;
     });
-
     try {
-      late final String fileName;
-      late final List<String> headers;
-      late final List<List<String>> rows;
+      final pdfData = _buildPdfData();
+      final saved = await PdfReportService.generateAndSave(
+        title: _selectedReport.label,
+        fileName: pdfData.fileName,
+        headers: pdfData.headers,
+        rows: pdfData.rows,
+        startDate: _startDate,
+        endDate: _endDate,
+        filters: _pdfFilters,
+      );
+      if (!mounted || !saved) {
+        return;
+      }
+      _showMessage('PDF izvještaj je uspješno sačuvan.');
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+      _showMessage(_cleanError(error), isError: true);
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isPdfDownloading = false;
+        });
+      }
+    }
+  }
 
-      switch (_selectedReport) {
-        case ReportType.products:
-          fileName = 'product_report.pdf';
-          headers = <String>[
+  Future<void> _printPdf() async {
+    if (!_hasData || _isPdfPrinting) {
+      return;
+    }
+    setState(() {
+      _isPdfPrinting = true;
+    });
+    try {
+      final pdfData = _buildPdfData();
+      final printed = await PdfReportService.generateAndPrint(
+        title: _selectedReport.label,
+        fileName: pdfData.fileName,
+        headers: pdfData.headers,
+        rows: pdfData.rows,
+        startDate: _startDate,
+        endDate: _endDate,
+        filters: _pdfFilters,
+      );
+      if (!mounted || !printed) {
+        return;
+      }
+      _showMessage('PDF izvještaj je poslan na ispis.');
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+      _showMessage(_cleanError(error), isError: true);
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isPdfPrinting = false;
+        });
+      }
+    }
+  }
+
+  ({String fileName, List<String> headers, List<List<String>> rows})
+  _buildPdfData() {
+    switch (_selectedReport) {
+      case ReportType.products:
+        return (
+          fileName: 'product_report.pdf',
+          headers: <String>[
             'Proizvod',
             'Kategorija',
             'Cijena',
@@ -630,8 +579,8 @@ class _ReportScreenState extends State<ReportScreen> {
             'Cijena s popustom',
             'Prodano',
             'Prihod',
-          ];
-          rows = _productReport
+          ],
+          rows: _productReport
               .map(
                 (item) => <String>[
                   item.productName,
@@ -643,13 +592,13 @@ class _ReportScreenState extends State<ReportScreen> {
                   '${_moneyFormat.format(item.totalRevenue)} KM',
                 ],
               )
-              .toList();
-          break;
-
-        case ReportType.topSellingProducts:
-          fileName = 'top_selling_products_report.pdf';
-          headers = <String>['Proizvod', 'Kategorija', 'Prodano', 'Prihod'];
-          rows = _topSellingProducts
+              .toList(),
+        );
+      case ReportType.topSellingProducts:
+        return (
+          fileName: 'top_selling_products_report.pdf',
+          headers: <String>['Proizvod', 'Kategorija', 'Prodano', 'Prihod'],
+          rows: _topSellingProducts
               .map(
                 (item) => <String>[
                   item.productName,
@@ -658,13 +607,13 @@ class _ReportScreenState extends State<ReportScreen> {
                   '${_moneyFormat.format(item.totalRevenue)} KM',
                 ],
               )
-              .toList();
-          break;
-
-        case ReportType.salesByCategory:
-          fileName = 'sales_by_category_report.pdf';
-          headers = <String>['Kategorija', 'Prodano', 'Prihod'];
-          rows = _salesByCategory
+              .toList(),
+        );
+      case ReportType.salesByCategory:
+        return (
+          fileName: 'sales_by_category_report.pdf',
+          headers: <String>['Kategorija', 'Prodano', 'Prihod'],
+          rows: _salesByCategory
               .map(
                 (item) => <String>[
                   item.categoryName,
@@ -672,33 +621,33 @@ class _ReportScreenState extends State<ReportScreen> {
                   '${_moneyFormat.format(item.totalRevenue)} KM',
                 ],
               )
-              .toList();
-          break;
-
-        case ReportType.monthlyRevenue:
-          fileName = 'monthly_revenue_report.pdf';
-          headers = <String>['Datum', 'Prihod'];
-          final sorted = <MonthlyRevenueItem>[..._monthlyRevenue]
-            ..sort((a, b) => a.date.compareTo(b.date));
-          rows = sorted
+              .toList(),
+        );
+      case ReportType.monthlyRevenue:
+        final sorted = <MonthlyRevenueItem>[..._monthlyRevenue]
+          ..sort((a, b) => a.date.compareTo(b.date));
+        return (
+          fileName: 'monthly_revenue_report.pdf',
+          headers: <String>['Datum', 'Prihod'],
+          rows: sorted
               .map(
                 (item) => <String>[
                   _dateFormat.format(item.date),
                   '${_moneyFormat.format(item.revenue)} KM',
                 ],
               )
-              .toList();
-          break;
-
-        case ReportType.topCustomers:
-          fileName = 'top_customers_report.pdf';
-          headers = <String>[
+              .toList(),
+        );
+      case ReportType.topCustomers:
+        return (
+          fileName: 'top_customers_report.pdf',
+          headers: <String>[
             'Kupac',
             'Korisničko ime',
             'Broj narudžbi',
             'Ukupno potrošeno',
-          ];
-          rows = _topCustomers
+          ],
+          rows: _topCustomers
               .map(
                 (item) => <String>[
                   item.customerName,
@@ -707,43 +656,13 @@ class _ReportScreenState extends State<ReportScreen> {
                   '${_moneyFormat.format(item.totalSpent)} KM',
                 ],
               )
-              .toList();
-          break;
-      }
-
-      final saved = await PdfReportService.generateAndSave(
-        title: _selectedReport.label,
-        fileName: fileName,
-        headers: headers,
-        rows: rows,
-        startDate: _startDate,
-        endDate: _endDate,
-        filters: _pdfFilters,
-      );
-
-      if (!mounted || !saved) {
-        return;
-      }
-
-      _showMessage('PDF izvještaj je uspješno sačuvan.');
-    } catch (error) {
-      if (!mounted) {
-        return;
-      }
-
-      _showMessage(_cleanError(error), isError: true);
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isPdfDownloading = false;
-        });
-      }
+              .toList(),
+        );
     }
   }
 
   List<String> get _pdfFilters {
     final filters = <String>[];
-
     if (_selectedReport.supportsProductFilters) {
       for (final category in _categories) {
         if (category.id == _selectedCategoryId) {
@@ -751,7 +670,6 @@ class _ReportScreenState extends State<ReportScreen> {
           break;
         }
       }
-
       for (final product in _products) {
         if (product.id == _selectedProductId) {
           filters.add('Proizvod: ${product.name}');
@@ -759,11 +677,9 @@ class _ReportScreenState extends State<ReportScreen> {
         }
       }
     }
-
     if (filters.isEmpty) {
       filters.add('Bez dodatnih filtera');
     }
-
     return filters;
   }
 
@@ -772,19 +688,15 @@ class _ReportScreenState extends State<ReportScreen> {
       case ReportType.products:
         _productReport = [];
         break;
-
       case ReportType.topSellingProducts:
         _topSellingProducts = [];
         break;
-
       case ReportType.salesByCategory:
         _salesByCategory = [];
         break;
-
       case ReportType.monthlyRevenue:
         _monthlyRevenue = [];
         break;
-
       case ReportType.topCustomers:
         _topCustomers = [];
         break;
@@ -795,16 +707,12 @@ class _ReportScreenState extends State<ReportScreen> {
     switch (_selectedReport) {
       case ReportType.products:
         return _productReport.isNotEmpty;
-
       case ReportType.topSellingProducts:
         return _topSellingProducts.isNotEmpty;
-
       case ReportType.salesByCategory:
         return _salesByCategory.isNotEmpty;
-
       case ReportType.monthlyRevenue:
         return _monthlyRevenue.isNotEmpty;
-
       case ReportType.topCustomers:
         return _topCustomers.isNotEmpty;
     }
@@ -814,13 +722,10 @@ class _ReportScreenState extends State<ReportScreen> {
     if (error is CustomException) {
       return error.message;
     }
-
     final message = error.toString();
-
     if (message.startsWith('Exception: ')) {
       return message.substring('Exception: '.length);
     }
-
     return message;
   }
 
@@ -828,7 +733,6 @@ class _ReportScreenState extends State<ReportScreen> {
     if (!mounted) {
       return;
     }
-
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(
@@ -958,7 +862,6 @@ class _ReportScreenState extends State<ReportScreen> {
                           if (value == null) {
                             return;
                           }
-
                           setState(() {
                             _selectedReport = value;
                           });
@@ -1209,7 +1112,6 @@ class _ReportScreenState extends State<ReportScreen> {
 
   Widget _buildSummaryCards() {
     final summaries = _getSummaryData();
-
     return LayoutBuilder(
       builder: (context, constraints) {
         final cardWidth = constraints.maxWidth >= 900
@@ -1217,7 +1119,6 @@ class _ReportScreenState extends State<ReportScreen> {
             : constraints.maxWidth >= 600
             ? (constraints.maxWidth - 16) / 2
             : constraints.maxWidth;
-
         return Wrap(
           spacing: 16,
           runSpacing: 16,
@@ -1291,17 +1192,14 @@ class _ReportScreenState extends State<ReportScreen> {
         final best = _productReport.reduce(
           (a, b) => a.totalSold >= b.totalSold ? a : b,
         );
-
         final totalSold = _productReport.fold<int>(
           0,
           (sum, item) => sum + item.totalSold,
         );
-
         final revenue = _productReport.fold<double>(
           0,
           (sum, item) => sum + item.totalRevenue,
         );
-
         return [
           _SummaryItem(
             'Najprodavaniji proizvod',
@@ -1319,20 +1217,16 @@ class _ReportScreenState extends State<ReportScreen> {
             Icons.payments_outlined,
           ),
         ];
-
       case ReportType.topSellingProducts:
         final best = _topSellingProducts.first;
-
         final totalSold = _topSellingProducts.fold<int>(
           0,
           (sum, item) => sum + item.totalSold,
         );
-
         final revenue = _topSellingProducts.fold<double>(
           0,
           (sum, item) => sum + item.totalRevenue,
         );
-
         return [
           _SummaryItem(
             'Najprodavaniji proizvod',
@@ -1350,22 +1244,18 @@ class _ReportScreenState extends State<ReportScreen> {
             Icons.payments_outlined,
           ),
         ];
-
       case ReportType.salesByCategory:
         final best = _salesByCategory.reduce(
           (a, b) => a.totalRevenue >= b.totalRevenue ? a : b,
         );
-
         final totalSold = _salesByCategory.fold<int>(
           0,
           (sum, item) => sum + item.totalSold,
         );
-
         final revenue = _salesByCategory.fold<double>(
           0,
           (sum, item) => sum + item.totalRevenue,
         );
-
         return [
           _SummaryItem(
             'Najuspješnija kategorija',
@@ -1383,19 +1273,15 @@ class _ReportScreenState extends State<ReportScreen> {
             Icons.payments_outlined,
           ),
         ];
-
       case ReportType.monthlyRevenue:
         final best = _monthlyRevenue.reduce(
           (a, b) => a.revenue >= b.revenue ? a : b,
         );
-
         final total = _monthlyRevenue.fold<double>(
           0,
           (sum, item) => sum + item.revenue,
         );
-
         final average = total / _monthlyRevenue.length;
-
         return [
           _SummaryItem(
             'Najbolji dan',
@@ -1413,20 +1299,16 @@ class _ReportScreenState extends State<ReportScreen> {
             Icons.show_chart,
           ),
         ];
-
       case ReportType.topCustomers:
         final best = _topCustomers.first;
-
         final totalOrders = _topCustomers.fold<int>(
           0,
           (sum, item) => sum + item.ordersCount,
         );
-
         final totalSpent = _topCustomers.fold<double>(
           0,
           (sum, item) => sum + item.totalSpent,
         );
-
         return [
           _SummaryItem(
             'Najbolji kupac',
@@ -1476,16 +1358,12 @@ class _ReportScreenState extends State<ReportScreen> {
     switch (_selectedReport) {
       case ReportType.products:
         return 'Prodaja proizvoda';
-
       case ReportType.topSellingProducts:
         return 'Najprodavaniji proizvodi';
-
       case ReportType.salesByCategory:
         return 'Prihod po kategorijama';
-
       case ReportType.monthlyRevenue:
         return 'Kretanje prihoda';
-
       case ReportType.topCustomers:
         return 'Potrošnja top kupaca';
     }
@@ -1496,15 +1374,12 @@ class _ReportScreenState extends State<ReportScreen> {
       case ReportType.products:
         final sorted = [..._productReport]
           ..sort((a, b) => b.totalSold.compareTo(a.totalSold));
-
         final items = sorted.take(10).toList();
-
         return _buildBarChart(
           labels: items.map((item) => item.productName).toList(),
           values: items.map((item) => item.totalSold.toDouble()).toList(),
           axisLabel: 'Prodano',
         );
-
       case ReportType.topSellingProducts:
         return _buildBarChart(
           labels: _topSellingProducts.map((item) => item.productName).toList(),
@@ -1513,17 +1388,14 @@ class _ReportScreenState extends State<ReportScreen> {
               .toList(),
           axisLabel: 'Prodano',
         );
-
       case ReportType.salesByCategory:
         return _buildBarChart(
           labels: _salesByCategory.map((item) => item.categoryName).toList(),
           values: _salesByCategory.map((item) => item.totalRevenue).toList(),
           axisLabel: 'Prihod (KM)',
         );
-
       case ReportType.monthlyRevenue:
         return _buildRevenueLineChart();
-
       case ReportType.topCustomers:
         return _buildBarChart(
           labels: _topCustomers.map((item) => item.customerName).toList(),
@@ -1541,15 +1413,10 @@ class _ReportScreenState extends State<ReportScreen> {
     if (labels.isEmpty || values.isEmpty) {
       return const Center(child: Text('Nema podataka za prikaz grafikona.'));
     }
-
     final maxValue = values.reduce(math.max);
-
     final maxY = maxValue <= 0 ? 1.0 : maxValue * 1.2;
-
     final interval = maxY > 5 ? maxY / 5 : 1.0;
-
     final chartWidth = math.max(700.0, labels.length * 115.0);
-
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: SizedBox(
@@ -1603,11 +1470,9 @@ class _ReportScreenState extends State<ReportScreen> {
                   reservedSize: 75,
                   getTitlesWidget: (value, meta) {
                     final index = value.toInt();
-
                     if (index < 0 || index >= labels.length) {
                       return const SizedBox.shrink();
                     }
-
                     return SideTitleWidget(
                       axisSide: meta.axisSide,
                       space: 8,
@@ -1656,20 +1521,13 @@ class _ReportScreenState extends State<ReportScreen> {
     if (_monthlyRevenue.isEmpty) {
       return const Center(child: Text('Nema podataka za prikaz grafikona.'));
     }
-
     final sorted = [..._monthlyRevenue]
       ..sort((a, b) => a.date.compareTo(b.date));
-
     final maxValue = sorted.map((item) => item.revenue).reduce(math.max);
-
     final maxY = maxValue <= 0 ? 1.0 : maxValue * 1.2;
-
     final interval = maxY > 5 ? maxY / 5 : 1.0;
-
     final labelInterval = math.max(1, (sorted.length / 7).ceil());
-
     final chartWidth = math.max(700.0, sorted.length * 55.0);
-
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: SizedBox(
@@ -1722,16 +1580,13 @@ class _ReportScreenState extends State<ReportScreen> {
                   interval: 1,
                   getTitlesWidget: (value, meta) {
                     final index = value.toInt();
-
                     if (index < 0 || index >= sorted.length) {
                       return const SizedBox.shrink();
                     }
-
                     if (index % labelInterval != 0 &&
                         index != sorted.length - 1) {
                       return const SizedBox.shrink();
                     }
-
                     return SideTitleWidget(
                       axisSide: meta.axisSide,
                       space: 8,
@@ -1801,7 +1656,9 @@ class _ReportScreenState extends State<ReportScreen> {
               ),
               const SizedBox(width: 10),
               OutlinedButton.icon(
-                onPressed: _isPdfDownloading ? null : _downloadPdf,
+                onPressed: _isPdfDownloading || _isPdfPrinting
+                    ? null
+                    : _downloadPdf,
                 icon: _isPdfDownloading
                     ? const SizedBox(
                         width: 17,
@@ -1816,6 +1673,24 @@ class _ReportScreenState extends State<ReportScreen> {
                   foregroundColor: _primaryBlue,
                   side: const BorderSide(color: _primaryBlue),
                 ),
+              ),
+              const SizedBox(width: 10),
+              FilledButton.icon(
+                onPressed: _isPdfPrinting || _isPdfDownloading
+                    ? null
+                    : _printPdf,
+                icon: _isPdfPrinting
+                    ? const SizedBox(
+                        width: 17,
+                        height: 17,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Icon(Icons.print_outlined),
+                label: Text(_isPdfPrinting ? 'Priprema...' : 'Ispiši PDF'),
+                style: FilledButton.styleFrom(backgroundColor: _primaryBlue),
               ),
             ],
           ),
@@ -1868,7 +1743,6 @@ class _ReportScreenState extends State<ReportScreen> {
               )
               .toList(),
         );
-
       case ReportType.topSellingProducts:
         return DataTable(
           headingRowColor: WidgetStatePropertyAll(Colors.grey.shade100),
@@ -1893,7 +1767,6 @@ class _ReportScreenState extends State<ReportScreen> {
               )
               .toList(),
         );
-
       case ReportType.salesByCategory:
         return DataTable(
           headingRowColor: WidgetStatePropertyAll(Colors.grey.shade100),
@@ -1916,11 +1789,9 @@ class _ReportScreenState extends State<ReportScreen> {
               )
               .toList(),
         );
-
       case ReportType.monthlyRevenue:
         final sorted = [..._monthlyRevenue]
           ..sort((a, b) => a.date.compareTo(b.date));
-
         return DataTable(
           headingRowColor: WidgetStatePropertyAll(Colors.grey.shade100),
           columns: const [
@@ -1938,7 +1809,6 @@ class _ReportScreenState extends State<ReportScreen> {
               )
               .toList(),
         );
-
       case ReportType.topCustomers:
         return DataTable(
           headingRowColor: WidgetStatePropertyAll(Colors.grey.shade100),
@@ -1985,6 +1855,5 @@ class _SummaryItem {
   final String title;
   final String value;
   final IconData icon;
-
   const _SummaryItem(this.title, this.value, this.icon);
 }
