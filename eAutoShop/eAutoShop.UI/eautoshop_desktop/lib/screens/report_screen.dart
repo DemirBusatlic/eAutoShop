@@ -1689,7 +1689,7 @@ class _ReportScreenState extends State<ReportScreen> {
                         ),
                       )
                     : const Icon(Icons.print_outlined),
-                label: Text(_isPdfPrinting ? 'Priprema...' : 'Ispiši PDF'),
+                label: Text(_isPdfPrinting ? 'Priprema...' : 'Printaj PDF'),
                 style: FilledButton.styleFrom(backgroundColor: _primaryBlue),
               ),
             ],
