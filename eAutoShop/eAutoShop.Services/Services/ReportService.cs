@@ -134,12 +134,10 @@ namespace eAutoShop.Services.Services
         {
             ValidateDateRange(request);
 
-            if (request.ProductId.HasValue &&
-                !await _context.Products.AnyAsync(x => x.Id == request.ProductId.Value))
+            if (request.ProductId.HasValue && !await _context.Products.AnyAsync(x => x.Id == request.ProductId.Value))
                 throw new UserException("Selected product doesn't exist.");
 
-            if (request.ProductCategoryId.HasValue &&
-                !await _context.ProductCategories.AnyAsync(x => x.Id == request.ProductCategoryId.Value))
+            if (request.ProductCategoryId.HasValue && !await _context.ProductCategories.AnyAsync(x => x.Id == request.ProductCategoryId.Value))
                 throw new UserException("Selected product category doesn't exist.");
         }
     }
