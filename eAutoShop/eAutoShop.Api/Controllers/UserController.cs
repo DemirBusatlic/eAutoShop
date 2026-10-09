@@ -52,6 +52,23 @@ namespace eAutoShop.Api.Controllers
             return await _userService.Register(request);
         }
 
+        [AllowAnonymous]
+        [HttpPost("ForgotPassword")]
+        public async Task<IActionResult> ForgotPassword([FromBody] UserForgotPasswordRequest request)
+        {
+            await _userService.ForgotPassword(request);
+
+            return Ok(new{message ="If an active account exists for this email, " + "a password reset code has been sent."});
+        }
+
+        [AllowAnonymous]
+        [HttpPost("ResetPassword")]
+        public async Task<IActionResult> ResetPassword([FromBody] UserResetPasswordRequest request)
+        {
+            await _userService.ResetPassword(request);
+
+            return Ok(new{message = "Password has been reset successfully."});
+        }
         [Authorize]
         [HttpGet("Me")]
         public async Task<UserModel> GetCurrentUser()

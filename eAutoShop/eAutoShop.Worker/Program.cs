@@ -7,6 +7,7 @@ using RabbitMQ.Client;
 var builder = Host.CreateApplicationBuilder(args);
 
 builder.Services.AddScoped<IGenerateProductReportService, GenerateProductReportService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 builder.Services.AddSingleton<IConnectionFactory>(sp =>
 {
@@ -28,6 +29,7 @@ builder.Services.AddSingleton<IConnectionFactory>(sp =>
 
 builder.Services.AddSingleton<RabbitMQService>();
 builder.Services.AddHostedService<RabbitMqListener>();
+builder.Services.AddHostedService<PasswordResetEmailListener>();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 

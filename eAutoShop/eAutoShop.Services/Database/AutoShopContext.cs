@@ -23,6 +23,8 @@ public partial class AutoShopContext : DbContext
 
     public virtual DbSet<AuthToken> AuthTokens { get; set; }
 
+    public virtual DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
+
     public virtual DbSet<AutoShopService> AutoShopServices { get; set; }
 
     public virtual DbSet<CarManufacturer> CarManufacturers { get; set; }
@@ -127,6 +129,30 @@ public partial class AutoShopContext : DbContext
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_AuthTokens_Users");
+        });
+
+        modelBuilder.Entity<PasswordResetToken>(entity =>
+        {
+            entity.HasIndex(
+                e => new { e.UserId, e.CreatedAt },
+                "IX_PasswordResetTokens_UserId_CreatedAt"
+            );
+
+            entity.Property(e => e.CodeHash)
+                .HasMaxLength(100)
+                .IsUnicode(false);
+
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(sysutcdatetime())");
+
+            entity.Property(e => e.FailedAttempts)
+                .HasDefaultValue(0);
+
+            entity.HasOne(d => d.User)
+                .WithMany(p => p.PasswordResetTokens)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_PasswordResetTokens_Users");
         });
 
         modelBuilder.Entity<Notification>(entity =>

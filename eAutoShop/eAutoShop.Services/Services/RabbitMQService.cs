@@ -1,4 +1,5 @@
 ﻿using eAutoShop.Model.Request;
+using eAutoShop.Model.Model;
 using RabbitMQ.Client;
 using System;
 using System.Text;
@@ -57,6 +58,14 @@ namespace eAutoShop.Services.Services
                     queue: "generate_top_customers_report",
                     request: reportRequest);
             }
+
+            public Task SendPasswordResetEmail(PasswordResetEmailModel passwordResetEmail)
+            {
+                return SendMessage(
+                    queue: "password_reset_email",
+                    request: passwordResetEmail);
+            }
+
 
             private async Task SendMessage<TRequest>(string queue,TRequest request)
             {

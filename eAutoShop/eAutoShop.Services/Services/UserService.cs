@@ -5,10 +5,12 @@ using eAutoShop.Model.SearchObjects;
 using eAutoShop.Services.Database;
 using eAutoShop.Services.Helpers;
 using eAutoShop.Services.Interfaces;
+using eAutoShop.Services.Services.eAutoShop.Services.Database;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Security.Cryptography;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,10 +21,12 @@ namespace eAutoShop.Services.Services
     public class UserService : BaseCRUDService<UserModel, User, UserSearchObject, UserInsertRequest, UserUpdateRequest>, IUserService
     {
         private readonly ILogger<UserService> _logger;
+        private readonly RabbitMQService _rabbitMQService;
 
-        public UserService(AutoShopContext context, IMapper mapper, ILogger<UserService> logger) : base(context, mapper)
+        public UserService(AutoShopContext context, IMapper mapper, ILogger<UserService> logger, RabbitMQService rabbitMQService): base(context, mapper)
         {
             _logger = logger;
+            _rabbitMQService = rabbitMQService;
         }
 
         public override IQueryable<User> AddInclude(IQueryable<User> query, UserSearchObject? search = null)
@@ -127,6 +131,177 @@ namespace eAutoShop.Services.Services
             foreach (var token in activeTokens)
             {
                 token.Revoked = DateTime.UtcNow;
+            }
+
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task ForgotPassword(UserForgotPasswordRequest request)
+        {
+            var email = request.Email?.Trim().ToLowerInvariant();
+
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                throw new UserException("Email is required.");
+            }
+
+            var user = await _context.Users.FirstOrDefaultAsync(x => x.Email == email && x.Active);
+
+            if (user == null)
+            {
+                return;
+            }
+
+            var now = DateTime.UtcNow;
+
+            var latestActiveResetToken = await _context.PasswordResetTokens.Where(x => x.UserId == user.Id && x.UsedAt == null && x.RevokedAt == null && x.ExpiresAt > now).OrderByDescending(x => x.CreatedAt).FirstOrDefaultAsync();
+
+            if (latestActiveResetToken != null && latestActiveResetToken.CreatedAt > now.AddMinutes(-1))
+            {
+                return;
+            }
+
+            var previousTokens = await _context.PasswordResetTokens.Where(x =>x.UserId == user.Id &&x.UsedAt == null && x.RevokedAt == null).ToListAsync();
+
+            foreach (var previousToken in previousTokens)
+            {
+                previousToken.RevokedAt = now;
+            }
+
+            var code = RandomNumberGenerator.GetInt32(0, 1_000_000).ToString("D6");
+
+            var passwordResetToken = new PasswordResetToken
+            {
+                UserId = user.Id,
+                CodeHash = BCrypt.Net.BCrypt.HashPassword(code),
+                CreatedAt = now,
+                ExpiresAt = now.AddMinutes(15),
+                FailedAttempts = 0
+            };
+
+            _context.PasswordResetTokens.Add(passwordResetToken);
+            await _context.SaveChangesAsync();
+
+            try
+            {
+                await _rabbitMQService.SendPasswordResetEmail(new PasswordResetEmailModel
+                    {
+                        Email = user.Email,
+                        RecipientName = $"{user.Name} {user.Surname}".Trim(),
+                        Code = code,
+                        ExpiresAt = passwordResetToken.ExpiresAt
+                    });
+            }
+            catch (Exception exception)
+            {
+                passwordResetToken.RevokedAt = DateTime.UtcNow;
+                await _context.SaveChangesAsync();
+
+                _logger.LogError(exception, "Password reset email could not be queued for user {UserId}.", user.Id);
+
+                throw new UserException("Password reset request could not be processed. Please try again.");
+            }
+        }
+
+        public async Task ResetPassword(UserResetPasswordRequest request)
+        {
+            var email = request.Email?.Trim().ToLowerInvariant();
+            var code = request.Code?.Trim();
+
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                throw new UserException("Email is required.");
+            }
+
+            if (string.IsNullOrWhiteSpace(code) || code.Length != 6 || !code.All(char.IsDigit))
+            {
+                throw new UserException("Reset code must contain exactly 6 digits.");
+            }
+
+            if (string.IsNullOrWhiteSpace(request.NewPassword))
+            {
+                throw new UserException("New password is required.");
+            }
+
+            if (request.NewPassword.Length < 8)
+            {
+                throw new UserException("New password must contain at least 8 characters.");
+            }
+
+            if (request.NewPassword != request.ConfirmNewPassword)
+            {
+                throw new UserException("New password values don't match.");
+            }
+
+            var user = await _context.Users.FirstOrDefaultAsync(x => x.Email == email && x.Active);
+
+            if (user == null)
+            {
+                throw new UserException("Reset code is invalid or has expired.");
+            }
+
+            var now = DateTime.UtcNow;
+
+            var resetToken = await _context.PasswordResetTokens.Where(x => x.UserId == user.Id && x.UsedAt == null && x.RevokedAt == null).OrderByDescending(x => x.CreatedAt).FirstOrDefaultAsync();
+
+            if (resetToken == null)
+            {
+                throw new UserException("Reset code is invalid or has expired.");
+            }
+
+            if (resetToken.ExpiresAt <= now)
+            {
+                resetToken.RevokedAt = now;
+                await _context.SaveChangesAsync();
+
+                throw new UserException("Reset code is invalid or has expired.");
+            }
+
+            if (resetToken.FailedAttempts >= 5)
+            {
+                resetToken.RevokedAt = now;
+                await _context.SaveChangesAsync();
+
+                throw new UserException("Reset code is invalid or has expired.");
+            }
+
+            var validCode = BCrypt.Net.BCrypt.Verify(code,resetToken.CodeHash);
+
+            if (!validCode)
+            {
+                resetToken.FailedAttempts++;
+
+                if (resetToken.FailedAttempts >= 5)
+                {
+                    resetToken.RevokedAt = now;
+                }
+
+                await _context.SaveChangesAsync();
+
+                throw new UserException("Reset code is invalid or has expired.");
+            }
+
+            if (!string.IsNullOrWhiteSpace(user.PasswordHash) && BCrypt.Net.BCrypt.Verify(request.NewPassword, user.PasswordHash))
+            {
+                throw new UserException("New password can't be the same as the old one.");
+            }
+
+            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
+
+            resetToken.UsedAt = now;
+
+            var otherActiveResetTokens =await _context.PasswordResetTokens.Where(x =>x.UserId == user.Id && x.Id != resetToken.Id && x.UsedAt == null && x.RevokedAt == null).ToListAsync();
+
+            foreach (var otherResetToken in otherActiveResetTokens)
+            {
+                otherResetToken.RevokedAt = now;
+            }
+
+            var activeAuthTokens = await _context.AuthTokens.Where(x => x.UserId == user.Id && x.Revoked == null).ToListAsync();
+
+            foreach (var authToken in activeAuthTokens)
+            {
+                authToken.Revoked = now;
             }
 
             await _context.SaveChangesAsync();

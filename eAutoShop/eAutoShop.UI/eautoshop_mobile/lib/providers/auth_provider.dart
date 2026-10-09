@@ -130,6 +130,72 @@ class AuthProvider extends BaseProvider<AuthProvider, AuthProvider> {
     }
   }
 
+  Future<void> forgotPassword(String email) async {
+    try {
+      final response = await http
+          .post(
+            Uri.parse('${BaseProvider.baseUrl}/User/ForgotPassword'),
+            headers: const {
+              'Content-Type': 'application/json; charset=UTF-8',
+              'Accept': 'application/json',
+            },
+            body: jsonEncode({'email': email.trim()}),
+          )
+          .timeout(const Duration(seconds: 10));
+
+      if (response.statusCode < 200 || response.statusCode >= 300) {
+        handleHttpError(response);
+      }
+    } on CustomException {
+      rethrow;
+    } catch (error) {
+      debugPrint('Greška prilikom slanja reset koda: $error');
+
+      throw CustomException(
+        'Nije moguće pristupiti serveru. '
+        'Provjerite internet konekciju.',
+      );
+    }
+  }
+
+  Future<void> resetPassword({
+    required String email,
+    required String code,
+    required String newPassword,
+    required String confirmNewPassword,
+  }) async {
+    try {
+      final response = await http
+          .post(
+            Uri.parse('${BaseProvider.baseUrl}/User/ResetPassword'),
+            headers: const {
+              'Content-Type': 'application/json; charset=UTF-8',
+              'Accept': 'application/json',
+            },
+            body: jsonEncode({
+              'email': email.trim(),
+              'code': code.trim(),
+              'newPassword': newPassword,
+              'confirmNewPassword': confirmNewPassword,
+            }),
+          )
+          .timeout(const Duration(seconds: 10));
+
+      if (response.statusCode < 200 || response.statusCode >= 300) {
+        handleHttpError(response);
+      }
+    } on CustomException {
+      rethrow;
+    } catch (error) {
+      debugPrint('Greška prilikom resetovanja lozinke: $error');
+
+      throw CustomException(
+        'Nije moguće pristupiti serveru. '
+        'Provjerite internet konekciju.',
+      );
+    }
+  }
+
   Future<void> logout() async {
     try {
       final response = await http

@@ -1,11 +1,12 @@
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:eautoshop_mobile/constants.dart';
 import 'package:eautoshop_mobile/providers/auth_provider.dart';
+import 'package:eautoshop_mobile/screens/forgot_password_screen.dart';
 import 'package:eautoshop_mobile/screens/home_screen.dart';
 import 'package:eautoshop_mobile/screens/master_screen.dart';
 import 'package:eautoshop_mobile/screens/register_screen.dart';
 import 'package:eautoshop_mobile/utilities/custom_exception.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -51,13 +52,13 @@ class _LoginScreenState extends State<LoginScreen> {
         MaterialPageRoute(builder: (_) => const HomeScreen()),
         (route) => false,
       );
-    } on CustomException catch (e) {
+    } on CustomException catch (error) {
       if (!mounted) {
         return;
       }
 
       setState(() {
-        _errorMessage = e.toString();
+        _errorMessage = error.toString();
       });
     } catch (_) {
       if (!mounted) {
@@ -76,6 +77,13 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  void _openForgotPasswordScreen() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const ForgotPasswordScreen()),
+    );
+  }
+
   void _openRegisterScreen() {
     Navigator.push(
       context,
@@ -87,6 +95,7 @@ class _LoginScreenState extends State<LoginScreen> {
   void dispose() {
     _usernameController.dispose();
     _passwordController.dispose();
+
     super.dispose();
   }
 
@@ -243,7 +252,13 @@ class _LoginScreenState extends State<LoginScreen> {
                                 : const Text(AppConstants.loginButtonLabel),
                           ),
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 8),
+                        TextButton(
+                          onPressed: _isLoading
+                              ? null
+                              : _openForgotPasswordScreen,
+                          child: const Text('Zaboravili ste lozinku?'),
+                        ),
                         TextButton(
                           onPressed: _isLoading ? null : _openRegisterScreen,
                           child: const Text('Nemate račun? Registrujte se.'),

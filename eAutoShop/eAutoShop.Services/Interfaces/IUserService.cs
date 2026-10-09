@@ -19,5 +19,9 @@ namespace eAutoShop.Services.Interfaces
 
         Task ChangeActiveStatus(int id);
 
+        Task ForgotPassword(UserForgotPasswordRequest request);
+
+        Task ResetPassword(UserResetPasswordRequest request);
+
     }
 }
