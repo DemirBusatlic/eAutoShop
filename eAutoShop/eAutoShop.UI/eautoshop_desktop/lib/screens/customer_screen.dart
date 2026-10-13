@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:typed_data';
-
 import 'package:eautoshop_desktop/constants.dart';
 import 'package:eautoshop_desktop/models/city/city.dart';
 import 'package:eautoshop_desktop/models/user/user.dart';
@@ -14,7 +13,6 @@ import 'package:provider/provider.dart';
 
 class CustomerScreen extends StatefulWidget {
   const CustomerScreen({super.key});
-
   @override
   State<CustomerScreen> createState() => _CustomerScreenState();
 }
@@ -22,10 +20,8 @@ class CustomerScreen extends StatefulWidget {
 class _CustomerScreenState extends State<CustomerScreen> {
   static const _primaryBlue = Color(0xFF2848C7);
   final _searchController = TextEditingController();
-
   bool _initialLoading = true;
   String? _loadError;
-
   @override
   void initState() {
     super.initState();
@@ -43,7 +39,6 @@ class _CustomerScreenState extends State<CustomerScreen> {
       _initialLoading = true;
       _loadError = null;
     });
-
     try {
       await Future.wait([
         context.read<UserProvider>().getCustomers(),
@@ -54,7 +49,6 @@ class _CustomerScreenState extends State<CustomerScreen> {
     } catch (_) {
       _loadError = 'Podaci o kupcima nisu mogli biti učitani.';
     }
-
     if (mounted) setState(() => _initialLoading = false);
   }
 
@@ -71,7 +65,6 @@ class _CustomerScreenState extends State<CustomerScreen> {
   Future<void> _clearSearch() async {
     _searchController.clear();
     setState(() {});
-
     try {
       await context.read<UserProvider>().getCustomers();
     } on CustomException catch (error) {
@@ -85,7 +78,6 @@ class _CustomerScreenState extends State<CustomerScreen> {
       barrierDismissible: false,
       builder: (_) => _CustomerEditDialog(customer: customer),
     );
-
     if (saved == true && mounted) {
       await _search();
       _showMessage('Podaci kupca su uspješno ažurirani.');
@@ -115,9 +107,7 @@ class _CustomerScreenState extends State<CustomerScreen> {
         ],
       ),
     );
-
     if (confirmed != true || !mounted) return;
-
     try {
       await context.read<UserProvider>().changeActiveStatus(customer.id);
       await _search();
@@ -154,7 +144,6 @@ class _CustomerScreenState extends State<CustomerScreen> {
     if (_initialLoading) {
       return const Center(child: CircularProgressIndicator());
     }
-
     if (_loadError != null) {
       return Center(
         child: Card(
@@ -182,9 +171,7 @@ class _CustomerScreenState extends State<CustomerScreen> {
         ),
       );
     }
-
     final provider = context.watch<UserProvider>();
-
     return Padding(
       padding: const EdgeInsets.all(AppPadding.large),
       child: Column(
@@ -272,7 +259,6 @@ class _CustomerScreenState extends State<CustomerScreen> {
     if (customers.isEmpty) {
       return const Center(child: Text('Nema pronađenih kupaca.'));
     }
-
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: SingleChildScrollView(
@@ -349,7 +335,6 @@ class _CustomerScreenState extends State<CustomerScreen> {
 class _CustomerEditDialog extends StatefulWidget {
   const _CustomerEditDialog({required this.customer});
   final User customer;
-
   @override
   State<_CustomerEditDialog> createState() => _CustomerEditDialogState();
 }
@@ -357,7 +342,6 @@ class _CustomerEditDialog extends StatefulWidget {
 class _CustomerEditDialogState extends State<_CustomerEditDialog> {
   static const _primaryBlue = Color(0xFF2848C7);
   final _formKey = GlobalKey<FormState>();
-
   late final TextEditingController _name;
   late final TextEditingController _surname;
   late final TextEditingController _username;
@@ -365,13 +349,11 @@ class _CustomerEditDialogState extends State<_CustomerEditDialog> {
   late final TextEditingController _phone;
   late final TextEditingController _address;
   late final TextEditingController _postalCode;
-
   int? _cityId;
   String _gender = 'Male';
   String? _image;
   bool _imageChanged = false;
   bool _saving = false;
-
   @override
   void initState() {
     super.initState();
@@ -411,15 +393,12 @@ class _CustomerEditDialogState extends State<_CustomerEditDialog> {
     );
     final file = await openFile(acceptedTypeGroups: [imageTypes]);
     if (file == null) return;
-
     try {
       final fileSize = await file.length();
-
       if (fileSize > 5 * 1024 * 1024) {
         _showError('Slika ne smije biti veća od 5 MB.');
         return;
       }
-
       final bytes = await file.readAsBytes();
       if (!mounted) return;
       setState(() {
@@ -437,9 +416,7 @@ class _CustomerEditDialogState extends State<_CustomerEditDialog> {
       _showError('Odaberite grad.');
       return;
     }
-
     setState(() => _saving = true);
-
     final request = UserUpdate(
       username: _username.text.trim(),
       name: _name.text.trim(),
@@ -452,7 +429,6 @@ class _CustomerEditDialogState extends State<_CustomerEditDialog> {
       cityId: _cityId,
       image: _imageChanged ? (_image ?? '') : null,
     );
-
     try {
       await context.read<UserProvider>().updateUser(
         id: widget.customer.id,
@@ -487,17 +463,59 @@ class _CustomerEditDialogState extends State<_CustomerEditDialog> {
     return value == null || value.trim().isEmpty ? 'Unesite $field.' : null;
   }
 
+  String? _emailValidator(String? value) {
+    final email = value?.trim() ?? '';
+
+    if (email.isEmpty) {
+      return 'Unesite email.';
+    }
+
+    final emailRegex = RegExp(
+      r'^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$',
+    );
+
+    if (!emailRegex.hasMatch(email)) {
+      return 'Unesite ispravan email.';
+    }
+
+    return null;
+  }
+
+  String? _phoneValidator(String? value) {
+    final phone = value?.trim() ?? '';
+
+    if (phone.isEmpty) {
+      return 'Unesite telefon.';
+    }
+
+    final allowedCharacters = RegExp(r'^\+?[0-9\s()/\-]+$');
+
+    if (!allowedCharacters.hasMatch(phone)) {
+      return 'Unesite ispravan broj telefona.';
+    }
+
+    final digitCount = phone.replaceAll(RegExp(r'\D'), '').length;
+
+    if (digitCount < 8 || digitCount > 15) {
+      return 'Telefon mora sadržavati između 8 i 15 cifara.';
+    }
+
+    return null;
+  }
+
   Widget _field(
     TextEditingController controller,
     String label,
     IconData icon, {
     String? Function(String?)? validator,
+    TextInputType? keyboardType,
   }) {
     return SizedBox(
       width: 320,
       child: TextFormField(
         controller: controller,
         validator: validator,
+        keyboardType: keyboardType,
         decoration: InputDecoration(
           labelText: label,
           prefixIcon: Icon(icon),
@@ -522,7 +540,6 @@ class _CustomerEditDialogState extends State<_CustomerEditDialog> {
   @override
   Widget build(BuildContext context) {
     final cities = context.watch<CityProvider>().cities;
-
     return AlertDialog(
       title: const Text('Uredi kupca'),
       content: SizedBox(
@@ -582,13 +599,15 @@ class _CustomerEditDialogState extends State<_CustomerEditDialog> {
                       _email,
                       'Email',
                       Icons.email_outlined,
-                      validator: (value) => _required(value, 'email'),
+                      validator: _emailValidator,
+                      keyboardType: TextInputType.emailAddress,
                     ),
                     _field(
                       _phone,
                       'Telefon',
                       Icons.phone_outlined,
-                      validator: (value) => _required(value, 'telefon'),
+                      validator: _phoneValidator,
+                      keyboardType: TextInputType.phone,
                     ),
                     _field(_address, 'Adresa', Icons.home_outlined),
                     _field(
@@ -673,7 +692,6 @@ class _CustomerEditDialogState extends State<_CustomerEditDialog> {
 class _StatusChip extends StatelessWidget {
   const _StatusChip({required this.active});
   final bool active;
-
   @override
   Widget build(BuildContext context) {
     final color = active ? const Color(0xFF1B7F3A) : const Color(0xFFB3261E);
@@ -694,7 +712,6 @@ class _StatusChip extends StatelessWidget {
 class _CustomerAvatar extends StatelessWidget {
   const _CustomerAvatar({required this.customer});
   final User customer;
-
   @override
   Widget build(BuildContext context) {
     return _Avatar(image: customer.image, radius: 20);
@@ -704,7 +721,6 @@ class _CustomerAvatar extends StatelessWidget {
 class _EditableAvatar extends StatelessWidget {
   const _EditableAvatar({required this.image});
   final String? image;
-
   @override
   Widget build(BuildContext context) {
     return _Avatar(image: image, radius: 38);
@@ -715,7 +731,6 @@ class _Avatar extends StatelessWidget {
   const _Avatar({required this.image, required this.radius});
   final String? image;
   final double radius;
-
   @override
   Widget build(BuildContext context) {
     final bytes = _decodeImage(image);

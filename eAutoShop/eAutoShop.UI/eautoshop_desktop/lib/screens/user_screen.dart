@@ -573,6 +573,28 @@ class _EmployeeDialogState extends State<_EmployeeDialog> {
     return emailRegex.hasMatch(value.trim()) ? null : 'Unesite ispravan email.';
   }
 
+  String? _phoneValidator(String? value) {
+    final phone = value?.trim() ?? '';
+
+    if (phone.isEmpty) {
+      return 'Unesite telefon.';
+    }
+
+    final allowedCharacters = RegExp(r'^\+?[0-9\s()/\-]+$');
+
+    if (!allowedCharacters.hasMatch(phone)) {
+      return 'Unesite ispravan broj telefona.';
+    }
+
+    final digitCount = phone.replaceAll(RegExp(r'\D'), '').length;
+
+    if (digitCount < 8 || digitCount > 15) {
+      return 'Telefon mora sadržavati između 8 i 15 cifara.';
+    }
+
+    return null;
+  }
+
   String? _passwordValidator(String? value) {
     if (_isEditing) return null;
     if (value == null || value.isEmpty) return 'Unesite lozinku.';
@@ -684,8 +706,7 @@ class _EmployeeDialogState extends State<_EmployeeDialog> {
                       controller: _phoneController,
                       label: 'Telefon',
                       icon: Icons.phone_outlined,
-                      validator: (value) =>
-                          _requiredValidator(value, 'telefon'),
+                      validator: _phoneValidator,
                       keyboardType: TextInputType.phone,
                     ),
                     _field(
